@@ -21,7 +21,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
-			ManagedExtensions="2"
+			ManagedExtensions="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\cvaux\include&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -58,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
+				AdditionalDependencies="$(NoInherit) cv.lib cxcore.lib highgui.lib Ole32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
@@ -117,7 +118,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\cvaux\include&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -134,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
+				AdditionalDependencies="$(NoInherit) cv.lib cxcore.lib highgui.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -200,6 +202,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\calibrationForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cvCalibrateProCam.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cvScanProCam.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cvUtilProCam.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\gdiForm.cpp"
 				>
 			</File>
@@ -234,6 +252,32 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\calibrationForm.h"
+				FileType="3"
+				>
+				<File
+					RelativePath=".\calibrationForm.resx"
+					SubType="Designer"
+					>
+				</File>
+			</File>
+			<File
+				RelativePath=".\cvCalibrateProCam.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cvScanProCam.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cvStructuredLight.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cvUtilProCam.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Form1.h"
 				FileType="3"
 				>
@@ -252,6 +296,10 @@
 					SubType="Designer"
 					>
 				</File>
+			</File>
+			<File
+				RelativePath=".\globals.h"
+				>
 			</File>
 			<File
 				RelativePath=".\resource.h"
