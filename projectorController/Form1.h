@@ -65,13 +65,13 @@ namespace projectorController {
 			helper->WorkerSupportsCancellation = true;
 			running = false;
 
-			projectorDisplay = new DISPLAY_DEVICE();
+			/*projectorDisplay = new DISPLAY_DEVICE();
 			projectorDefault = new DEVMODE();
 
 			if(!getProjector())
 			{
 				console->Text += "Could not find the projector as a secondary display!\r\n";
-			}
+			}*/
 
 			WSADATA wsd;
 			if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
@@ -96,6 +96,26 @@ namespace projectorController {
 			{
 				delete components;
 			}
+			
+			cvReleaseMat(&sl_calib->cam_intrinsic);
+			cvReleaseMat(&sl_calib->cam_distortion);
+			cvReleaseMat(&sl_calib->cam_extrinsic);
+			cvReleaseMat(&sl_calib->proj_intrinsic);
+			cvReleaseMat(&sl_calib->proj_distortion);
+			cvReleaseMat(&sl_calib->proj_extrinsic);
+			cvReleaseMat(&sl_calib->cam_center);
+			cvReleaseMat(&sl_calib->proj_center);
+			cvReleaseMat(&sl_calib->cam_rays);
+			cvReleaseMat(&sl_calib->proj_rays);
+			cvReleaseMat(&sl_calib->proj_column_planes);
+			cvReleaseMat(&sl_calib->proj_row_planes);
+			cvReleaseMat(&sl_calib->background_depth_map);
+			cvReleaseImage(&sl_calib->background_image);
+			cvReleaseImage(&sl_calib->background_mask);
+			cvDestroyWindow("projWindow");
+
+			delete sl_calib;
+			delete sl_params;
 		}
 
 	private: System::Windows::Forms::Button^  connectBtn;

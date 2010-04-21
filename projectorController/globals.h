@@ -54,7 +54,7 @@ static int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocatio
 
 	imagesBuffer = new IplImage* [numImages];
 	for(int i=0; i<numImages; i++)
-		imagesBuffer[i] = cvLoadImage(gc2std(files[0]->FullName).c_str());
+		imagesBuffer[i] = cvLoadImage(gc2std(files[i]->FullName).c_str());
 	
 	return numImages;
 }
