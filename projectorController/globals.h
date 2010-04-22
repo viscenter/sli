@@ -10,6 +10,18 @@ using namespace System::Collections;
 using namespace System::Windows::Forms;
 using namespace System::IO;
 
+struct slData
+{
+	IplImage* proj_chessboard;
+	IplImage* proj_frame;
+	IplImage** proj_gray_codes;
+	int patternNum;
+	int gray_ncols;
+	int gray_nrows;
+	int gray_colshift;
+	int gray_rowshift;
+};
+
 static std::string gc2std(System::String^ s)
 {
 	using System::IntPtr;

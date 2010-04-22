@@ -1072,6 +1072,9 @@ namespace projectorController {
 			
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
 			this->projStatusLbl->Text = "Projector calibration was successful.";
+
+			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
+			this->extrinsicStatusLbl->Text = "Calibrated!";
 			displayProjCalib(sl_calib);
 			return;
 		 }

@@ -49,10 +49,15 @@ namespace projectorController {
 			InitializeComponent();
 			sl_params = new slParams();
 			sl_calib = new slCalib();
+			sl_data = new slData();
 
 			if(!loadSLConfigXML(sl_params, sl_calib))
-				console->Text += "Could not load the Structured Light Configuration XML file!\r\n";
-
+				console->Text += "Could not load the Structured Light Configuration XML file!\r\nPlease correct the file and restart the program.\r\n";
+			else
+				console->Text += "Configuration File Read Successfully!\r\n";
+			
+			sl_data->proj_chessboard = NULL;
+			sl_data->proj_gray_codes = NULL;
 			this->ipBox->Text = CLIENT_IP;
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
@@ -64,7 +69,12 @@ namespace projectorController {
 			helper->WorkerReportsProgress = true;
 			helper->WorkerSupportsCancellation = true;
 			running = false;
-
+			sl_data->patternNum = 0;
+			sl_data->gray_ncols = 0;
+			sl_data->gray_nrows = 0;
+			sl_data->gray_colshift = 0;
+			sl_data->gray_rowshift = 0;
+			
 			/*projectorDisplay = new DISPLAY_DEVICE();
 			projectorDefault = new DEVMODE();
 
@@ -97,6 +107,16 @@ namespace projectorController {
 				delete components;
 			}
 			
+			if(sl_data->proj_chessboard)
+				cvReleaseImage(&sl_data->proj_chessboard);
+
+			if(sl_data->proj_gray_codes)
+			{
+				for(int i=0; i<(sl_data->gray_ncols+sl_data->gray_nrows+1); i++)
+					cvReleaseImage(&sl_data->proj_gray_codes[i]);
+				delete[] sl_data->proj_gray_codes;
+			}
+				
 			cvReleaseMat(&sl_calib->cam_intrinsic);
 			cvReleaseMat(&sl_calib->cam_distortion);
 			cvReleaseMat(&sl_calib->cam_extrinsic);
@@ -112,10 +132,12 @@ namespace projectorController {
 			cvReleaseMat(&sl_calib->background_depth_map);
 			cvReleaseImage(&sl_calib->background_image);
 			cvReleaseImage(&sl_calib->background_mask);
+			cvReleaseImage(&sl_data->proj_frame);
 			cvDestroyWindow("projWindow");
-
+			
 			delete sl_calib;
 			delete sl_params;
+			delete sl_data;
 		}
 
 	private: System::Windows::Forms::Button^  connectBtn;
@@ -143,8 +165,11 @@ namespace projectorController {
 	private: System::Windows::Forms::TextBox^  ipBox;
 
 	private: System::Windows::Forms::Label^  label4;
+	
 	private: slParams* sl_params;
 	private: slCalib* sl_calib;
+	private: slData* sl_data;
+
 
 
 	protected: 
@@ -431,11 +456,11 @@ namespace projectorController {
 							outMessage += sendMessage("ProjectorClient\r\n");
 							worker->ReportProgress( 0 );
 						}
-						else if(!strcmp(szBuffer, "O,0,0,0"))
+						/*else if(!strcmp(szBuffer, "O,0,0,0"))
 						{
-							outMessage += stopPattern();
+							outMessage += displayBlank();
 							worker->ReportProgress( 0 );
-						}
+						}*/
 						else if(!strcmp(szBuffer, "O,64,0,0"))
 						{
 							projectorOff();
@@ -448,11 +473,27 @@ namespace projectorController {
 							outMessage += "Turning projector on...\r\n";
 							worker->ReportProgress( 0 );
 						}
-						else if(szBuffer[0] == 'O')
+						else if(!strcmp(szBuffer, "O,128,0,0"))
 						{
-							outMessage += startPattern(szBuffer);
+							outMessage += displayCheckerboard();
+							worker->ReportProgress(0);
+						}
+						else if(!strcmp(szBuffer, "O,0,64,0"))   //Normally UV
+						{
+							outMessage += displayBlank();
+							worker->ReportProgress(0);
+						}
+						else if(!strcmp(szBuffer, "O,0,128,0"))  //Royal Blue
+						{
+							outMessage += startPattern();
 							worker->ReportProgress( 0 );
 						}
+						else if(!strcmp(szBuffer, "O,0,32,0"))  //Blue
+						{
+							outMessage += nextPattern();
+							worker->ReportProgress( 0 );
+						}
+
 					}
 					return;
 			 }
@@ -474,24 +515,50 @@ namespace projectorController {
 				return gcnew System::String(buffer);
 			}
 			
-			System::String^ startPattern(char* message)
+			System::String^ startPattern()
 			{
-				if(!patternForm)
-					patternForm = gcnew gdiForm(projectorDefault);
+				if(!sl_data->proj_gray_codes)
+				{
+					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
+						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
+						sl_params->scan_cols, sl_params->scan_rows);
+				}
+				sl_data->patternNum = 0;
 				
-				int patternNo = 1;
+				cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
+				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				cvShowImage("projWindow", sl_data->proj_frame);
 				
-				if(!strcmp(message, "O,0,64,0"))
-					patternNo = 1;
-				else if(!strcmp(message, "O,0,128,0"))
-					patternNo = 2;
-				else if(!strcmp(message, "O,0,32,0"))
-					patternNo = 3;
-				else if(!strcmp(message, "O,32,0,0"))
-					patternNo = 4;
+				return "Pattern Sequence Started\r\n";
+			}
 
-				patternForm->showPattern(patternNo);
-				return "Pattern Started\r\n";
+			System::String^ nextPattern()
+			{
+				if(!sl_data->proj_gray_codes)
+				{
+					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
+						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
+						sl_params->scan_cols, sl_params->scan_rows);
+				}
+				
+				bool last = false;
+				if(!(sl_data->patternNum%2))
+				{
+					cvSubRS(sl_data->proj_gray_codes[sl_data->patternNum], cvScalar(255), sl_data->proj_frame);
+					sl_data->patternNum = (sl_data->patternNum+1)%(sl_data->gray_ncols + sl_data->gray_nrows+1);
+					last = !(sl_data->patternNum);
+				}
+				else
+				{
+					cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
+				}
+				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				cvShowImage("projWindow", sl_data->proj_frame);
+
+				if(last)  //TODO: Figure out how to remember what images to open for reconstruction!
+					return "Last Pattern Displayed\r\n";
+				
+				return "Next Pattern Displayed\r\n";
 			}
 
 			System::String^ stopPattern()
@@ -501,6 +568,33 @@ namespace projectorController {
 				patternForm->hidePattern();
 				return "Pattern Stopped\r\n";
 			}
+
+			System::String^ displayCheckerboard()
+			{
+				if(sl_data->proj_chessboard == NULL)
+				{
+					sl_data->proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
+					int proj_border_cols, proj_border_rows;
+					if(generateChessboard(sl_params, sl_data->proj_chessboard, proj_border_cols, proj_border_rows) == -1)
+						return "Calibration Checkerboard creation failed!\r\n";
+				}
+				
+				cvCopy(sl_data->proj_chessboard, sl_data->proj_frame);
+				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				cvShowImage("projWindow", sl_data->proj_frame);
+
+				return "Displaying Calibration Checkerboard\r\n";
+			}
+			
+			System::String^ displayBlank()
+			{
+				cvSet(sl_data->proj_frame, cvScalar(255));
+				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				cvShowImage("projWindow", sl_data->proj_frame);
+
+				return "Displaying Blank Image\r\n";
+			}
+
 
 			bool getProjector()
 			{
@@ -603,12 +697,6 @@ namespace projectorController {
 					imagesBuffer[i] = cvLoadImage(gc2std(files[0]->FullName).c_str());
 				
 				return numImages;
-				/*cvNamedWindow("test",1);
-				cvShowImage("test", myImage);
-
-				cvWaitKey();
-				cvDestroyWindow("test");
-				cvReleaseImage(&myImage);*/
 			}
 
 			int getLatestImages(IplImage**& imagesBuffer, int numImages)
@@ -661,9 +749,9 @@ namespace projectorController {
 
 				// Create fullscreen window (for controlling projector display).
 				cvNamedWindow("projWindow", CV_WINDOW_AUTOSIZE);
-				IplImage* proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 3);
-				cvSet(proj_frame, cvScalar(0, 0, 0));
-				cvShowImage("projWindow", proj_frame);
+				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 3);
+				cvSet(sl_data->proj_frame, cvScalar(0, 0, 0));
+				cvShowImage("projWindow", sl_data->proj_frame);
 				cvMoveWindow("projWindow", -sl_params->proj_w-7, -33);
 				cvWaitKey(1);
 				
