@@ -388,7 +388,6 @@ namespace projectorController {
 			this->Controls->Add(this->groupBox1);
 			this->Name = L"calibrationForm";
 			this->Text = L"Structured Light Calibration";
-			this->TopMost = true;
 			this->groupBox1->ResumeLayout(false);
 			this->groupBox1->PerformLayout();
 			this->groupBox2->ResumeLayout(false);
@@ -466,13 +465,15 @@ namespace projectorController {
 				CvMat* point_counts    = cvCreateMat(n_boards, 1, CV_32SC1);
 				IplImage** calibImages = new IplImage*[n_boards];
 				CvSize frame_size = cvGetSize(imagesBuffer[0]);
+				for(int i=0; i<n_boards; i++)
+					calibImages[i] = cvCreateImage(frame_size, imagesBuffer[0]->depth, imagesBuffer[0]->nChannels);
 
 				// Create a window to display captured frames.
-				cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
-				cvCreateTrackbar("Cam. Gain", "camWindow", &sl_params->cam_gain, 100, NULL);
-				HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-				BringWindowToTop(camWindow);
-				cvWaitKey(1);
+				//cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+				//cvCreateTrackbar("Cam. Gain", "camWindow", &sl_params->cam_gain, 100, NULL);
+				//HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
+				//BringWindowToTop(camWindow);
+				//cvWaitKey(1);
 
 				// Capture live image stream, until "ESC" is pressed or calibration is complete.
 				int successes = 0;
@@ -507,14 +508,14 @@ namespace projectorController {
 					}
 					
 					// Display frame.
-					cvDrawChessboardCorners(cam_frame, board_size, corners, corner_count, found);
-					cvShowImageResampled("camWindow", cam_frame, sl_params->window_w, sl_params->window_h);
+					//cvDrawChessboardCorners(cam_frame, board_size, corners, corner_count, found);
+					//cvShowImageResampled("camWindow", cam_frame, sl_params->window_w, sl_params->window_h);
 
 					// Free allocated resources.
 					delete[] corners;
 
 					// Process user input.
-					int cvKey = cvWaitKey(0);
+					/*int cvKey = cvWaitKey(0);
 					if(cvKey==27)
 					{
 						break;
@@ -525,14 +526,14 @@ namespace projectorController {
 						if(goodFrame)
 						{
 							successes--;
-							cvReleaseImage(&calibImages[successes]);
+							//cvReleaseImage(&calibImages[successes]);
 						}
-					}
+					}*/
 				}
 				cvReleaseImage(&cam_frame);
 
 				// Close the display window.
-				cvDestroyWindow("camWindow");
+				//cvDestroyWindow("camWindow");
 
 				// Calibrate camera, if minimum number of frames are available.
 				if(successes >= 2){
@@ -601,9 +602,11 @@ namespace projectorController {
 				}
 				else{
 					this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
-					this->cameraStatusLbl->Text = "ERROR: At least two detected chessboards are required!";
+					this->cameraStatusLbl->Text = "ERROR: Not enough targets were found! ";
 					for(int i=0; i<n_boards; i++)
 						cvReleaseImage(&imagesBuffer[i]);
+					for(int i=0; i<n_boards; i++)
+						cvReleaseImage(&calibImages[i]);
 					delete[] imagesBuffer;
 					return;
 				}
@@ -614,7 +617,7 @@ namespace projectorController {
 				cvReleaseMat(&point_counts);
 				for(int i=0; i<n_boards; i++)
 					cvReleaseImage(&imagesBuffer[i]);
-				for(int i=0; i<successes; i++)
+				for(int i=0; i<n_boards; i++)
 					cvReleaseImage(&calibImages[i]);
 				delete[] imagesBuffer;
 				delete[] calibImages;
@@ -623,8 +626,8 @@ namespace projectorController {
 				sl_calib->cam_intrinsic_calib = true;
 
 				// Return without errors.
-				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->cameraStatusLbl->Text = "Camera calibration was successful.";
+				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Green;
+				this->cameraStatusLbl->Text = "Camera calibration was successful. (" + successes + "/" + n_boards + ")";
 				displayCamCalib(sl_calib);
 				return; 
 			 }
@@ -812,8 +815,6 @@ namespace projectorController {
 					if(goodFrame)
 					{
 						successes--;
-						cvReleaseImage(&proj_calibImages[successes]);
-						cvReleaseImage(&cam_calibImages[successes]);
 					}
 				}
 			}

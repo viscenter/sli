@@ -4,7 +4,6 @@
 
 #include <signal.h>
 #include <Windows.h>
-#include "gdiForm.h"
 #include "cvStructuredLight.h"
 #include "cvCalibrateProCam.h"
 #include "cvScanProCam.h"
@@ -150,7 +149,6 @@ namespace projectorController {
 	private: bool running;
 	private: DISPLAY_DEVICE* projectorDisplay;
 	private: DEVMODE* projectorDefault;
-	private: gdiForm^ patternForm;
 	public: System::Windows::Forms::TextBox^  console;
 	private: System::Windows::Forms::TextBox^  setNameBox;
 
@@ -453,7 +451,7 @@ namespace projectorController {
 						}
 						else if(szBuffer[0] == 'W')
 						{
-							outMessage += sendMessage("ProjectorClient\r\n");
+							outMessage += sendMessage("0027_20100101_0001_eqpi\r\n");//ProjectorClient\r\n");
 							worker->ReportProgress( 0 );
 						}
 						/*else if(!strcmp(szBuffer, "O,0,0,0"))
@@ -493,7 +491,6 @@ namespace projectorController {
 							outMessage += nextPattern();
 							worker->ReportProgress( 0 );
 						}
-
 					}
 					return;
 			 }
@@ -534,6 +531,7 @@ namespace projectorController {
 
 			System::String^ nextPattern()
 			{
+				static bool inverseTime = true;
 				if(!sl_data->proj_gray_codes)
 				{
 					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
@@ -542,15 +540,17 @@ namespace projectorController {
 				}
 				
 				bool last = false;
-				if(!(sl_data->patternNum%2))
+				if(inverseTime || sl_data->patternNum == 0)
 				{
 					cvSubRS(sl_data->proj_gray_codes[sl_data->patternNum], cvScalar(255), sl_data->proj_frame);
 					sl_data->patternNum = (sl_data->patternNum+1)%(sl_data->gray_ncols + sl_data->gray_nrows+1);
 					last = !(sl_data->patternNum);
+					inverseTime = false;
 				}
 				else
 				{
 					cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
+					inverseTime = true;
 				}
 				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
@@ -559,14 +559,6 @@ namespace projectorController {
 					return "Last Pattern Displayed\r\n";
 				
 				return "Next Pattern Displayed\r\n";
-			}
-
-			System::String^ stopPattern()
-			{
-				if(!patternForm)
-					patternForm = gcnew gdiForm(projectorDefault);
-				patternForm->hidePattern();
-				return "Pattern Stopped\r\n";
 			}
 
 			System::String^ displayCheckerboard()
@@ -624,7 +616,7 @@ namespace projectorController {
 							ZeroMemory(projectorDefault, sizeof(DEVMODE));
 							projectorDefault->dmSize = sizeof(DEVMODE);
 							projectorDefault->dmFields = DM_POSITION;
-							projectorDefault->dmPosition.x = 1440;
+							projectorDefault->dmPosition.x = -800;
 							projectorDefault->dmPosition.y = 0;
 							projectorDefault->dmPelsWidth = 800;
 							projectorDefault->dmPelsHeight = 600;
@@ -642,7 +634,7 @@ namespace projectorController {
 						ZeroMemory(projectorDefault, sizeof(DEVMODE));
 						projectorDefault->dmSize = sizeof(DEVMODE);
 						projectorDefault->dmFields = DM_POSITION;
-						projectorDefault->dmPosition.x = 1440;
+						projectorDefault->dmPosition.x = -800;
 						projectorDefault->dmPosition.y = 0;
 						projectorDefault->dmPelsWidth = 800;
 						projectorDefault->dmPelsHeight = 600;
@@ -749,7 +741,7 @@ namespace projectorController {
 
 				// Create fullscreen window (for controlling projector display).
 				cvNamedWindow("projWindow", CV_WINDOW_AUTOSIZE);
-				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 3);
+				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 				cvSet(sl_data->proj_frame, cvScalar(0, 0, 0));
 				cvShowImage("projWindow", sl_data->proj_frame);
 				cvMoveWindow("projWindow", -sl_params->proj_w-7, -33);
