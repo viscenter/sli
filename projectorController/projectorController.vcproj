@@ -206,20 +206,70 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cvCalibrateProCam.cpp"
+				RelativePath="..\common\cvCalibrateProCam.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\cvScanProCam.cpp"
+				RelativePath="..\common\cvScanProCam.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\cvUtilProCam.cpp"
+				RelativePath="..\common\cvUtilProCam.cpp"
 				>
-			</File>
-			<File
-				RelativePath=".\gdiForm.cpp"
-				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\projectorController.cpp"
@@ -262,19 +312,19 @@
 				</File>
 			</File>
 			<File
-				RelativePath=".\cvCalibrateProCam.h"
+				RelativePath="..\common\cvCalibrateProCam.h"
 				>
 			</File>
 			<File
-				RelativePath=".\cvScanProCam.h"
+				RelativePath="..\common\cvScanProCam.h"
 				>
 			</File>
 			<File
-				RelativePath=".\cvStructuredLight.h"
+				RelativePath="..\common\cvStructuredLight.h"
 				>
 			</File>
 			<File
-				RelativePath=".\cvUtilProCam.h"
+				RelativePath="..\common\cvUtilProCam.h"
 				>
 			</File>
 			<File
@@ -288,17 +338,7 @@
 				</File>
 			</File>
 			<File
-				RelativePath=".\gdiForm.h"
-				FileType="3"
-				>
-				<File
-					RelativePath=".\gdiForm.resx"
-					SubType="Designer"
-					>
-				</File>
-			</File>
-			<File
-				RelativePath=".\globals.h"
+				RelativePath="..\common\globals.h"
 				>
 			</File>
 			<File
@@ -321,22 +361,6 @@
 			</File>
 			<File
 				RelativePath=".\app.rc"
-				>
-			</File>
-			<File
-				RelativePath=".\pattern1.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\pattern2.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\pattern3.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\pattern4.bmp"
 				>
 			</File>
 		</Filter>

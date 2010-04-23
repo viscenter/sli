@@ -1,25 +1,75 @@
-// cvStructuredLighting.h: Header file for the console application.
-//
-// Overview:
-//   This file defines the structures used to store system parameters and calibration details.
-//   A user-supplied XML-formatted file is used to define system parameters for the console
-//   application. System calibration parameters can be loaded from prior instances.
-//
-// Details:
-//   Please read the SIGGRAPH 2009 course notes for additional details.
-//
-//     Douglas Lanman and Gabriel Taubin
-//     "Build Your Own 3D Scanner: 3D Photography for Beginners"
-//     ACM SIGGRAPH 2009 Course Notes
-//
-// Author:
-//   Douglas Lanman
-//   Brown University
-//   July 2009
+#ifndef GLOBALS_H
+#define GLOBALS_H
 
-// Define structure for storing structured lighting parameters.
-#ifndef STRUCTURED_LIGHT
-#define STRUCTURED_LIGHT
+#include <cstdlib>
+#include <string>
+
+using namespace System;
+using namespace System::ComponentModel;
+using namespace System::Collections;
+using namespace System::Windows::Forms;
+using namespace System::IO;
+
+struct slData
+{
+	IplImage* proj_chessboard;
+	IplImage* proj_frame;
+	IplImage** proj_gray_codes;
+	int patternNum;
+	int gray_ncols;
+	int gray_nrows;
+	int gray_colshift;
+	int gray_rowshift;
+};
+
+static std::string gc2std(System::String^ s)
+{
+	using System::IntPtr;
+	using System::Runtime::InteropServices::Marshal;
+
+	IntPtr ip = Marshal::StringToHGlobalAnsi(s);
+	std::string ss;
+	try 
+	{
+		ss = static_cast<const char*>(ip.ToPointer());
+	} catch (std::bad_alloc&) 
+	{
+		Marshal::FreeHGlobal(ip);
+		throw;
+	}
+	Marshal::FreeHGlobal(ip);
+	return ss;
+}
+
+ref class FileInfoNameComparer : IComparer
+{
+	public: virtual int Compare(Object^ x, Object^ y)
+	{
+		FileInfo^ objX = (FileInfo^)x;
+		FileInfo^ objY = (FileInfo^)y;
+		return objX->Name->CompareTo(objY->Name)* -1;
+	}
+};
+
+static int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocation, String^ filePattern)
+{
+	DirectoryInfo^ dir = gcnew DirectoryInfo(dirLocation);
+	if(!dir->Exists)
+		return 0;
+
+	array<FileInfo^>^ files = dir->GetFiles(filePattern);
+	files->Sort(files, gcnew FileInfoNameComparer());
+	
+	numImages = (numImages < files->Length)?numImages:files->Length;
+	if(numImages <= 0)
+		return 0;
+
+	imagesBuffer = new IplImage* [numImages];
+	for(int i=0; i<numImages; i++)
+		imagesBuffer[i] = cvLoadImage(gc2std(files[i]->FullName).c_str());
+	
+	return numImages;
+}
 
 struct slParams{
 
@@ -108,4 +158,5 @@ struct slCalib{
 	IplImage* background_image;     // background image 
 	IplImage* background_mask;      // background mask
 };
+
 #endif

@@ -4,12 +4,12 @@
 
 #include <signal.h>
 #include <Windows.h>
-#include "cvStructuredLight.h"
-#include "cvCalibrateProCam.h"
-#include "cvScanProCam.h"
-#include "cvUtilProCam.h"
+//#include "../common/cvStructuredLight.h"
+#include "../common/cvCalibrateProCam.h"
+#include "../common/cvScanProCam.h"
+#include "../common/cvUtilProCam.h"
 #include "calibrationForm.h"
-#include "globals.h"
+#include "../common/globals.h"
 
 #define CLIENT_IP "127.0.0.1"
 #define DEFAULT_PORT_NUM 5555

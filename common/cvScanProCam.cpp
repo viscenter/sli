@@ -25,7 +25,7 @@
 //   July 2009
 
 #include "stdafx.h"
-#include "cvStructuredLight.h"
+#include "globals.h"
 #include "cvScanProCam.h"
 #include "cvUtilProCam.h"
 

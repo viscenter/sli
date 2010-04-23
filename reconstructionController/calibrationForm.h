@@ -12,7 +12,7 @@ using namespace System::Windows::Forms;
 using namespace System::Data;
 using namespace System::Drawing;
 
-namespace projectorController {
+namespace reconstructionController {
 
 	/// <summary>
 	/// Summary for calibrationForm
