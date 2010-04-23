@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "../common/cvStructuredLight.h"
 #include "../common/cvCalibrateProCam.h"
 #include "../common/cvUtilProCam.h"
 #include "../common/globals.h"

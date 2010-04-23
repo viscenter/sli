@@ -4,11 +4,10 @@
 
 #include <signal.h>
 #include <Windows.h>
-//#include "../common/cvStructuredLight.h"
 #include "../common/cvCalibrateProCam.h"
 #include "../common/cvScanProCam.h"
 #include "../common/cvUtilProCam.h"
-#include "calibrationForm.h"
+#include "../common/calibrationForm.h"
 #include "../common/globals.h"
 
 #define CLIENT_IP "127.0.0.1"
@@ -29,6 +28,7 @@ namespace projectorController {
 	using namespace System::Drawing;
 	using namespace System::Threading;
 	using namespace System::IO;
+	using namespace reconstructionController;
 
 	/// <summary>
 	/// Summary for Form1

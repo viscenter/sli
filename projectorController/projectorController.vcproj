@@ -202,7 +202,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\calibrationForm.cpp"
+				RelativePath="..\common\calibrationForm.cpp"
 				>
 			</File>
 			<File
@@ -302,11 +302,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\calibrationForm.h"
+				RelativePath="..\common\calibrationForm.h"
 				FileType="3"
 				>
 				<File
-					RelativePath=".\calibrationForm.resx"
+					RelativePath="..\common\calibrationForm.resx"
 					SubType="Designer"
 					>
 				</File>
