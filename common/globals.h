@@ -71,6 +71,12 @@ static int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocatio
 	return numImages;
 }
 
+struct reconPtrs
+{
+	sockaddr_in local;
+	sockaddr_in client;
+};
+
 struct slParams{
 
 	// Output options.
@@ -159,4 +165,12 @@ struct slCalib{
 	IplImage* background_mask;      // background mask
 };
 
+
+static void reconstructSurface(LPVOID lpParam)
+{
+	reconstructionController::Form1 myForm = (reconstructionController::Form1)lpParm
+	IplImage** imagesBuffer;
+	int numImages = getLatestImages(imagesBuffer, 22);
+	return;
+}
 #endif

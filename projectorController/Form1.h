@@ -15,6 +15,7 @@
 #define BUFFER_SIZE 1024
 #define DEFAULT_BASE_FOLDER "X:/windowsDocuments/"
 #define DEFAULT_SET_NAME "laserTests"
+#define CONFIG_FILE "./config.xml"
 
 using namespace std;
 
@@ -726,7 +727,7 @@ namespace projectorController {
 			
 			private: bool loadSLConfigXML(slParams* sl_params, slCalib* sl_calib)
 			{
-				char* configFile = "./config.xml";
+				char* configFile = CONFIG_FILE;
 				
 				// Read structured lighting parameters from configuration file.
 				FILE* pFile = fopen(configFile, "r");

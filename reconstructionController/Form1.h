@@ -10,11 +10,11 @@
 #include "../common/calibrationForm.h"
 #include "../common/globals.h"
 
-#define CLIENT_IP "127.0.0.1"
-#define DEFAULT_PORT_NUM 5555
+#define DEFAULT_PORT_NUM 7272
 #define BUFFER_SIZE 1024
 #define DEFAULT_BASE_FOLDER "X:/windowsDocuments/"
 #define DEFAULT_SET_NAME "laserTests"
+#define CONFIG_FILE "./config.xml"
 
 using namespace std;
 
@@ -45,18 +45,13 @@ namespace reconstructionController {
 		Form1(void)
 		{
 			InitializeComponent();
-			sl_params = new slParams();
-			sl_calib = new slCalib();
-			sl_data = new slData();
-
+			
+			recon_ptrs = new reconPtrs();
 			if(!loadSLConfigXML(sl_params, sl_calib))
 				console->Text += "Could not load the Structured Light Configuration XML file!\r\nPlease correct the file and restart the program.\r\n";
 			else
 				console->Text += "Configuration File Read Successfully!\r\n";
 			
-			sl_data->proj_chessboard = NULL;
-			sl_data->proj_gray_codes = NULL;
-			this->ipBox->Text = CLIENT_IP;
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
 			portNumber = DEFAULT_PORT_NUM;
@@ -67,20 +62,7 @@ namespace reconstructionController {
 			helper->WorkerReportsProgress = true;
 			helper->WorkerSupportsCancellation = true;
 			running = false;
-			sl_data->patternNum = 0;
-			sl_data->gray_ncols = 0;
-			sl_data->gray_nrows = 0;
-			sl_data->gray_colshift = 0;
-			sl_data->gray_rowshift = 0;
 			
-			/*projectorDisplay = new DISPLAY_DEVICE();
-			projectorDefault = new DEVMODE();
-
-			if(!getProjector())
-			{
-				console->Text += "Could not find the projector as a secondary display!\r\n";
-			}*/
-
 			WSADATA wsd;
 			if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
 			{
@@ -98,6 +80,7 @@ namespace reconstructionController {
 			{
 				helper->CancelAsync();
 				closesocket(sClient);
+				closesocket(sListen);
 			}
 			WSACleanup();
 			if (components)
@@ -105,16 +88,6 @@ namespace reconstructionController {
 				delete components;
 			}
 			
-			if(sl_data->proj_chessboard)
-				cvReleaseImage(&sl_data->proj_chessboard);
-
-			if(sl_data->proj_gray_codes)
-			{
-				for(int i=0; i<(sl_data->gray_ncols+sl_data->gray_nrows+1); i++)
-					cvReleaseImage(&sl_data->proj_gray_codes[i]);
-				delete[] sl_data->proj_gray_codes;
-			}
-				
 			cvReleaseMat(&sl_calib->cam_intrinsic);
 			cvReleaseMat(&sl_calib->cam_distortion);
 			cvReleaseMat(&sl_calib->cam_extrinsic);
@@ -130,21 +103,19 @@ namespace reconstructionController {
 			cvReleaseMat(&sl_calib->background_depth_map);
 			cvReleaseImage(&sl_calib->background_image);
 			cvReleaseImage(&sl_calib->background_mask);
-			cvReleaseImage(&sl_data->proj_frame);
-			cvDestroyWindow("projWindow");
 			
 			delete sl_calib;
 			delete sl_params;
-			delete sl_data;
+			delete recon_ptrs;
 		}
 
 	private: System::Windows::Forms::Button^  connectBtn;
-	private: System::Windows::Forms::Label^  label1;
-	private: System::Windows::Forms::TextBox^  portBox;
+
+
 	private: int portNumber;
 	private: System::String^ outMessage;
 	private: BackgroundWorker^ helper;
-	private: SOCKET sClient;
+	private: SOCKET sClient, sListen;
 	private: bool running;
 	private: DISPLAY_DEVICE* projectorDisplay;
 	private: DEVMODE* projectorDefault;
@@ -159,14 +130,16 @@ namespace reconstructionController {
 	private: System::Windows::Forms::Label^  label3;
 	private: System::Windows::Forms::Button^  calibrationBtn;
 
-	private: System::Windows::Forms::TextBox^  ipBox;
 
-	private: System::Windows::Forms::Label^  label4;
+
+
 	
 	private: slParams* sl_params;
 	private: slCalib* sl_calib;
 	private: slData* sl_data;
-
+private: System::Windows::Forms::Label^  label1;
+private: System::Windows::Forms::TextBox^  portBox;
+private: reconPtrs* recon_ptrs;
 
 
 	protected: 
@@ -188,8 +161,6 @@ namespace reconstructionController {
 		void InitializeComponent(void)
 		{
 			this->connectBtn = (gcnew System::Windows::Forms::Button());
-			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->portBox = (gcnew System::Windows::Forms::TextBox());
 			this->console = (gcnew System::Windows::Forms::TextBox());
 			this->setNameBox = (gcnew System::Windows::Forms::TextBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
@@ -198,39 +169,20 @@ namespace reconstructionController {
 			this->baseFolderLocation = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->calibrationBtn = (gcnew System::Windows::Forms::Button());
-			this->ipBox = (gcnew System::Windows::Forms::TextBox());
-			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->portBox = (gcnew System::Windows::Forms::TextBox());
 			this->SuspendLayout();
 			// 
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(393, 348);
+			this->connectBtn->Location = System::Drawing::Point(405, 348);
 			this->connectBtn->Name = L"connectBtn";
-			this->connectBtn->Size = System::Drawing::Size(75, 23);
+			this->connectBtn->Size = System::Drawing::Size(63, 23);
 			this->connectBtn->TabIndex = 1;
-			this->connectBtn->Text = L"Connect";
+			this->connectBtn->Text = L"Start";
 			this->connectBtn->UseVisualStyleBackColor = true;
 			this->connectBtn->Click += gcnew System::EventHandler(this, &Form1::connectBtn_Click);
-			// 
-			// label1
-			// 
-			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(12, 320);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(53, 13);
-			this->label1->TabIndex = 2;
-			this->label1->Text = L"TCP Port:";
-			// 
-			// portBox
-			// 
-			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(71, 317);
-			this->portBox->Name = L"portBox";
-			this->portBox->Size = System::Drawing::Size(38, 20);
-			this->portBox->TabIndex = 3;
-			this->portBox->Text = L"5555";
 			// 
 			// console
 			// 
@@ -310,30 +262,30 @@ namespace reconstructionController {
 			this->calibrationBtn->UseVisualStyleBackColor = true;
 			this->calibrationBtn->Click += gcnew System::EventHandler(this, &Form1::calibrationBtn_Click);
 			// 
-			// ipBox
+			// label1
 			// 
-			this->ipBox->Location = System::Drawing::Point(152, 317);
-			this->ipBox->Name = L"ipBox";
-			this->ipBox->Size = System::Drawing::Size(100, 20);
-			this->ipBox->TabIndex = 10;
-			this->ipBox->Text = L"127.0.0.1";
+			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(12, 320);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(60, 13);
+			this->label1->TabIndex = 2;
+			this->label1->Text = L"Listen Port:";
 			// 
-			// label4
+			// portBox
 			// 
-			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(126, 320);
-			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(20, 13);
-			this->label4->TabIndex = 11;
-			this->label4->Text = L"IP:";
+			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->portBox->Location = System::Drawing::Point(85, 317);
+			this->portBox->Name = L"portBox";
+			this->portBox->Size = System::Drawing::Size(38, 20);
+			this->portBox->TabIndex = 3;
+			this->portBox->Text = L"5555";
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(480, 378);
-			this->Controls->Add(this->label4);
-			this->Controls->Add(this->ipBox);
 			this->Controls->Add(this->calibrationBtn);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->baseFolderLocation);
@@ -345,7 +297,7 @@ namespace reconstructionController {
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->connectBtn);
 			this->Name = L"Form1";
-			this->Text = L"Structured Light Control";
+			this->Text = L"Reconstruction Controller";
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -357,28 +309,28 @@ namespace reconstructionController {
 				if(!running)
 				{
 					portNumber = atoi(gc2std(this->portBox->Text).c_str());
-					struct sockaddr_in server;
 
-					sClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-					if (sClient == INVALID_SOCKET)
+					sListen = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+					if (sListen == INVALID_SOCKET)
 					{
 						sprintf(buffer, "socket() failed: %d\r\n", WSAGetLastError());
 						console->Text += gcnew System::String(buffer);
 						return;
 					}
-					server.sin_family = AF_INET;
-					server.sin_port = htons(portNumber);
-					server.sin_addr.s_addr = inet_addr(gc2std(this->ipBox->Text).c_str());
-				   
-					if (connect(sClient, (struct sockaddr *)&server,
-						sizeof(server)) == SOCKET_ERROR)
+					recon_ptrs->local.sin_addr.s_addr = htonl(INADDR_ANY);
+					
+					recon_ptrs->local.sin_family = AF_INET;
+					recon_ptrs->local.sin_port = htons(portNumber);
+									   
+					if (bind(sListen, (struct sockaddr *)&recon_ptrs->local, sizeof(recon_ptrs->local)) == SOCKET_ERROR)
 					{
-						sprintf(buffer, "connect() failed: %d\r\n", WSAGetLastError());
+						sprintf(buffer, "bind() failed: %d\r\n", WSAGetLastError());
 						console->Text += gcnew System::String(buffer);
 						return;
 					}
+					listen(sListen, 8);
 
-					console->Text += "Connected...Waiting for signal.\r\n";
+					console->Text += "Waiting for connection.\r\n";
 					
 					helper->RunWorkerAsync();
 					portBox->Enabled = false;
@@ -416,6 +368,23 @@ namespace reconstructionController {
 					char szBuffer[BUFFER_SIZE];
 					int ret;
 
+					if (worker->CancellationPending)
+					{
+					   e->Cancel = true;
+					   return;
+					}
+
+					int iAddrSize = sizeof(recon_ptrs->client);
+					sClient = accept(sListen, (struct sockaddr *)&recon_ptrs->client,
+									&iAddrSize);
+					if (sClient == INVALID_SOCKET)
+					{
+						printf("accept() failed: %d\n", WSAGetLastError());
+						return;
+					}
+					printf("Accepted client: %s:%d\n",
+						inet_ntoa(recon_ptrs->client.sin_addr), ntohs(recon_ptrs->client.sin_port));
+						
 					while(true)
 					{
 						if (worker->CancellationPending)
@@ -442,54 +411,21 @@ namespace reconstructionController {
 						sprintf(buffer, "Received [%d bytes]: '%s'\r\n", ret, szBuffer);
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
+						
+						outMessage += "Starting reconstruction...";
+						worker->ReportProgress( 0 );
 
-						if(szBuffer[0] == 'V')
+						HANDLE hThread;
+						DWORD dwThreadId;
+						hThread = CreateThread(NULL, 0, &reconstructionController::Form1::reconstructSurface, (LPVOID)this, 0, &dwThreadId);
+						if (hThread == NULL)
 						{
-							outMessage += sendMessage("UBW FW D Version 1.4.3.eqpi\r\n");
+							sprintf(buffer, "CreateThread() failed: %d\n", GetLastError());
+							outMessage += gcnew System::String(buffer);
 							worker->ReportProgress( 0 );
 						}
-						else if(szBuffer[0] == 'W')
-						{
-							outMessage += sendMessage("0027_20100101_0001_eqpi\r\n");//ProjectorClient\r\n");
-							worker->ReportProgress( 0 );
-						}
-						/*else if(!strcmp(szBuffer, "O,0,0,0"))
-						{
-							outMessage += displayBlank();
-							worker->ReportProgress( 0 );
-						}*/
-						else if(!strcmp(szBuffer, "O,64,0,0"))
-						{
-							projectorOff();
-							outMessage += "Turning projector off...\r\n";
-							worker->ReportProgress( 0 );
-						}
-						else if(!strcmp(szBuffer, "O,1,0,0"))
-						{
-							projectorOn();
-							outMessage += "Turning projector on...\r\n";
-							worker->ReportProgress( 0 );
-						}
-						else if(!strcmp(szBuffer, "O,128,0,0"))
-						{
-							outMessage += displayCheckerboard();
-							worker->ReportProgress(0);
-						}
-						else if(!strcmp(szBuffer, "O,0,64,0"))   //Normally UV
-						{
-							outMessage += displayBlank();
-							worker->ReportProgress(0);
-						}
-						else if(!strcmp(szBuffer, "O,0,128,0"))  //Royal Blue
-						{
-							outMessage += startPattern();
-							worker->ReportProgress( 0 );
-						}
-						else if(!strcmp(szBuffer, "O,0,32,0"))  //Blue
-						{
-							outMessage += nextPattern();
-							worker->ReportProgress( 0 );
-						}
+						else
+							CloseHandle(hThread);
 					}
 					return;
 			 }
@@ -510,185 +446,6 @@ namespace reconstructionController {
 				sprintf(buffer, "Sent [%d bytes]: '%s'\r\n", ret, message);
 				return gcnew System::String(buffer);
 			}
-			
-			System::String^ startPattern()
-			{
-				if(!sl_data->proj_gray_codes)
-				{
-					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
-						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
-						sl_params->scan_cols, sl_params->scan_rows);
-				}
-				sl_data->patternNum = 0;
-				
-				cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-				cvShowImage("projWindow", sl_data->proj_frame);
-				
-				return "Pattern Sequence Started\r\n";
-			}
-
-			System::String^ nextPattern()
-			{
-				static bool inverseTime = true;
-				if(!sl_data->proj_gray_codes)
-				{
-					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
-						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
-						sl_params->scan_cols, sl_params->scan_rows);
-				}
-				
-				bool last = false;
-				if(inverseTime || sl_data->patternNum == 0)
-				{
-					cvSubRS(sl_data->proj_gray_codes[sl_data->patternNum], cvScalar(255), sl_data->proj_frame);
-					sl_data->patternNum = (sl_data->patternNum+1)%(sl_data->gray_ncols + sl_data->gray_nrows+1);
-					last = !(sl_data->patternNum);
-					inverseTime = false;
-				}
-				else
-				{
-					cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
-					inverseTime = true;
-				}
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-				cvShowImage("projWindow", sl_data->proj_frame);
-
-				if(last)  //TODO: Figure out how to remember what images to open for reconstruction!
-					return "Last Pattern Displayed\r\n";
-				
-				return "Next Pattern Displayed\r\n";
-			}
-
-			System::String^ displayCheckerboard()
-			{
-				if(sl_data->proj_chessboard == NULL)
-				{
-					sl_data->proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-					int proj_border_cols, proj_border_rows;
-					if(generateChessboard(sl_params, sl_data->proj_chessboard, proj_border_cols, proj_border_rows) == -1)
-						return "Calibration Checkerboard creation failed!\r\n";
-				}
-				
-				cvCopy(sl_data->proj_chessboard, sl_data->proj_frame);
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-				cvShowImage("projWindow", sl_data->proj_frame);
-
-				return "Displaying Calibration Checkerboard\r\n";
-			}
-			
-			System::String^ displayBlank()
-			{
-				cvSet(sl_data->proj_frame, cvScalar(255));
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-				cvShowImage("projWindow", sl_data->proj_frame);
-
-				return "Displaying Blank Image\r\n";
-			}
-
-
-			bool getProjector()
-			{
-				bool foundProjector = false;
-				DWORD DispNum = 0;
-				DISPLAY_DEVICE DisplayDevice;
-
-				// initialize DisplayDevice
-				ZeroMemory(&DisplayDevice, sizeof(DisplayDevice));
-				DisplayDevice.cb = sizeof(DisplayDevice);
-
-				// get all display devices
-				while (EnumDisplayDevices(NULL, DispNum, &DisplayDevice, 0))
-				{
-					if ((DisplayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) &&
-						!(DisplayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE))
-					{
-						console->Text += "Projector found on!  Storing current settings...\r\n";
-						ZeroMemory(projectorDefault, sizeof(DEVMODE));
-						projectorDefault->dmSize = sizeof(DEVMODE);
-						if (!EnumDisplaySettings(DisplayDevice.DeviceName, ENUM_REGISTRY_SETTINGS, projectorDefault))
-						{
-							console->Text += "Storing the current projector settings failed! Using defaults.\r\n";
-						}
-						else
-						{
-							ZeroMemory(projectorDefault, sizeof(DEVMODE));
-							projectorDefault->dmSize = sizeof(DEVMODE);
-							projectorDefault->dmFields = DM_POSITION;
-							projectorDefault->dmPosition.x = -800;
-							projectorDefault->dmPosition.y = 0;
-							projectorDefault->dmPelsWidth = 800;
-							projectorDefault->dmPelsHeight = 600;
-						}
-
-						(*projectorDisplay) = DisplayDevice;
-						//projectorOff();
-						foundProjector = true;
-						break;
-					}
-					else if (!(DisplayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) &&
-						!(DisplayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE))
-					{
-						console->Text += "Projector found off!  Using default settings.\r\n";
-						ZeroMemory(projectorDefault, sizeof(DEVMODE));
-						projectorDefault->dmSize = sizeof(DEVMODE);
-						projectorDefault->dmFields = DM_POSITION;
-						projectorDefault->dmPosition.x = -800;
-						projectorDefault->dmPosition.y = 0;
-						projectorDefault->dmPelsWidth = 800;
-						projectorDefault->dmPelsHeight = 600;
-						(*projectorDisplay) = DisplayDevice;
-						foundProjector = true;
-						projectorOn();
-						break;
-					}
-
-					ZeroMemory(&DisplayDevice, sizeof(DisplayDevice));
-					DisplayDevice.cb = sizeof(DisplayDevice);
-					DispNum++;
-				}
-
-				return foundProjector;
-			}
-
-			void projectorOn()
-			{
-					ChangeDisplaySettingsEx(projectorDisplay->DeviceName, projectorDefault, NULL, CDS_UPDATEREGISTRY, NULL);
-			}
-
-			void projectorOff()
-			{
-					DEVMODE DevMode;
-					ZeroMemory(&DevMode, sizeof(DevMode));
-					DevMode.dmSize = sizeof(DevMode);
-					DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_POSITION
-							| DM_DISPLAYFREQUENCY | DM_DISPLAYFLAGS ;
-
-					ChangeDisplaySettingsEx(projectorDisplay->DeviceName, &DevMode, NULL, CDS_UPDATEREGISTRY, NULL);
-			}
-
-			int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocation, String^ filePattern)
-			{
-				DirectoryInfo^ dir = gcnew DirectoryInfo(dirLocation);
-				if(!dir->Exists)
-				{
-					outMessage += dirLocation + " does not exist!\r\n";
-					return 0;
-				}
-
-				array<FileInfo^>^ files = dir->GetFiles(filePattern);
-				files->Sort(files, gcnew FileInfoNameComparer());
-				
-				numImages = (numImages < files->Length)?numImages:files->Length;
-				if(numImages <= 0)
-					return 0;
-
-				imagesBuffer = new IplImage* [numImages];
-				for(int i=0; i<numImages; i++)
-					imagesBuffer[i] = cvLoadImage(gc2std(files[0]->FullName).c_str());
-				
-				return numImages;
-			}
 
 			int getLatestImages(IplImage**& imagesBuffer, int numImages)
 			{
@@ -696,18 +453,6 @@ namespace reconstructionController {
 					this->setNameBox->Text + "_*.tif");
 			}
 
-			//Compares FileInfo objects backwards to produce a list where the biggest
-			//numbered images are first.
-			public: ref class FileInfoNameComparer : IComparer
-			{
-				public: virtual int Compare(Object^ x, Object^ y)
-				{
-					FileInfo^ objX = (FileInfo^)x;
-					FileInfo^ objY = (FileInfo^)y;
-					return objX->Name->CompareTo(objY->Name)* -1;
-				}
-			};
-			
 			private: System::Void editBaseFolderBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
 				System::Windows::Forms::DialogResult result = folderBrowserDialog1->ShowDialog();
@@ -725,7 +470,7 @@ namespace reconstructionController {
 			
 			private: bool loadSLConfigXML(slParams* sl_params, slCalib* sl_calib)
 			{
-				char* configFile = "./config.xml";
+				char* configFile = CONFIG_FILE;
 				
 				// Read structured lighting parameters from configuration file.
 				FILE* pFile = fopen(configFile, "r");
@@ -738,14 +483,6 @@ namespace reconstructionController {
 					return false;
 				}
 
-				// Create fullscreen window (for controlling projector display).
-				cvNamedWindow("projWindow", CV_WINDOW_AUTOSIZE);
-				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-				cvSet(sl_data->proj_frame, cvScalar(0, 0, 0));
-				cvShowImage("projWindow", sl_data->proj_frame);
-				cvMoveWindow("projWindow", -sl_params->proj_w-7, -33);
-				cvWaitKey(1);
-				
 				// Allocate storage for calibration parameters.
 				int cam_nelems                  = sl_params->cam_w*sl_params->cam_h;
 				int proj_nelems                 = sl_params->proj_w*sl_params->proj_h;
