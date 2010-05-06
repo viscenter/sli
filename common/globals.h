@@ -165,12 +165,15 @@ struct slCalib{
 	IplImage* background_mask;      // background mask
 };
 
-
-static void reconstructSurface(LPVOID lpParam)
+struct reconData
 {
-	reconstructionController::Form1 myForm = (reconstructionController::Form1)lpParm
-	IplImage** imagesBuffer;
-	int numImages = getLatestImages(imagesBuffer, 22);
-	return;
-}
+	slParams sl_params;
+	slCalib sl_calib;
+};
+
+struct reconIndirect
+{
+	reconData data;
+};
+
 #endif

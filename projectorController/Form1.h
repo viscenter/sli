@@ -10,8 +10,13 @@
 #include "../common/calibrationForm.h"
 #include "../common/globals.h"
 
-#define CLIENT_IP "127.0.0.1"
-#define DEFAULT_PORT_NUM 5555
+#define PHOTOSHOOT_IP "127.0.0.1"
+#define PHOTOSHOOT_PORT 5555
+#define PROJECTOR_IP "127.0.0.1"
+#define PROJECTOR_PORT 6464
+#define RECON_IP "127.0.0.1"
+#define RECON_PORT 7272
+
 #define BUFFER_SIZE 1024
 #define DEFAULT_BASE_FOLDER "X:/windowsDocuments/"
 #define DEFAULT_SET_NAME "laserTests"
@@ -58,10 +63,14 @@ namespace projectorController {
 			
 			sl_data->proj_chessboard = NULL;
 			sl_data->proj_gray_codes = NULL;
-			this->ipBox->Text = CLIENT_IP;
+			this->ipBox->Text = PHOTOSHOOT_IP;
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
-			portNumber = DEFAULT_PORT_NUM;
+			this->proj_ip_box->Text = PROJECTOR_IP;
+			this->proj_port_box->Text = PROJECTOR_PORT;
+			this->recon_ip_box->Text = RECON_IP;
+			this->recon_port_box->Text = RECON_PORT;
+			portNumber = PHOTOSHOOT_PORT;
 			helper = gcnew System::ComponentModel::BackgroundWorker();
 			helper->DoWork += gcnew DoWorkEventHandler( this, &Form1::helper_DoWork );
 			helper->RunWorkerCompleted += gcnew RunWorkerCompletedEventHandler( this, &Form1::helper_RunWorkerCompleted );
@@ -168,6 +177,21 @@ namespace projectorController {
 	private: slParams* sl_params;
 	private: slCalib* sl_calib;
 	private: slData* sl_data;
+private: System::Windows::Forms::Label^  label5;
+private: System::Windows::Forms::Label^  label6;
+private: System::Windows::Forms::Label^  label7;
+private: System::Windows::Forms::TextBox^  proj_ip_box;
+private: System::Windows::Forms::TextBox^  proj_port_box;
+
+
+private: System::Windows::Forms::Label^  label8;
+private: System::Windows::Forms::Label^  label9;
+private: System::Windows::Forms::Label^  label10;
+private: System::Windows::Forms::TextBox^  recon_ip_box;
+private: System::Windows::Forms::TextBox^  recon_port_box;
+
+
+private: System::Windows::Forms::Label^  label11;
 
 
 
@@ -202,33 +226,44 @@ namespace projectorController {
 			this->calibrationBtn = (gcnew System::Windows::Forms::Button());
 			this->ipBox = (gcnew System::Windows::Forms::TextBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->proj_ip_box = (gcnew System::Windows::Forms::TextBox());
+			this->proj_port_box = (gcnew System::Windows::Forms::TextBox());
+			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->label9 = (gcnew System::Windows::Forms::Label());
+			this->label10 = (gcnew System::Windows::Forms::Label());
+			this->recon_ip_box = (gcnew System::Windows::Forms::TextBox());
+			this->recon_port_box = (gcnew System::Windows::Forms::TextBox());
+			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(393, 348);
+			this->connectBtn->Location = System::Drawing::Point(396, 404);
 			this->connectBtn->Name = L"connectBtn";
 			this->connectBtn->Size = System::Drawing::Size(75, 23);
 			this->connectBtn->TabIndex = 1;
-			this->connectBtn->Text = L"Connect";
+			this->connectBtn->Text = L"Start";
 			this->connectBtn->UseVisualStyleBackColor = true;
 			this->connectBtn->Click += gcnew System::EventHandler(this, &Form1::connectBtn_Click);
 			// 
 			// label1
 			// 
-			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->label1->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(12, 320);
+			this->label1->Location = System::Drawing::Point(246, 358);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(53, 13);
+			this->label1->Size = System::Drawing::Size(29, 13);
 			this->label1->TabIndex = 2;
-			this->label1->Text = L"TCP Port:";
+			this->label1->Text = L"Port:";
 			// 
 			// portBox
 			// 
-			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(71, 317);
+			this->portBox->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->portBox->Location = System::Drawing::Point(281, 355);
 			this->portBox->Name = L"portBox";
 			this->portBox->Size = System::Drawing::Size(38, 20);
 			this->portBox->TabIndex = 3;
@@ -250,22 +285,22 @@ namespace projectorController {
 			this->console->Name = L"console";
 			this->console->ReadOnly = true;
 			this->console->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->console->Size = System::Drawing::Size(456, 265);
+			this->console->Size = System::Drawing::Size(459, 268);
 			this->console->TabIndex = 1;
 			// 
 			// setNameBox
 			// 
-			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->setNameBox->Location = System::Drawing::Point(330, 317);
+			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->setNameBox->Location = System::Drawing::Point(78, 315);
 			this->setNameBox->Name = L"setNameBox";
-			this->setNameBox->Size = System::Drawing::Size(139, 20);
+			this->setNameBox->Size = System::Drawing::Size(152, 20);
 			this->setNameBox->TabIndex = 4;
 			// 
 			// label2
 			// 
-			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(267, 320);
+			this->label2->Location = System::Drawing::Point(15, 318);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 5;
@@ -274,7 +309,7 @@ namespace projectorController {
 			// editBaseFolderBtn
 			// 
 			this->editBaseFolderBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->editBaseFolderBtn->Location = System::Drawing::Point(129, 286);
+			this->editBaseFolderBtn->Location = System::Drawing::Point(132, 284);
 			this->editBaseFolderBtn->Name = L"editBaseFolderBtn";
 			this->editBaseFolderBtn->Size = System::Drawing::Size(59, 23);
 			this->editBaseFolderBtn->TabIndex = 6;
@@ -286,7 +321,7 @@ namespace projectorController {
 			// 
 			this->baseFolderLocation->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->baseFolderLocation->AutoEllipsis = true;
-			this->baseFolderLocation->Location = System::Drawing::Point(194, 291);
+			this->baseFolderLocation->Location = System::Drawing::Point(197, 289);
 			this->baseFolderLocation->Name = L"baseFolderLocation";
 			this->baseFolderLocation->Size = System::Drawing::Size(272, 18);
 			this->baseFolderLocation->TabIndex = 7;
@@ -296,7 +331,7 @@ namespace projectorController {
 			// 
 			this->label3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(12, 291);
+			this->label3->Location = System::Drawing::Point(15, 289);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(111, 13);
 			this->label3->TabIndex = 8;
@@ -304,7 +339,8 @@ namespace projectorController {
 			// 
 			// calibrationBtn
 			// 
-			this->calibrationBtn->Location = System::Drawing::Point(15, 348);
+			this->calibrationBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->calibrationBtn->Location = System::Drawing::Point(363, 373);
 			this->calibrationBtn->Name = L"calibrationBtn";
 			this->calibrationBtn->Size = System::Drawing::Size(108, 23);
 			this->calibrationBtn->TabIndex = 9;
@@ -314,26 +350,151 @@ namespace projectorController {
 			// 
 			// ipBox
 			// 
-			this->ipBox->Location = System::Drawing::Point(152, 317);
+			this->ipBox->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->ipBox->Location = System::Drawing::Point(157, 355);
 			this->ipBox->Name = L"ipBox";
-			this->ipBox->Size = System::Drawing::Size(100, 20);
+			this->ipBox->Size = System::Drawing::Size(73, 20);
 			this->ipBox->TabIndex = 10;
 			this->ipBox->Text = L"127.0.0.1";
 			// 
 			// label4
 			// 
+			this->label4->Anchor = System::Windows::Forms::AnchorStyles::None;
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(126, 320);
+			this->label4->Location = System::Drawing::Point(131, 358);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(20, 13);
 			this->label4->TabIndex = 11;
 			this->label4->Text = L"IP:";
 			// 
+			// label5
+			// 
+			this->label5->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label5->AutoSize = true;
+			this->label5->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label5->Location = System::Drawing::Point(15, 358);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(75, 13);
+			this->label5->TabIndex = 12;
+			this->label5->Text = L"Photoshoot:";
+			// 
+			// label6
+			// 
+			this->label6->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label6->AutoSize = true;
+			this->label6->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label6->Location = System::Drawing::Point(15, 383);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(62, 13);
+			this->label6->TabIndex = 17;
+			this->label6->Text = L"Projector:";
+			// 
+			// label7
+			// 
+			this->label7->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(131, 383);
+			this->label7->Name = L"label7";
+			this->label7->Size = System::Drawing::Size(20, 13);
+			this->label7->TabIndex = 16;
+			this->label7->Text = L"IP:";
+			// 
+			// proj_ip_box
+			// 
+			this->proj_ip_box->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->proj_ip_box->Location = System::Drawing::Point(157, 380);
+			this->proj_ip_box->Name = L"proj_ip_box";
+			this->proj_ip_box->Size = System::Drawing::Size(73, 20);
+			this->proj_ip_box->TabIndex = 15;
+			this->proj_ip_box->Text = L"127.0.0.1";
+			// 
+			// proj_port_box
+			// 
+			this->proj_port_box->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->proj_port_box->Location = System::Drawing::Point(281, 380);
+			this->proj_port_box->Name = L"proj_port_box";
+			this->proj_port_box->Size = System::Drawing::Size(38, 20);
+			this->proj_port_box->TabIndex = 14;
+			this->proj_port_box->Text = L"6464";
+			// 
+			// label8
+			// 
+			this->label8->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(246, 383);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(29, 13);
+			this->label8->TabIndex = 13;
+			this->label8->Text = L"Port:";
+			// 
+			// label9
+			// 
+			this->label9->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label9->AutoSize = true;
+			this->label9->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label9->Location = System::Drawing::Point(15, 409);
+			this->label9->Name = L"label9";
+			this->label9->Size = System::Drawing::Size(97, 13);
+			this->label9->TabIndex = 22;
+			this->label9->Text = L"Reconstruction:";
+			// 
+			// label10
+			// 
+			this->label10->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label10->AutoSize = true;
+			this->label10->Location = System::Drawing::Point(131, 409);
+			this->label10->Name = L"label10";
+			this->label10->Size = System::Drawing::Size(20, 13);
+			this->label10->TabIndex = 21;
+			this->label10->Text = L"IP:";
+			// 
+			// recon_ip_box
+			// 
+			this->recon_ip_box->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->recon_ip_box->Location = System::Drawing::Point(157, 406);
+			this->recon_ip_box->Name = L"recon_ip_box";
+			this->recon_ip_box->Size = System::Drawing::Size(73, 20);
+			this->recon_ip_box->TabIndex = 20;
+			this->recon_ip_box->Text = L"127.0.0.1";
+			// 
+			// recon_port_box
+			// 
+			this->recon_port_box->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->recon_port_box->Location = System::Drawing::Point(281, 406);
+			this->recon_port_box->Name = L"recon_port_box";
+			this->recon_port_box->Size = System::Drawing::Size(38, 20);
+			this->recon_port_box->TabIndex = 19;
+			this->recon_port_box->Text = L"7272";
+			// 
+			// label11
+			// 
+			this->label11->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->label11->AutoSize = true;
+			this->label11->Location = System::Drawing::Point(246, 409);
+			this->label11->Name = L"label11";
+			this->label11->Size = System::Drawing::Size(29, 13);
+			this->label11->TabIndex = 18;
+			this->label11->Text = L"Port:";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(480, 378);
+			this->ClientSize = System::Drawing::Size(483, 434);
+			this->Controls->Add(this->label9);
+			this->Controls->Add(this->label10);
+			this->Controls->Add(this->recon_ip_box);
+			this->Controls->Add(this->recon_port_box);
+			this->Controls->Add(this->label11);
+			this->Controls->Add(this->label6);
+			this->Controls->Add(this->label7);
+			this->Controls->Add(this->proj_ip_box);
+			this->Controls->Add(this->proj_port_box);
+			this->Controls->Add(this->label8);
+			this->Controls->Add(this->label5);
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->ipBox);
 			this->Controls->Add(this->calibrationBtn);

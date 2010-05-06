@@ -37,4 +37,34 @@ int generateGrayCodes(int width, int height,
 // Run the structured light scanner.
 int runStructuredLight(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib, int scan_index);
 
+int decodeGrayCodes(int proj_width, int proj_height,
+					IplImage**& gray_codes, 
+					IplImage*& decoded_cols,
+					IplImage*& decoded_rows,
+					IplImage*& mask,
+					int& n_cols, int& n_rows,
+					int& col_shift, int& row_shift, 
+					int sl_thresh);
+
+int displayDecodingResults(IplImage*& decoded_cols, 
+						   IplImage*& decoded_rows, 
+						   IplImage*& mask,
+						   struct slParams* sl_params);
+
+int displayDepthMap(CvMat*& depth_map,
+					IplImage*& mask,
+				    struct slParams* sl_params);
+
+int reconstructStructuredLight(struct slParams* sl_params, 
+					           struct slCalib* sl_calib,
+							   IplImage*& texture_image,
+							   IplImage*& gray_decoded_cols, 
+							   IplImage*& gray_decoded_rows, 
+						       IplImage*& gray_mask,
+							   CvMat*&    points,
+							   CvMat*&    colors,
+							   CvMat*&    depth_map,
+							   CvMat*&    mask);
+
+
 #endif

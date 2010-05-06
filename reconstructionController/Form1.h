@@ -47,7 +47,9 @@ namespace reconstructionController {
 			InitializeComponent();
 			
 			recon_ptrs = new reconPtrs();
-			if(!loadSLConfigXML(sl_params, sl_calib))
+			recon_indir = new reconIndirect();
+
+			if(!loadSLConfigXML(&recon_indir->data.sl_params, &recon_indir->data.sl_calib))
 				console->Text += "Could not load the Structured Light Configuration XML file!\r\nPlease correct the file and restart the program.\r\n";
 			else
 				console->Text += "Configuration File Read Successfully!\r\n";
@@ -88,24 +90,23 @@ namespace reconstructionController {
 				delete components;
 			}
 			
-			cvReleaseMat(&sl_calib->cam_intrinsic);
-			cvReleaseMat(&sl_calib->cam_distortion);
-			cvReleaseMat(&sl_calib->cam_extrinsic);
-			cvReleaseMat(&sl_calib->proj_intrinsic);
-			cvReleaseMat(&sl_calib->proj_distortion);
-			cvReleaseMat(&sl_calib->proj_extrinsic);
-			cvReleaseMat(&sl_calib->cam_center);
-			cvReleaseMat(&sl_calib->proj_center);
-			cvReleaseMat(&sl_calib->cam_rays);
-			cvReleaseMat(&sl_calib->proj_rays);
-			cvReleaseMat(&sl_calib->proj_column_planes);
-			cvReleaseMat(&sl_calib->proj_row_planes);
-			cvReleaseMat(&sl_calib->background_depth_map);
-			cvReleaseImage(&sl_calib->background_image);
-			cvReleaseImage(&sl_calib->background_mask);
+			cvReleaseMat(&recon_indir->data.sl_calib.cam_intrinsic);
+			cvReleaseMat(&recon_indir->data.sl_calib.cam_distortion);
+			cvReleaseMat(&recon_indir->data.sl_calib.cam_extrinsic);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_intrinsic);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_distortion);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_extrinsic);
+			cvReleaseMat(&recon_indir->data.sl_calib.cam_center);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_center);
+			cvReleaseMat(&recon_indir->data.sl_calib.cam_rays);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_rays);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_column_planes);
+			cvReleaseMat(&recon_indir->data.sl_calib.proj_row_planes);
+			cvReleaseMat(&recon_indir->data.sl_calib.background_depth_map);
+			cvReleaseImage(&recon_indir->data.sl_calib.background_image);
+			cvReleaseImage(&recon_indir->data.sl_calib.background_mask);
 			
-			delete sl_calib;
-			delete sl_params;
+			delete recon_indir;
 			delete recon_ptrs;
 		}
 
@@ -134,9 +135,9 @@ namespace reconstructionController {
 
 
 	
-	private: slParams* sl_params;
-	private: slCalib* sl_calib;
-	private: slData* sl_data;
+
+	public: reconIndirect* recon_indir;
+
 private: System::Windows::Forms::Label^  label1;
 private: System::Windows::Forms::TextBox^  portBox;
 private: reconPtrs* recon_ptrs;
@@ -415,17 +416,9 @@ private: reconPtrs* recon_ptrs;
 						outMessage += "Starting reconstruction...";
 						worker->ReportProgress( 0 );
 
-						HANDLE hThread;
-						DWORD dwThreadId;
-						hThread = CreateThread(NULL, 0, &reconstructionController::Form1::reconstructSurface, (LPVOID)this, 0, &dwThreadId);
-						if (hThread == NULL)
-						{
-							sprintf(buffer, "CreateThread() failed: %d\n", GetLastError());
-							outMessage += gcnew System::String(buffer);
-							worker->ReportProgress( 0 );
-						}
-						else
-							CloseHandle(hThread);
+						Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
+						newThread->Start(this);
+						
 					}
 					return;
 			 }
@@ -464,7 +457,7 @@ private: reconPtrs* recon_ptrs;
 			
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
-				calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
+				calibrationForm^ calibrationWindow = gcnew calibrationForm(&recon_indir->data.sl_params, &recon_indir->data.sl_calib);
 				calibrationWindow->Visible = true;
 			}
 			
@@ -477,73 +470,184 @@ private: reconPtrs* recon_ptrs;
 				if(pFile != NULL){
 					fclose(pFile);
 					console->Text += "Reading configuration file...\r\n";
-					readConfiguration(configFile, sl_params);
+					readConfiguration(configFile, &recon_indir->data.sl_params);
 				}
 				else{
 					return false;
 				}
 
 				// Allocate storage for calibration parameters.
-				int cam_nelems                  = sl_params->cam_w*sl_params->cam_h;
-				int proj_nelems                 = sl_params->proj_w*sl_params->proj_h;
-				sl_calib->cam_intrinsic_calib    = false;
-				sl_calib->proj_intrinsic_calib   = false;
-				sl_calib->procam_extrinsic_calib = false;
-				sl_calib->cam_intrinsic          = cvCreateMat(3,3,CV_32FC1);
-				sl_calib->cam_distortion         = cvCreateMat(5,1,CV_32FC1);
-				sl_calib->cam_extrinsic          = cvCreateMat(2, 3, CV_32FC1);
-				sl_calib->proj_intrinsic         = cvCreateMat(3, 3, CV_32FC1);
-				sl_calib->proj_distortion        = cvCreateMat(5, 1, CV_32FC1);
-				sl_calib->proj_extrinsic         = cvCreateMat(2, 3, CV_32FC1);
-				sl_calib->cam_center             = cvCreateMat(3, 1, CV_32FC1);
-				sl_calib->proj_center            = cvCreateMat(3, 1, CV_32FC1);
-				sl_calib->cam_rays               = cvCreateMat(3, cam_nelems, CV_32FC1);
-				sl_calib->proj_rays              = cvCreateMat(3, proj_nelems, CV_32FC1);
-				sl_calib->proj_column_planes     = cvCreateMat(sl_params->proj_w, 4, CV_32FC1);
-				sl_calib->proj_row_planes        = cvCreateMat(sl_params->proj_h, 4, CV_32FC1);
+				int cam_nelems                  = recon_indir->data.sl_params.cam_w*recon_indir->data.sl_params.cam_h;
+				int proj_nelems                 = recon_indir->data.sl_params.proj_w*recon_indir->data.sl_params.proj_h;
+				recon_indir->data.sl_calib.cam_intrinsic_calib    = false;
+				recon_indir->data.sl_calib.proj_intrinsic_calib   = false;
+				recon_indir->data.sl_calib.procam_extrinsic_calib = false;
+				recon_indir->data.sl_calib.cam_intrinsic          = cvCreateMat(3,3,CV_32FC1);
+				recon_indir->data.sl_calib.cam_distortion         = cvCreateMat(5,1,CV_32FC1);
+				recon_indir->data.sl_calib.cam_extrinsic          = cvCreateMat(2, 3, CV_32FC1);
+				recon_indir->data.sl_calib.proj_intrinsic         = cvCreateMat(3, 3, CV_32FC1);
+				recon_indir->data.sl_calib.proj_distortion        = cvCreateMat(5, 1, CV_32FC1);
+				recon_indir->data.sl_calib.proj_extrinsic         = cvCreateMat(2, 3, CV_32FC1);
+				recon_indir->data.sl_calib.cam_center             = cvCreateMat(3, 1, CV_32FC1);
+				recon_indir->data.sl_calib.proj_center            = cvCreateMat(3, 1, CV_32FC1);
+				recon_indir->data.sl_calib.cam_rays               = cvCreateMat(3, cam_nelems, CV_32FC1);
+				recon_indir->data.sl_calib.proj_rays              = cvCreateMat(3, proj_nelems, CV_32FC1);
+				recon_indir->data.sl_calib.proj_column_planes     = cvCreateMat(recon_indir->data.sl_params.proj_w, 4, CV_32FC1);
+				recon_indir->data.sl_calib.proj_row_planes        = cvCreateMat(recon_indir->data.sl_params.proj_h, 4, CV_32FC1);
 				
 				// Load intrinsic camera calibration parameters (if found).
 				char str1[1024], str2[1024];
-				sprintf(str1, "%s\\calib\\cam\\cam_intrinsic.xml",  sl_params->outdir);
-				sprintf(str2, "%s\\calib\\cam\\cam_distortion.xml", sl_params->outdir);
+				sprintf(str1, "%s\\calib\\cam\\cam_intrinsic.xml",  recon_indir->data.sl_params.outdir);
+				sprintf(str2, "%s\\calib\\cam\\cam_distortion.xml", recon_indir->data.sl_params.outdir);
 				if( ((CvMat*)cvLoad(str1) != 0) && ((CvMat*)cvLoad(str2) != 0) ){
-					sl_calib->cam_intrinsic  = (CvMat*)cvLoad(str1);
-					sl_calib->cam_distortion = (CvMat*)cvLoad(str2);
-					sl_calib->cam_intrinsic_calib = true;
+					recon_indir->data.sl_calib.cam_intrinsic  = (CvMat*)cvLoad(str1);
+					recon_indir->data.sl_calib.cam_distortion = (CvMat*)cvLoad(str2);
+					recon_indir->data.sl_calib.cam_intrinsic_calib = true;
 					console->Text += "Loaded previous intrinsic camera calibration.\r\n";
 				}
 
 				// Load intrinsic projector calibration parameters (if found);
-				sprintf(str1, "%s\\calib\\proj\\proj_intrinsic.xml",  sl_params->outdir);
-				sprintf(str2, "%s\\calib\\proj\\proj_distortion.xml", sl_params->outdir);
+				sprintf(str1, "%s\\calib\\proj\\proj_intrinsic.xml",  recon_indir->data.sl_params.outdir);
+				sprintf(str2, "%s\\calib\\proj\\proj_distortion.xml", recon_indir->data.sl_params.outdir);
 				if( ((CvMat*)cvLoad(str1) != 0) && ((CvMat*)cvLoad(str2) != 0) ){
-					sl_calib->proj_intrinsic  = (CvMat*)cvLoad(str1);
-					sl_calib->proj_distortion = (CvMat*)cvLoad(str2);
-					sl_calib->proj_intrinsic_calib = true;
+					recon_indir->data.sl_calib.proj_intrinsic  = (CvMat*)cvLoad(str1);
+					recon_indir->data.sl_calib.proj_distortion = (CvMat*)cvLoad(str2);
+					recon_indir->data.sl_calib.proj_intrinsic_calib = true;
 					console->Text += "Loaded previous intrinsic projector calibration.\r\n";
 				}
 				
 				// Load extrinsic projector-camera parameters (if found).
-				sprintf(str1, "%s\\calib\\proj\\cam_extrinsic.xml",  sl_params->outdir);
-				sprintf(str2, "%s\\calib\\proj\\proj_extrinsic.xml", sl_params->outdir);
-				if( (sl_calib->cam_intrinsic_calib && sl_calib->proj_intrinsic_calib) &&
+				sprintf(str1, "%s\\calib\\proj\\cam_extrinsic.xml",  recon_indir->data.sl_params.outdir);
+				sprintf(str2, "%s\\calib\\proj\\proj_extrinsic.xml", recon_indir->data.sl_params.outdir);
+				if( (recon_indir->data.sl_calib.cam_intrinsic_calib && recon_indir->data.sl_calib.proj_intrinsic_calib) &&
 					( ((CvMat*)cvLoad(str1) != 0) && ((CvMat*)cvLoad(str2) != 0) ) ){
-					sl_calib->cam_extrinsic  = (CvMat*)cvLoad(str1);
-					sl_calib->proj_extrinsic = (CvMat*)cvLoad(str2);
-					sl_calib->procam_extrinsic_calib = true;
-					evaluateProCamGeometry(sl_params, sl_calib);
+					recon_indir->data.sl_calib.cam_extrinsic  = (CvMat*)cvLoad(str1);
+					recon_indir->data.sl_calib.proj_extrinsic = (CvMat*)cvLoad(str2);
+					recon_indir->data.sl_calib.procam_extrinsic_calib = true;
+					evaluateProCamGeometry(&recon_indir->data.sl_params, &recon_indir->data.sl_calib);
 					console->Text += "Loaded previous extrinsic projector-camera calibration.\r\n";
 				}
 				
 				// Initialize background model.
-				sl_calib->background_depth_map = cvCreateMat(sl_params->cam_h, sl_params->cam_w, CV_32FC1);
-				sl_calib->background_image     = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U, 3);
-				sl_calib->background_mask      = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U, 1);
-				cvSet(sl_calib->background_depth_map, cvScalar(FLT_MAX));
-				cvZero(sl_calib->background_image);
-				cvSet(sl_calib->background_mask, cvScalar(255));
+				recon_indir->data.sl_calib.background_depth_map = cvCreateMat(recon_indir->data.sl_params.cam_h, recon_indir->data.sl_params.cam_w, CV_32FC1);
+				recon_indir->data.sl_calib.background_image     = cvCreateImage(cvSize(recon_indir->data.sl_params.cam_w, recon_indir->data.sl_params.cam_h), IPL_DEPTH_8U, 3);
+				recon_indir->data.sl_calib.background_mask      = cvCreateImage(cvSize(recon_indir->data.sl_params.cam_w, recon_indir->data.sl_params.cam_h), IPL_DEPTH_8U, 1);
+				cvSet(recon_indir->data.sl_calib.background_depth_map, cvScalar(FLT_MAX));
+				cvZero(recon_indir->data.sl_calib.background_image);
+				cvSet(recon_indir->data.sl_calib.background_mask, cvScalar(255));
 				
 				return true;
+			}
+
+			static void reconstructSurface(System::Object^ myForm)
+			{
+				reconstructionController::Form1^ theForm = (reconstructionController::Form1^)myForm;
+		
+				slParams* sl_params = &theForm->recon_indir->data.sl_params;
+				slCalib* sl_calib = &theForm->recon_indir->data.sl_calib;
+				
+				IplImage** proj_gray_codes = NULL;
+				int gray_ncols, gray_nrows;
+				int gray_colshift, gray_rowshift;
+				
+				generateGrayCodes(sl_params->proj_w, sl_params->proj_h, proj_gray_codes, 
+				gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+				sl_params->scan_cols, sl_params->scan_rows);
+
+				IplImage** cam_gray_codes;
+				int numImages = theForm->getLatestImages(cam_gray_codes, 22);
+
+				IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
+				IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
+				IplImage* gray_mask         = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U,  1);
+				
+				decodeGrayCodes(sl_params->proj_w, sl_params->proj_h,
+								cam_gray_codes, 
+								gray_decoded_cols, gray_decoded_rows, gray_mask,
+								gray_ncols, gray_nrows, 
+								gray_colshift, gray_rowshift, 
+								sl_params->thresh);
+				
+				char str[1024], outputDir[1024];
+				if(sl_params->save){
+					sprintf(outputDir, "%s\\%s\\%0.2d", sl_params->outdir, sl_params->object, 1);
+					_mkdir(outputDir);
+				}
+
+				// Display and save the correspondences.
+				if(sl_params->display)
+					displayDecodingResults(gray_decoded_cols, gray_decoded_rows, gray_mask, sl_params);
+
+				// Reconstruct the point cloud and depth map.
+				//printf("Reconstructing the point cloud and the depth map...\n");
+				CvMat *points    = cvCreateMat(3, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+				CvMat *colors    = cvCreateMat(3, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+				CvMat *depth_map = cvCreateMat(sl_params->cam_h, sl_params->cam_w, CV_32FC1);
+				CvMat *mask      = cvCreateMat(1, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+				reconstructStructuredLight(sl_params, sl_calib, 
+										   cam_gray_codes[0],
+										   gray_decoded_cols, gray_decoded_rows, gray_mask,
+										   points, colors, depth_map, mask);
+
+				// Display and save the depth map.
+				if(sl_params->display)
+					displayDepthMap(depth_map, gray_mask, sl_params);
+				if(sl_params->save){
+					//printf("Saving the depth map...\n");
+					IplImage* depth_map_image = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U, 1);
+					for(int r=0; r<sl_params->cam_h; r++){
+						for(int c=0; c<sl_params->cam_w; c++){
+							char* depth_map_image_data = (char*)(depth_map_image->imageData + r*depth_map_image->widthStep);
+							if(mask->data.fl[sl_params->cam_w*r+c])
+								depth_map_image_data[c] = 
+									255-int(255*(depth_map->data.fl[sl_params->cam_w*r+c]-sl_params->dist_range[0])/
+										(sl_params->dist_range[1]-sl_params->dist_range[0]));
+							else
+								depth_map_image_data[c] = 0;
+						}
+					}
+					CvMat* dist_range = cvCreateMat(1, 2, CV_32FC1);
+					cvmSet(dist_range, 0, 0, sl_params->dist_range[0]);
+					cvmSet(dist_range, 0, 1, sl_params->dist_range[1]);
+					char str[1024];
+					sprintf(str, "%s\\depth_map.png", outputDir);
+					cvSaveImage(str, depth_map_image);
+					sprintf(str, "%s\\depth_map_range.xml", outputDir);
+					cvSave(str, dist_range);
+					cvReleaseImage(&depth_map_image);
+					cvReleaseMat(&dist_range);
+				}
+
+				// Save the texture map.
+				//printf("Saving the texture map...\n");
+				sprintf(str, "%s\\%s\\%s_%0.2d.png", sl_params->outdir, sl_params->object, sl_params->object, 1);
+				cvSaveImage(str, cam_gray_codes[0]);
+
+				// Save the point cloud.
+				//printf("Saving the point cloud...\n");
+				sprintf(str, "%s\\%s\\%s_%0.2d.wrl", sl_params->outdir, sl_params->object, sl_params->object, 1);
+				if(savePointsVRML(str, points, NULL, colors, mask)){
+					MessageBox::Show("Scanning was not successful and must be repeated!", "Reconstruction Error", 
+						MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+					return;
+				}
+
+				// Free allocated resources.
+				cvReleaseImage(&gray_decoded_cols);
+				cvReleaseImage(&gray_decoded_rows);
+				cvReleaseImage(&gray_mask);
+				cvReleaseMat(&points);
+				cvReleaseMat(&colors);
+				cvReleaseMat(&depth_map);
+				cvReleaseMat(&mask);
+				for(int i=0; i<(gray_ncols+gray_nrows+1); i++)
+					cvReleaseImage(&proj_gray_codes[i]);
+				delete[] proj_gray_codes;
+				for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
+					cvReleaseImage(&cam_gray_codes[i]);
+				delete[] cam_gray_codes;
+
+				return;
 			}
 };
 }
