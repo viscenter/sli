@@ -671,7 +671,7 @@ namespace reconstructionController {
 			cvReleaseImage(&proj_chessboard);
 
 			IplImage** imagesBuffer;
-			int n_boards = getImages(imagesBuffer, 25, this->cameraCalibrationDirLbl->Text, "*.tif");
+			int n_boards = getImages(imagesBuffer, 25, this->projectorCalibrationDirLbl->Text, "*.tif");
 			scanf("%d", &n_boards);
 			if(n_boards<4){
 				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
@@ -710,11 +710,11 @@ namespace reconstructionController {
 				proj_calibImages[i] = cvCreateImage(frame_size, imagesBuffer[0]->depth, imagesBuffer[0]->nChannels);
 
 			// Create a window to display capture frames.
-			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+			/*cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
 			cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
 			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
 			BringWindowToTop(camWindow);
-			cvWaitKey(1);
+			cvWaitKey(1);*/
 
 			// Allocate storage for grayscale images.
 			IplImage* cam_frame_1_gray = cvCreateImage(frame_size, IPL_DEPTH_8U, 1);
@@ -722,11 +722,11 @@ namespace reconstructionController {
 
 			// Capture live image stream, until "ESC" is pressed or calibration is complete.
 			int successes = 0;
-			bool goodFrame;
+			//bool goodFrame;
 			int cvKey = -1;
 			for(int num=0; num<n_boards; num+=2)
 			{
-				goodFrame = false;
+				//goodFrame = false;
 				// Get next available "safe" frame.
 				cvCopyImage(imagesBuffer[num], cam_frame_1);
 				cvScale(cam_frame_1, cam_frame_1, 2.*(sl_params->cam_gain/100.), 0);
@@ -761,8 +761,8 @@ namespace reconstructionController {
 					int proj_found = detectChessboard(cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
 
 					// Display current projector tracking results.
-					cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
-					cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+					//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
+					//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
 
 					// If chessboard is detected, then update calibration lists.
 					if(proj_corner_count == proj_board_n){
@@ -788,24 +788,24 @@ namespace reconstructionController {
 
 						// Update display.
 						successes++;
-						goodFrame = true;
+						//goodFrame = true;
 					}
 
 					// Free allocated resources.
 					delete[] proj_corners;
 				}
-				else
+				/*else
 				{	
 					// Camera chessboard not found, display current camera tracking results.
 					cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
 					cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
-				}
+				}*/
 
 				// Free allocated resources.
 				delete[] cam_corners;
 
 				// Process user input.
-				int cvKey = cvWaitKey(0);
+				/*int cvKey = cvWaitKey(0);
 				if(cvKey==27)
 					break;
 				else if(cvKey=='r')
@@ -815,11 +815,11 @@ namespace reconstructionController {
 					{
 						successes--;
 					}
-				}
+				}*/
 			}
 
 			// Close the display window.
-			cvDestroyWindow("camWindow");
+			//cvDestroyWindow("camWindow");
 
 			// Calibrate projector, if minimum number of frames are available.
 			if(successes >= 2){

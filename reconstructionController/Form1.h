@@ -56,6 +56,7 @@ namespace reconstructionController {
 			
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
+			this->portBox->Text = "" + DEFAULT_PORT_NUM;
 			portNumber = DEFAULT_PORT_NUM;
 			helper = gcnew System::ComponentModel::BackgroundWorker();
 			helper->DoWork += gcnew DoWorkEventHandler( this, &Form1::helper_DoWork );

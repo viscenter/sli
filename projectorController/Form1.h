@@ -187,6 +187,9 @@ private: System::Windows::Forms::TextBox^  recon_port_box;
 
 
 private: System::Windows::Forms::Label^  label11;
+private: System::Windows::Forms::Label^  label12;
+private: System::Windows::Forms::TextBox^  tileBox;
+
 
 
 
@@ -232,6 +235,8 @@ private: System::Windows::Forms::Label^  label11;
 			this->recon_ip_box = (gcnew System::Windows::Forms::TextBox());
 			this->recon_port_box = (gcnew System::Windows::Forms::TextBox());
 			this->label11 = (gcnew System::Windows::Forms::Label());
+			this->label12 = (gcnew System::Windows::Forms::Label());
+			this->tileBox = (gcnew System::Windows::Forms::TextBox());
 			this->SuspendLayout();
 			// 
 			// connectBtn
@@ -474,11 +479,31 @@ private: System::Windows::Forms::Label^  label11;
 			this->label11->TabIndex = 18;
 			this->label11->Text = L"Port:";
 			// 
+			// label12
+			// 
+			this->label12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->label12->AutoSize = true;
+			this->label12->Location = System::Drawing::Point(260, 318);
+			this->label12->Name = L"label12";
+			this->label12->Size = System::Drawing::Size(58, 13);
+			this->label12->TabIndex = 24;
+			this->label12->Text = L"Tile Name:";
+			// 
+			// tileBox
+			// 
+			this->tileBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->tileBox->Location = System::Drawing::Point(324, 315);
+			this->tileBox->Name = L"tileBox";
+			this->tileBox->Size = System::Drawing::Size(145, 20);
+			this->tileBox->TabIndex = 23;
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(483, 434);
+			this->Controls->Add(this->label12);
+			this->Controls->Add(this->tileBox);
 			this->Controls->Add(this->label9);
 			this->Controls->Add(this->label10);
 			this->Controls->Add(this->recon_ip_box);
@@ -653,7 +678,7 @@ private: System::Windows::Forms::Label^  label11;
 						}
 						else if(szBuffer[0] == 'W')
 						{
-							outMessage += sendMessage(sClient, "0027_20100101_0001_eqpi\r\n");//ProjectorClient\r\n");
+							outMessage += sendMessage(sClient, "1337_20100101_0099_eqpi\r\n");//ProjectorClient\r\n");
 							worker->ReportProgress( 0 );
 						}
 						/*else if(!strcmp(szBuffer, "O,64,0,0"))
