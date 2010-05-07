@@ -409,7 +409,8 @@ private: reconPtrs* recon_ptrs;
 						else
 							szBuffer[ret] = '\0';
 						
-						sprintf(buffer, "Received [%d bytes]: '%s'\r\n", ret, szBuffer);
+						sprintf(buffer, "Received: '%s'\r\n", szBuffer);
+						this->setNameBox->Text = gcnew System::String(szBuffer);
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
 						

@@ -67,9 +67,10 @@ namespace projectorController {
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
 			this->proj_ip_box->Text = PROJECTOR_IP;
-			this->proj_port_box->Text = PROJECTOR_PORT;
+			this->proj_port_box->Text = "" + PROJECTOR_PORT;
 			this->recon_ip_box->Text = RECON_IP;
-			this->recon_port_box->Text = RECON_PORT;
+			this->recon_port_box->Text = "" + RECON_PORT;
+			this->portBox->Text = "" + PHOTOSHOOT_PORT;
 			portNumber = PHOTOSHOOT_PORT;
 			helper = gcnew System::ComponentModel::BackgroundWorker();
 			helper->DoWork += gcnew DoWorkEventHandler( this, &Form1::helper_DoWork );
@@ -84,14 +85,6 @@ namespace projectorController {
 			sl_data->gray_colshift = 0;
 			sl_data->gray_rowshift = 0;
 			
-			/*projectorDisplay = new DISPLAY_DEVICE();
-			projectorDefault = new DEVMODE();
-
-			if(!getProjector())
-			{
-				console->Text += "Could not find the projector as a secondary display!\r\n";
-			}*/
-
 			WSADATA wsd;
 			if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
 			{
@@ -109,6 +102,8 @@ namespace projectorController {
 			{
 				helper->CancelAsync();
 				closesocket(sClient);
+				closesocket(projClient);
+				closesocket(reconClient);
 			}
 			WSACleanup();
 			if (components)
@@ -155,7 +150,7 @@ namespace projectorController {
 	private: int portNumber;
 	private: System::String^ outMessage;
 	private: BackgroundWorker^ helper;
-	private: SOCKET sClient;
+	private: SOCKET sClient, projClient, reconClient;
 	private: bool running;
 	private: DISPLAY_DEVICE* projectorDisplay;
 	private: DEVMODE* projectorDefault;
@@ -520,21 +515,63 @@ private: System::Windows::Forms::Label^  label11;
 				if(!running)
 				{
 					portNumber = atoi(gc2std(this->portBox->Text).c_str());
-					struct sockaddr_in server;
+					struct sockaddr_in server, projServer, reconServer;
 
 					sClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+					
 					if (sClient == INVALID_SOCKET)
 					{
 						sprintf(buffer, "socket() failed: %d\r\n", WSAGetLastError());
 						console->Text += gcnew System::String(buffer);
 						return;
 					}
+
+					projClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+					if (projClient == INVALID_SOCKET)
+					{
+						sprintf(buffer, "socket() failed: %d\r\n", WSAGetLastError());
+						console->Text += gcnew System::String(buffer);
+						return;
+					}
+
+					reconClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+					if (reconClient == INVALID_SOCKET)
+					{
+						sprintf(buffer, "socket() failed: %d\r\n", WSAGetLastError());
+						console->Text += gcnew System::String(buffer);
+						return;
+					}
+
 					server.sin_family = AF_INET;
 					server.sin_port = htons(portNumber);
 					server.sin_addr.s_addr = inet_addr(gc2std(this->ipBox->Text).c_str());
+
+					projServer.sin_family = AF_INET;
+					projServer.sin_port = htons(atoi(gc2std(this->proj_port_box->Text).c_str()));
+					projServer.sin_addr.s_addr = inet_addr(gc2std(this->proj_ip_box->Text).c_str());
+
+					reconServer.sin_family = AF_INET;
+					reconServer.sin_port = htons(atoi(gc2std(this->recon_port_box->Text).c_str()));
+					reconServer.sin_addr.s_addr = inet_addr(gc2std(this->recon_ip_box->Text).c_str());
 				   
 					if (connect(sClient, (struct sockaddr *)&server,
 						sizeof(server)) == SOCKET_ERROR)
+					{
+						sprintf(buffer, "connect() failed: %d\r\n", WSAGetLastError());
+						console->Text += gcnew System::String(buffer);
+						return;
+					}
+
+					if (connect(projClient, (struct sockaddr *)&projServer,
+						sizeof(projServer)) == SOCKET_ERROR)
+					{
+						sprintf(buffer, "connect() failed: %d\r\n", WSAGetLastError());
+						console->Text += gcnew System::String(buffer);
+						return;
+					}
+
+					if (connect(reconClient, (struct sockaddr *)&reconServer,
+						sizeof(reconServer)) == SOCKET_ERROR)
 					{
 						sprintf(buffer, "connect() failed: %d\r\n", WSAGetLastError());
 						console->Text += gcnew System::String(buffer);
@@ -547,15 +584,18 @@ private: System::Windows::Forms::Label^  label11;
 					portBox->Enabled = false;
 					running = true;
 					connectBtn->Text = "Stop";
+					this->calibrationBtn->Text = "Toggle Projector";
 				}
 				else
 				{
 					helper->CancelAsync();
 					closesocket(sClient);
+					closesocket(projClient);
+					closesocket(reconClient);
 					portBox->Enabled = true;
 					running = false;
 					connectBtn->Text = "Connect";
-					
+					this->calibrationBtn->Text = "Calibration Controls";
 				}
 			 }
 
@@ -608,20 +648,15 @@ private: System::Windows::Forms::Label^  label11;
 
 						if(szBuffer[0] == 'V')
 						{
-							outMessage += sendMessage("UBW FW D Version 1.4.3.eqpi\r\n");
+							outMessage += sendMessage(sClient, "UBW FW D Version 1.4.3.eqpi\r\n");
 							worker->ReportProgress( 0 );
 						}
 						else if(szBuffer[0] == 'W')
 						{
-							outMessage += sendMessage("0027_20100101_0001_eqpi\r\n");//ProjectorClient\r\n");
+							outMessage += sendMessage(sClient, "0027_20100101_0001_eqpi\r\n");//ProjectorClient\r\n");
 							worker->ReportProgress( 0 );
 						}
-						/*else if(!strcmp(szBuffer, "O,0,0,0"))
-						{
-							outMessage += displayBlank();
-							worker->ReportProgress( 0 );
-						}*/
-						else if(!strcmp(szBuffer, "O,64,0,0"))
+						/*else if(!strcmp(szBuffer, "O,64,0,0"))
 						{
 							projectorOff();
 							outMessage += "Turning projector off...\r\n";
@@ -632,7 +667,7 @@ private: System::Windows::Forms::Label^  label11;
 							projectorOn();
 							outMessage += "Turning projector on...\r\n";
 							worker->ReportProgress( 0 );
-						}
+						}*/
 						else if(!strcmp(szBuffer, "O,128,0,0"))
 						{
 							outMessage += displayCheckerboard();
@@ -657,12 +692,12 @@ private: System::Windows::Forms::Label^  label11;
 					return;
 			 }
 
-			System::String^ sendMessage(char* message)
+			System::String^ sendMessage(SOCKET socket, const char* message)
 			{
 				int ret;
 				char buffer[BUFFER_SIZE];
 
-				ret = send(sClient, message, strlen(message), 0);
+				ret = send(socket, message, strlen(message), 0);
 				if (ret == 0)
 					return "";
 				else if (ret == SOCKET_ERROR)
@@ -676,12 +711,14 @@ private: System::Windows::Forms::Label^  label11;
 			
 			System::String^ startPattern()
 			{
+				sendMessage(projClient, "a");
 				if(!sl_data->proj_gray_codes)
 				{
 					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
 						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
 						sl_params->scan_cols, sl_params->scan_rows);
 				}
+				Sleep(1000);
 				sl_data->patternNum = 0;
 				
 				cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
@@ -718,13 +755,19 @@ private: System::Windows::Forms::Label^  label11;
 				cvShowImage("projWindow", sl_data->proj_frame);
 
 				if(last)  //TODO: Figure out how to remember what images to open for reconstruction!
+				{
+					sendMessage(projClient, "a");
+					Sleep(1000);
+					sendMessage(reconClient, gc2std(this->setNameBox->Text).c_str());
 					return "Last Pattern Displayed\r\n";
+				}
 				
 				return "Next Pattern Displayed\r\n";
 			}
 
 			System::String^ displayCheckerboard()
 			{
+				
 				if(sl_data->proj_chessboard == NULL)
 				{
 					sl_data->proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
@@ -736,98 +779,22 @@ private: System::Windows::Forms::Label^  label11;
 				cvCopy(sl_data->proj_chessboard, sl_data->proj_frame);
 				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
+				
+				sendMessage(projClient, "a");
 
 				return "Displaying Calibration Checkerboard\r\n";
 			}
 			
 			System::String^ displayBlank()
 			{
+				sendMessage(projClient, "a");
+				Sleep(1000);
+
 				cvSet(sl_data->proj_frame, cvScalar(255));
 				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
 
 				return "Displaying Blank Image\r\n";
-			}
-
-
-			bool getProjector()
-			{
-				bool foundProjector = false;
-				DWORD DispNum = 0;
-				DISPLAY_DEVICE DisplayDevice;
-
-				// initialize DisplayDevice
-				ZeroMemory(&DisplayDevice, sizeof(DisplayDevice));
-				DisplayDevice.cb = sizeof(DisplayDevice);
-
-				// get all display devices
-				while (EnumDisplayDevices(NULL, DispNum, &DisplayDevice, 0))
-				{
-					if ((DisplayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) &&
-						!(DisplayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE))
-					{
-						console->Text += "Projector found on!  Storing current settings...\r\n";
-						ZeroMemory(projectorDefault, sizeof(DEVMODE));
-						projectorDefault->dmSize = sizeof(DEVMODE);
-						if (!EnumDisplaySettings(DisplayDevice.DeviceName, ENUM_REGISTRY_SETTINGS, projectorDefault))
-						{
-							console->Text += "Storing the current projector settings failed! Using defaults.\r\n";
-						}
-						else
-						{
-							ZeroMemory(projectorDefault, sizeof(DEVMODE));
-							projectorDefault->dmSize = sizeof(DEVMODE);
-							projectorDefault->dmFields = DM_POSITION;
-							projectorDefault->dmPosition.x = -800;
-							projectorDefault->dmPosition.y = 0;
-							projectorDefault->dmPelsWidth = 800;
-							projectorDefault->dmPelsHeight = 600;
-						}
-
-						(*projectorDisplay) = DisplayDevice;
-						//projectorOff();
-						foundProjector = true;
-						break;
-					}
-					else if (!(DisplayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) &&
-						!(DisplayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE))
-					{
-						console->Text += "Projector found off!  Using default settings.\r\n";
-						ZeroMemory(projectorDefault, sizeof(DEVMODE));
-						projectorDefault->dmSize = sizeof(DEVMODE);
-						projectorDefault->dmFields = DM_POSITION;
-						projectorDefault->dmPosition.x = -800;
-						projectorDefault->dmPosition.y = 0;
-						projectorDefault->dmPelsWidth = 800;
-						projectorDefault->dmPelsHeight = 600;
-						(*projectorDisplay) = DisplayDevice;
-						foundProjector = true;
-						projectorOn();
-						break;
-					}
-
-					ZeroMemory(&DisplayDevice, sizeof(DisplayDevice));
-					DisplayDevice.cb = sizeof(DisplayDevice);
-					DispNum++;
-				}
-
-				return foundProjector;
-			}
-
-			void projectorOn()
-			{
-					ChangeDisplaySettingsEx(projectorDisplay->DeviceName, projectorDefault, NULL, CDS_UPDATEREGISTRY, NULL);
-			}
-
-			void projectorOff()
-			{
-					DEVMODE DevMode;
-					ZeroMemory(&DevMode, sizeof(DevMode));
-					DevMode.dmSize = sizeof(DevMode);
-					DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_POSITION
-							| DM_DISPLAYFREQUENCY | DM_DISPLAYFLAGS ;
-
-					ChangeDisplaySettingsEx(projectorDisplay->DeviceName, &DevMode, NULL, CDS_UPDATEREGISTRY, NULL);
 			}
 
 			int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocation, String^ filePattern)
@@ -882,8 +849,16 @@ private: System::Windows::Forms::Label^  label11;
 			
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
-				calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
-				calibrationWindow->Visible = true;
+				if(!running)
+				{
+					calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
+					calibrationWindow->Visible = true;
+				}
+				else
+				{
+					sendMessage(projClient, "a");
+					Sleep(1000);
+				}
 			}
 			
 			private: bool loadSLConfigXML(slParams* sl_params, slCalib* sl_calib)
