@@ -31,9 +31,9 @@
   <square_width_pixels>75</square_width_pixels>
   <square_height_pixels>75</square_height_pixels></projector_chessboard>
 <scanning_and_reconstruction>
-  <mode>2</mode>
+  <mode>1</mode>
   <reconstruct_columns>1</reconstruct_columns>
-  <reconstruct_rows>1</reconstruct_rows>
+  <reconstruct_rows>0</reconstruct_rows>
   <frame_delay_ms>200</frame_delay_ms>
   <minimum_contrast_threshold>50</minimum_contrast_threshold>
   <minimum_distance_mm>250.</minimum_distance_mm>

@@ -606,7 +606,12 @@ private: System::Windows::Forms::TextBox^  tileBox;
 					console->Text += "Connected...Waiting for signal.\r\n";
 					
 					helper->RunWorkerAsync();
+					this->ipBox->Enabled = false;
 					portBox->Enabled = false;
+					this->recon_ip_box->Enabled = false;
+					this->recon_port_box->Enabled = false;
+					this->proj_ip_box->Enabled = false;
+					this->proj_port_box->Enabled = false;
 					running = true;
 					connectBtn->Text = "Stop";
 					this->calibrationBtn->Text = "Toggle Projector";
@@ -617,7 +622,12 @@ private: System::Windows::Forms::TextBox^  tileBox;
 					closesocket(sClient);
 					closesocket(projClient);
 					closesocket(reconClient);
+					this->ipBox->Enabled = true;
 					portBox->Enabled = true;
+					this->recon_ip_box->Enabled = true;
+					this->recon_port_box->Enabled = true;
+					this->proj_ip_box->Enabled = true;
+					this->proj_port_box->Enabled = true;
 					running = false;
 					connectBtn->Text = "Connect";
 					this->calibrationBtn->Text = "Calibration Controls";
@@ -804,17 +814,12 @@ private: System::Windows::Forms::TextBox^  tileBox;
 				cvCopy(sl_data->proj_chessboard, sl_data->proj_frame);
 				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
-				
-				sendMessage(projClient, "a");
 
 				return "Displaying Calibration Checkerboard\r\n";
 			}
 			
 			System::String^ displayBlank()
 			{
-				sendMessage(projClient, "a");
-				Sleep(1000);
-
 				cvSet(sl_data->proj_frame, cvScalar(255));
 				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
@@ -882,7 +887,6 @@ private: System::Windows::Forms::TextBox^  tileBox;
 				else
 				{
 					sendMessage(projClient, "a");
-					Sleep(1000);
 				}
 			}
 			
