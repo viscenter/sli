@@ -468,11 +468,11 @@ namespace reconstructionController {
 					calibImages[i] = cvCreateImage(frame_size, imagesBuffer[0]->depth, imagesBuffer[0]->nChannels);
 
 				// Create a window to display captured frames.
-				//cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
-				//cvCreateTrackbar("Cam. Gain", "camWindow", &sl_params->cam_gain, 100, NULL);
-				//HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-				//BringWindowToTop(camWindow);
-				//cvWaitKey(1);
+				cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+				cvCreateTrackbar("Cam. Gain", "camWindow", &sl_params->cam_gain, 100, NULL);
+				HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
+				BringWindowToTop(camWindow);
+				cvWaitKey(1);
 
 				// Capture live image stream, until "ESC" is pressed or calibration is complete.
 				int successes = 0;
@@ -507,32 +507,37 @@ namespace reconstructionController {
 					}
 					
 					// Display frame.
-					//cvDrawChessboardCorners(cam_frame, board_size, corners, corner_count, found);
-					//cvShowImageResampled("camWindow", cam_frame, sl_params->window_w, sl_params->window_h);
+					if(!found)
+					{
+						cvDrawChessboardCorners(cam_frame, board_size, corners, corner_count, found);
+						cvShowImageResampled("camWindow", cam_frame, sl_params->window_w, sl_params->window_h);
+					}
 
 					// Free allocated resources.
 					delete[] corners;
 
 					// Process user input.
-					/*int cvKey = cvWaitKey(0);
-					if(cvKey==27)
+					if(!found)
 					{
-						break;
-					}
-					else if(cvKey=='r')
-					{
-						num--;
-						if(goodFrame)
+						int cvKey = cvWaitKey(0);
+						if(cvKey==27)
 						{
-							successes--;
-							//cvReleaseImage(&calibImages[successes]);
+							break;
 						}
-					}*/
+						else if(cvKey=='r')
+						{
+							num--;
+							if(goodFrame)
+							{
+								successes--;
+							}
+						}
+					}
 				}
 				cvReleaseImage(&cam_frame);
 
 				// Close the display window.
-				//cvDestroyWindow("camWindow");
+				cvDestroyWindow("camWindow");
 
 				// Calibrate camera, if minimum number of frames are available.
 				if(successes >= 2){
@@ -712,6 +717,7 @@ namespace reconstructionController {
 			// Create a window to display capture frames.
 			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
 			cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
+			cvCreateTrackbar("Proj. Gain",  "camWindow", &sl_params->proj_gain,  100, NULL);
 			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
 			BringWindowToTop(camWindow);
 			cvWaitKey(1);
@@ -726,7 +732,7 @@ namespace reconstructionController {
 			int cvKey = -1;
 			for(int num=n_boards-1; num>0; num-=2)
 			{
-				//goodFrame = false;
+				goodFrame = false;
 				// Get next available "safe" frame.
 				cvCopyImage(imagesBuffer[num], cam_frame_1);
 				cvScale(cam_frame_1, cam_frame_1, 2.*(sl_params->cam_gain/100.), 0);
@@ -735,21 +741,17 @@ namespace reconstructionController {
 				// Find camera chessboard corners.
 				CvPoint2D32f* cam_corners = new CvPoint2D32f[cam_board_n];
 				int cam_corner_count;
+				int proj_found = 0;
 				int cam_found =	detectChessboard(cam_frame_1, cam_board_size, cam_corners, &cam_corner_count);
 
 				// If camera chessboard is found, attempt to detect projector chessboard.
 				if(cam_corner_count == cam_board_n){
 
-					cvScale(imagesBuffer[num-1], imagesBuffer[num-1], 2.*(90./100.), 0);
-					cvScale(cam_frame_1, cam_frame_1, 2.*(70/100.), 0);
-					cvCopyImage(imagesBuffer[num-1], cam_frame_2);
-					cvCopyImage(imagesBuffer[num-1], cam_frame_3);
+					cvScale(imagesBuffer[num-1], cam_frame_2, 2.*(sl_params->proj_gain/100.), 0);
 
 					// Convert frames to grayscale and apply background subtraction.
 					cvCvtColor(cam_frame_1, cam_frame_1_gray, CV_RGB2GRAY);   //Do I need these?  Test without them!
 					cvCvtColor(cam_frame_2, cam_frame_2_gray, CV_RGB2GRAY);
-					//cvCopyImage(cam_frame_1, cam_frame_1_gray);
-					//cvCopyImage(cam_frame_2, cam_frame_2_gray);
 					cvSub(cam_frame_1_gray, cam_frame_2_gray, cam_frame_2_gray);
 
 					// Invert chessboard image.
@@ -761,11 +763,15 @@ namespace reconstructionController {
 					// Find projector chessboard corners.
 					CvPoint2D32f* proj_corners = new CvPoint2D32f[proj_board_n];
 					int proj_corner_count;
-					int proj_found = detectChessboard(cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
-
+					proj_found = detectChessboard(cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
+					
 					// Display current projector tracking results.
-					cvDrawChessboardCorners(cam_frame_2_gray, proj_board_size, proj_corners, proj_corner_count, proj_found);
-					cvShowImageResampled("camWindow", cam_frame_2_gray, sl_params->window_w, sl_params->window_h);
+					if(!proj_found)
+					{
+						cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
+						cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
+						cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+					}
 
 					// If chessboard is detected, then update calibration lists.
 					if(proj_corner_count == proj_board_n){
@@ -808,15 +814,18 @@ namespace reconstructionController {
 				delete[] cam_corners;
 
 				// Process user input.
-				int cvKey = cvWaitKey(0);
-				if(cvKey==27)
-					break;
-				else if(cvKey=='r')
+				if(!proj_found || !cam_found)
 				{
-					num+=2;
-					if(goodFrame)
+					int cvKey = cvWaitKey(0);
+					if(cvKey==27)
+						break;
+					else if(cvKey=='r')
 					{
-						successes--;
+						num+=2;
+						if(goodFrame)
+						{
+							successes--;
+						}
 					}
 				}
 			}
@@ -1074,7 +1083,7 @@ namespace reconstructionController {
 			// Return without errors.
 			
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->projStatusLbl->Text = "Projector calibration was successful.";
+			this->projStatusLbl->Text = "Projector calibration was successful. " + "("+successes+"/"+n_boards/2+")";
 
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
 			this->extrinsicStatusLbl->Text = "Calibrated!";
