@@ -71,6 +71,37 @@ static int getImages(IplImage**& imagesBuffer, int numImages, String^ dirLocatio
 	return numImages;
 }
 
+static int getImages2(IplImage**& imagesBuffer, int numImages, String^ dirLocation, String^ filePattern)
+{
+	DirectoryInfo^ dir = gcnew DirectoryInfo(dirLocation);
+	if(!dir->Exists)
+		return 0;
+
+	array<FileInfo^>^ files = dir->GetFiles(filePattern);
+	files->Sort(files, gcnew FileInfoNameComparer());
+	
+	numImages = (numImages < files->Length)?numImages:files->Length;
+	if(numImages <= 0)
+		return 0;
+
+	imagesBuffer = new IplImage* [numImages];
+	for(int i=numImages-1; i>=0; i--)
+		imagesBuffer[i] = cvLoadImage(gc2std(files[numImages-i-1]->FullName).c_str());
+	
+	return numImages;
+}
+
+static int checkImages(String^ dirLocation, String^ filePattern)
+{
+	DirectoryInfo^ dir = gcnew DirectoryInfo(dirLocation);
+	if(!dir->Exists)
+		return 0;
+
+	array<FileInfo^>^ files = dir->GetFiles(filePattern);
+	
+	return files->Length;
+}
+
 struct reconPtrs
 {
 	sockaddr_in local;

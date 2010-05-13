@@ -65,6 +65,7 @@ namespace reconstructionController {
 			helper->WorkerReportsProgress = true;
 			helper->WorkerSupportsCancellation = true;
 			running = false;
+			reconPattern = "";
 			
 			WSADATA wsd;
 			if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
@@ -142,6 +143,10 @@ namespace reconstructionController {
 private: System::Windows::Forms::Label^  label1;
 private: System::Windows::Forms::TextBox^  portBox;
 private: reconPtrs* recon_ptrs;
+private: System::Windows::Forms::Label^  label12;
+private: System::Windows::Forms::TextBox^  tileBox;
+private: System::Windows::Forms::Button^  manualReconBtn;
+public: String^ reconPattern;
 
 
 	protected: 
@@ -173,16 +178,19 @@ private: reconPtrs* recon_ptrs;
 			this->calibrationBtn = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->portBox = (gcnew System::Windows::Forms::TextBox());
+			this->label12 = (gcnew System::Windows::Forms::Label());
+			this->tileBox = (gcnew System::Windows::Forms::TextBox());
+			this->manualReconBtn = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(405, 348);
+			this->connectBtn->Location = System::Drawing::Point(405, 381);
 			this->connectBtn->Name = L"connectBtn";
 			this->connectBtn->Size = System::Drawing::Size(63, 23);
 			this->connectBtn->TabIndex = 1;
-			this->connectBtn->Text = L"Start";
+			this->connectBtn->Text = L"Listen";
 			this->connectBtn->UseVisualStyleBackColor = true;
 			this->connectBtn->Click += gcnew System::EventHandler(this, &Form1::connectBtn_Click);
 			// 
@@ -202,13 +210,13 @@ private: reconPtrs* recon_ptrs;
 			this->console->Name = L"console";
 			this->console->ReadOnly = true;
 			this->console->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->console->Size = System::Drawing::Size(456, 265);
+			this->console->Size = System::Drawing::Size(456, 262);
 			this->console->TabIndex = 1;
 			// 
 			// setNameBox
 			// 
 			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->setNameBox->Location = System::Drawing::Point(330, 317);
+			this->setNameBox->Location = System::Drawing::Point(75, 329);
 			this->setNameBox->Name = L"setNameBox";
 			this->setNameBox->Size = System::Drawing::Size(139, 20);
 			this->setNameBox->TabIndex = 4;
@@ -217,7 +225,7 @@ private: reconPtrs* recon_ptrs;
 			// 
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(267, 320);
+			this->label2->Location = System::Drawing::Point(12, 332);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 5;
@@ -226,7 +234,7 @@ private: reconPtrs* recon_ptrs;
 			// editBaseFolderBtn
 			// 
 			this->editBaseFolderBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->editBaseFolderBtn->Location = System::Drawing::Point(129, 286);
+			this->editBaseFolderBtn->Location = System::Drawing::Point(129, 282);
 			this->editBaseFolderBtn->Name = L"editBaseFolderBtn";
 			this->editBaseFolderBtn->Size = System::Drawing::Size(59, 23);
 			this->editBaseFolderBtn->TabIndex = 6;
@@ -238,7 +246,7 @@ private: reconPtrs* recon_ptrs;
 			// 
 			this->baseFolderLocation->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->baseFolderLocation->AutoEllipsis = true;
-			this->baseFolderLocation->Location = System::Drawing::Point(194, 291);
+			this->baseFolderLocation->Location = System::Drawing::Point(194, 287);
 			this->baseFolderLocation->Name = L"baseFolderLocation";
 			this->baseFolderLocation->Size = System::Drawing::Size(272, 18);
 			this->baseFolderLocation->TabIndex = 7;
@@ -248,7 +256,7 @@ private: reconPtrs* recon_ptrs;
 			// 
 			this->label3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(12, 291);
+			this->label3->Location = System::Drawing::Point(12, 287);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(111, 13);
 			this->label3->TabIndex = 8;
@@ -256,7 +264,7 @@ private: reconPtrs* recon_ptrs;
 			// 
 			// calibrationBtn
 			// 
-			this->calibrationBtn->Location = System::Drawing::Point(15, 348);
+			this->calibrationBtn->Location = System::Drawing::Point(360, 332);
 			this->calibrationBtn->Name = L"calibrationBtn";
 			this->calibrationBtn->Size = System::Drawing::Size(108, 23);
 			this->calibrationBtn->TabIndex = 9;
@@ -268,7 +276,7 @@ private: reconPtrs* recon_ptrs;
 			// 
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(12, 320);
+			this->label1->Location = System::Drawing::Point(276, 386);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(60, 13);
 			this->label1->TabIndex = 2;
@@ -277,17 +285,48 @@ private: reconPtrs* recon_ptrs;
 			// portBox
 			// 
 			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(85, 317);
+			this->portBox->Location = System::Drawing::Point(349, 383);
 			this->portBox->Name = L"portBox";
 			this->portBox->Size = System::Drawing::Size(38, 20);
 			this->portBox->TabIndex = 3;
 			this->portBox->Text = L"5555";
 			// 
+			// label12
+			// 
+			this->label12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->label12->AutoSize = true;
+			this->label12->Location = System::Drawing::Point(12, 360);
+			this->label12->Name = L"label12";
+			this->label12->Size = System::Drawing::Size(58, 13);
+			this->label12->TabIndex = 26;
+			this->label12->Text = L"Tile Name:";
+			// 
+			// tileBox
+			// 
+			this->tileBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->tileBox->Location = System::Drawing::Point(76, 357);
+			this->tileBox->Name = L"tileBox";
+			this->tileBox->Size = System::Drawing::Size(138, 20);
+			this->tileBox->TabIndex = 25;
+			// 
+			// manualReconBtn
+			// 
+			this->manualReconBtn->Location = System::Drawing::Point(12, 386);
+			this->manualReconBtn->Name = L"manualReconBtn";
+			this->manualReconBtn->Size = System::Drawing::Size(121, 23);
+			this->manualReconBtn->TabIndex = 27;
+			this->manualReconBtn->Text = L"Manual Reconstruct";
+			this->manualReconBtn->UseVisualStyleBackColor = true;
+			this->manualReconBtn->Click += gcnew System::EventHandler(this, &Form1::manualReconBtn_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(480, 378);
+			this->ClientSize = System::Drawing::Size(480, 416);
+			this->Controls->Add(this->manualReconBtn);
+			this->Controls->Add(this->label12);
+			this->Controls->Add(this->tileBox);
 			this->Controls->Add(this->calibrationBtn);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->baseFolderLocation);
@@ -336,6 +375,10 @@ private: reconPtrs* recon_ptrs;
 					
 					helper->RunWorkerAsync();
 					portBox->Enabled = false;
+					this->setNameBox->Enabled = false;
+					this->tileBox->Enabled = false;
+					this->manualReconBtn->Enabled = false;
+					this->calibrationBtn->Enabled = false;
 					running = true;
 					connectBtn->Text = "Stop";
 				}
@@ -344,8 +387,12 @@ private: reconPtrs* recon_ptrs;
 					helper->CancelAsync();
 					closesocket(sClient);
 					portBox->Enabled = true;
+					this->setNameBox->Enabled = true;
+					this->tileBox->Enabled = true;
+					this->manualReconBtn->Enabled = true;
+					this->calibrationBtn->Enabled = true;
 					running = false;
-					connectBtn->Text = "Connect";
+					connectBtn->Text = "Listen";
 					
 				}
 			 }
@@ -353,6 +400,8 @@ private: reconPtrs* recon_ptrs;
 	 public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
 			 {
 				 console->Text += "Closing Connection...";
+				 console->SelectionStart = console->TextLength;
+				 console->ScrollToCaret();
 			 }
 
 	 public: void helper_ProgressChanged( Object^ /*sender*/, ProgressChangedEventArgs^ e )
@@ -411,15 +460,28 @@ private: reconPtrs* recon_ptrs;
 							szBuffer[ret] = '\0';
 						
 						sprintf(buffer, "Received: '%s'\r\n", szBuffer);
-						this->setNameBox->Text = gcnew System::String(szBuffer);
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
 						
 						outMessage += "Starting reconstruction...";
 						worker->ReportProgress( 0 );
-
-						Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
-						newThread->Start(this);
+						
+						int numImages = checkImages(this->baseFolderLocation->Text, gcnew System::String(szBuffer)+"_*.tif");
+						if(numImages >= 22)
+						{
+							this->reconPattern = gcnew System::String(szBuffer);
+							outMessage += "Found " + numImages + " images of " + reconPattern + "\r\n";
+							outMessage += "Starting reconstruction...\r\n";
+							worker->ReportProgress( 0 );
+							Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
+							newThread->Start(this);
+						}
+						else
+						{
+							outMessage += "Only " + numImages + " images were found.\r\n";
+							outMessage += "22 are needed for reconstruction.\r\n";
+							worker->ReportProgress( 0 );
+						}
 						
 					}
 					return;
@@ -444,8 +506,7 @@ private: reconPtrs* recon_ptrs;
 
 			int getLatestImages(IplImage**& imagesBuffer, int numImages)
 			{
-				return getImages(imagesBuffer, numImages, this->baseFolderLocation->Text + "/" + this->setNameBox->Text,
-					this->setNameBox->Text + "_*.tif");
+				return getImages2(imagesBuffer, numImages, this->baseFolderLocation->Text, this->reconPattern + "_*.tif");
 			}
 
 			private: System::Void editBaseFolderBtn_Click(System::Object^  sender, System::EventArgs^  e) 
@@ -544,7 +605,7 @@ private: reconPtrs* recon_ptrs;
 			static void reconstructSurface(System::Object^ myForm)
 			{
 				reconstructionController::Form1^ theForm = (reconstructionController::Form1^)myForm;
-		
+				string baseName = gc2std(theForm->reconPattern);	
 				slParams* sl_params = &theForm->recon_indir->data.sl_params;
 				slCalib* sl_calib = &theForm->recon_indir->data.sl_calib;
 				
@@ -571,10 +632,8 @@ private: reconPtrs* recon_ptrs;
 								sl_params->thresh);
 				
 				char str[1024], outputDir[1024];
-				if(sl_params->save){
-					sprintf(outputDir, "%s\\%s\\%0.2d", sl_params->outdir, sl_params->object, 1);
-					_mkdir(outputDir);
-				}
+				sprintf(outputDir, "%s\\%s", sl_params->outdir, baseName.c_str());
+				_mkdir(outputDir);
 
 				// Display and save the correspondences.
 				if(sl_params->display)
@@ -594,40 +653,40 @@ private: reconPtrs* recon_ptrs;
 				// Display and save the depth map.
 				if(sl_params->display)
 					displayDepthMap(depth_map, gray_mask, sl_params);
-				if(sl_params->save){
+
 					//printf("Saving the depth map...\n");
-					IplImage* depth_map_image = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U, 1);
-					for(int r=0; r<sl_params->cam_h; r++){
-						for(int c=0; c<sl_params->cam_w; c++){
-							char* depth_map_image_data = (char*)(depth_map_image->imageData + r*depth_map_image->widthStep);
-							if(mask->data.fl[sl_params->cam_w*r+c])
-								depth_map_image_data[c] = 
-									255-int(255*(depth_map->data.fl[sl_params->cam_w*r+c]-sl_params->dist_range[0])/
-										(sl_params->dist_range[1]-sl_params->dist_range[0]));
-							else
-								depth_map_image_data[c] = 0;
-						}
+				IplImage* depth_map_image = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_8U, 1);
+				for(int r=0; r<sl_params->cam_h; r++){
+					for(int c=0; c<sl_params->cam_w; c++){
+						char* depth_map_image_data = (char*)(depth_map_image->imageData + r*depth_map_image->widthStep);
+						if(mask->data.fl[sl_params->cam_w*r+c])
+							depth_map_image_data[c] = 
+								255-int(255*(depth_map->data.fl[sl_params->cam_w*r+c]-sl_params->dist_range[0])/
+									(sl_params->dist_range[1]-sl_params->dist_range[0]));
+						else
+							depth_map_image_data[c] = 0;
 					}
-					CvMat* dist_range = cvCreateMat(1, 2, CV_32FC1);
-					cvmSet(dist_range, 0, 0, sl_params->dist_range[0]);
-					cvmSet(dist_range, 0, 1, sl_params->dist_range[1]);
-					char str[1024];
-					sprintf(str, "%s\\depth_map.png", outputDir);
-					cvSaveImage(str, depth_map_image);
-					sprintf(str, "%s\\depth_map_range.xml", outputDir);
-					cvSave(str, dist_range);
-					cvReleaseImage(&depth_map_image);
-					cvReleaseMat(&dist_range);
 				}
+				CvMat* dist_range = cvCreateMat(1, 2, CV_32FC1);
+				cvmSet(dist_range, 0, 0, sl_params->dist_range[0]);
+				cvmSet(dist_range, 0, 1, sl_params->dist_range[1]);
+
+				sprintf(str, "%s\\depth_map.png", outputDir);
+				cvSaveImage(str, depth_map_image);
+				sprintf(str, "%s\\depth_map_range.xml", outputDir);
+				cvSave(str, dist_range);
+				cvReleaseImage(&depth_map_image);
+				cvReleaseMat(&dist_range);
+
 
 				// Save the texture map.
 				//printf("Saving the texture map...\n");
-				sprintf(str, "%s\\%s\\%s_%0.2d.png", sl_params->outdir, sl_params->object, sl_params->object, 1);
+				sprintf(str, "%s\\%s.png", outputDir, baseName.c_str());
 				cvSaveImage(str, cam_gray_codes[0]);
 
 				// Save the point cloud.
 				//printf("Saving the point cloud...\n");
-				sprintf(str, "%s\\%s\\%s_%0.2d.wrl", sl_params->outdir, sl_params->object, sl_params->object, 1);
+				sprintf(str, "%s\\%s.wrl", outputDir, baseName.c_str());
 				if(savePointsVRML(str, points, NULL, colors, mask)){
 					MessageBox::Show("Scanning was not successful and must be repeated!", "Reconstruction Error", 
 						MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
@@ -651,6 +710,28 @@ private: reconPtrs* recon_ptrs;
 
 				return;
 			}
+private: System::Void manualReconBtn_Click(System::Object^  sender, System::EventArgs^  e) 
+		 {
+			 int numImages = checkImages(this->baseFolderLocation->Text, this->setNameBox->Text + this->tileBox->Text + "_*.tif");
+			 if(numImages >= 22)
+			 {
+				 this->reconPattern = this->setNameBox->Text + this->tileBox->Text;
+				 this->console->Text += "Found " + numImages + " images of " + reconPattern + "\r\n";
+				 this->console->Text += "Starting reconstruction...\r\n";
+				 console->SelectionStart = console->TextLength;
+				 console->ScrollToCaret();
+				 Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
+				 newThread->Start(this);
+			 }
+			 else
+			 {
+				 this->console->Text += "Only " + numImages + " images were found.\r\n";
+				 this->console->Text += "22 are needed for construction.\r\n";
+				 console->SelectionStart = console->TextLength;
+				 console->ScrollToCaret();
+			 }
+
+		 }
 };
 }
 
