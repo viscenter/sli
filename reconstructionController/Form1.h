@@ -482,7 +482,6 @@ public: String^ reconPattern;
 							outMessage += "22 are needed for reconstruction.\r\n";
 							worker->ReportProgress( 0 );
 						}
-						
 					}
 					return;
 			 }
@@ -618,7 +617,7 @@ public: String^ reconPattern;
 				sl_params->scan_cols, sl_params->scan_rows);
 
 				IplImage** cam_gray_codes;
-				int numImages = theForm->getLatestImages(cam_gray_codes, 22);
+				int numImages = theForm->getLatestImages(cam_gray_codes, 50);
 
 				IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
 				IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);

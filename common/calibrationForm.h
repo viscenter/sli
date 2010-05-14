@@ -233,7 +233,7 @@ namespace reconstructionController {
 			this->groupBox2->Size = System::Drawing::Size(409, 76);
 			this->groupBox2->TabIndex = 6;
 			this->groupBox2->TabStop = false;
-			this->groupBox2->Text = L"Projector Intrinsic Calibration";
+			this->groupBox2->Text = L"Projector Intrinsic/Extrinsic Calibration";
 			// 
 			// projStatusLbl
 			// 
@@ -313,7 +313,7 @@ namespace reconstructionController {
 			this->groupBox3->Size = System::Drawing::Size(409, 76);
 			this->groupBox3->TabIndex = 7;
 			this->groupBox3->TabStop = false;
-			this->groupBox3->Text = L"Projector / Camera Extrinsic Calibration";
+			this->groupBox3->Text = L"Background Model";
 			// 
 			// extrinsicStatusLbl
 			// 
@@ -323,9 +323,9 @@ namespace reconstructionController {
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
 			this->extrinsicStatusLbl->Location = System::Drawing::Point(53, 52);
 			this->extrinsicStatusLbl->Name = L"extrinsicStatusLbl";
-			this->extrinsicStatusLbl->Size = System::Drawing::Size(249, 13);
+			this->extrinsicStatusLbl->Size = System::Drawing::Size(230, 13);
 			this->extrinsicStatusLbl->TabIndex = 5;
-			this->extrinsicStatusLbl->Text = L"Not Calibrated";
+			this->extrinsicStatusLbl->Text = L"No Background";
 			// 
 			// label8
 			// 
@@ -340,11 +340,11 @@ namespace reconstructionController {
 			// extrinsicStartBtn
 			// 
 			this->extrinsicStartBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->extrinsicStartBtn->Location = System::Drawing::Point(306, 47);
+			this->extrinsicStartBtn->Location = System::Drawing::Point(289, 47);
 			this->extrinsicStartBtn->Name = L"extrinsicStartBtn";
-			this->extrinsicStartBtn->Size = System::Drawing::Size(97, 23);
+			this->extrinsicStartBtn->Size = System::Drawing::Size(114, 23);
 			this->extrinsicStartBtn->TabIndex = 3;
-			this->extrinsicStartBtn->Text = L"Run Calibration";
+			this->extrinsicStartBtn->Text = L"Capture Background";
 			this->extrinsicStartBtn->UseVisualStyleBackColor = true;
 			// 
 			// label9
@@ -666,7 +666,7 @@ namespace reconstructionController {
 				return;
 			}
 			
-			IplImage* proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_16U, 1);
+			IplImage* proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 			int proj_border_cols, proj_border_rows;
 			if(generateChessboard(sl_params, proj_chessboard, proj_border_cols, proj_border_rows) == -1){
 				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
@@ -713,6 +713,9 @@ namespace reconstructionController {
 				cam_calibImages[i]  = cvCreateImage(frame_size, imagesBuffer[0]->depth, imagesBuffer[0]->nChannels);
 			for(int i=0; i<n_boards; i++)
 				proj_calibImages[i] = cvCreateImage(frame_size, imagesBuffer[0]->depth, imagesBuffer[0]->nChannels);
+
+			MessageBox::Show( imagesBuffer[0]->depth + " " + imagesBuffer[0]->nChannels, "Debug",
+            MessageBoxButtons::OK, MessageBoxIcon::Exclamation );
 
 			// Create a window to display capture frames.
 			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
@@ -1085,8 +1088,6 @@ namespace reconstructionController {
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
 			this->projStatusLbl->Text = "Projector calibration was successful. " + "("+successes+"/"+n_boards/2+")";
 
-			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->extrinsicStatusLbl->Text = "Calibrated!";
 			displayProjCalib(sl_calib);
 			return;
 		 }

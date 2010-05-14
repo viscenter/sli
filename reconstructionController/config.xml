@@ -31,15 +31,15 @@
   <square_width_pixels>75</square_width_pixels>
   <square_height_pixels>75</square_height_pixels></projector_chessboard>
 <scanning_and_reconstruction>
-  <mode>1</mode>
+  <mode>2</mode>
   <reconstruct_columns>1</reconstruct_columns>
-  <reconstruct_rows>0</reconstruct_rows>
+  <reconstruct_rows>1</reconstruct_rows>
   <frame_delay_ms>200</frame_delay_ms>
-  <minimum_contrast_threshold>10</minimum_contrast_threshold>
-  <minimum_distance_mm>200.</minimum_distance_mm>
-  <maximum_distance_mm>1200.</maximum_distance_mm>
-  <maximum_distance_variation_mm>20.</maximum_distance_variation_mm>
-  <minimum_background_distance_mm>3.</minimum_background_distance_mm></scanning_and_reconstruction>
+  <minimum_contrast_threshold>20</minimum_contrast_threshold>
+  <minimum_distance_mm>500.</minimum_distance_mm>
+  <maximum_distance_mm>1000.</maximum_distance_mm>
+  <maximum_distance_variation_mm>100.</maximum_distance_variation_mm>
+  <minimum_background_distance_mm>10.</minimum_background_distance_mm></scanning_and_reconstruction>
 <visualization>
   <display_intermediate_results>1</display_intermediate_results>
   <display_window_width_pixels>640</display_window_width_pixels></visualization>
