@@ -475,7 +475,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 
 				// Reject background points.
 				// Note: Currently only uses depth to determine foreground vs. background pixels.
-				float depth_difference = 
+				/*float depth_difference = 
 					background_depth_map->data.fl[sl_params->cam_w*r+c] - 
 					depth_map->data.fl[sl_params->cam_w*r+c];
 				if(depth_difference < sl_params->background_depth_thresh && 
@@ -488,7 +488,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
 					for(int i=0; i<3; i++)
 						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
-				}
+				}*/
 			}
 		}
 	}

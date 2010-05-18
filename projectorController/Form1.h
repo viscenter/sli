@@ -16,7 +16,6 @@
 #define RECON_PORT 7272
 
 #define BUFFER_SIZE 1024
-#define DEFAULT_BASE_FOLDER "X:/windowsDocuments/"
 #define DEFAULT_SET_NAME "laserTests"
 #define CONFIG_FILE "./config.xml"
 
@@ -62,7 +61,6 @@ namespace projectorController {
 			sl_data->proj_chessboard = NULL;
 			sl_data->proj_gray_codes = NULL;
 			this->ipBox->Text = PHOTOSHOOT_IP;
-			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
 			this->recon_ip_box->Text = RECON_IP;
 			this->recon_port_box->Text = "" + RECON_PORT;
@@ -155,10 +153,10 @@ namespace projectorController {
 
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::FolderBrowserDialog^  folderBrowserDialog1;
-	private: System::Windows::Forms::Button^  editBaseFolderBtn;
 
-	private: System::Windows::Forms::Label^  baseFolderLocation;
-	private: System::Windows::Forms::Label^  label3;
+
+
+
 	private: System::Windows::Forms::Button^  calibrationBtn;
 
 	private: System::Windows::Forms::TextBox^  ipBox;
@@ -214,9 +212,6 @@ private: bool reconOn;
 			this->setNameBox = (gcnew System::Windows::Forms::TextBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
-			this->editBaseFolderBtn = (gcnew System::Windows::Forms::Button());
-			this->baseFolderLocation = (gcnew System::Windows::Forms::Label());
-			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->calibrationBtn = (gcnew System::Windows::Forms::Button());
 			this->ipBox = (gcnew System::Windows::Forms::TextBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
@@ -233,7 +228,7 @@ private: bool reconOn;
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(396, 387);
+			this->connectBtn->Location = System::Drawing::Point(396, 363);
 			this->connectBtn->Name = L"connectBtn";
 			this->connectBtn->Size = System::Drawing::Size(75, 23);
 			this->connectBtn->TabIndex = 1;
@@ -245,7 +240,7 @@ private: bool reconOn;
 			// 
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(246, 361);
+			this->label1->Location = System::Drawing::Point(246, 337);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(29, 13);
 			this->label1->TabIndex = 2;
@@ -254,7 +249,7 @@ private: bool reconOn;
 			// portBox
 			// 
 			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(281, 358);
+			this->portBox->Location = System::Drawing::Point(281, 334);
 			this->portBox->Name = L"portBox";
 			this->portBox->Size = System::Drawing::Size(38, 20);
 			this->portBox->TabIndex = 3;
@@ -276,62 +271,31 @@ private: bool reconOn;
 			this->console->Name = L"console";
 			this->console->ReadOnly = true;
 			this->console->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->console->Size = System::Drawing::Size(459, 269);
+			this->console->Size = System::Drawing::Size(459, 276);
 			this->console->TabIndex = 1;
 			// 
 			// setNameBox
 			// 
 			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->setNameBox->Location = System::Drawing::Point(78, 318);
+			this->setNameBox->Location = System::Drawing::Point(78, 294);
 			this->setNameBox->Name = L"setNameBox";
 			this->setNameBox->Size = System::Drawing::Size(152, 20);
-			this->setNameBox->TabIndex = 4;
+			this->setNameBox->TabIndex = 40;
 			// 
 			// label2
 			// 
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(15, 321);
+			this->label2->Location = System::Drawing::Point(15, 297);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 5;
 			this->label2->Text = L"Set Name:";
 			// 
-			// editBaseFolderBtn
-			// 
-			this->editBaseFolderBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->editBaseFolderBtn->Location = System::Drawing::Point(132, 287);
-			this->editBaseFolderBtn->Name = L"editBaseFolderBtn";
-			this->editBaseFolderBtn->Size = System::Drawing::Size(59, 23);
-			this->editBaseFolderBtn->TabIndex = 6;
-			this->editBaseFolderBtn->Text = L"Edit";
-			this->editBaseFolderBtn->UseVisualStyleBackColor = true;
-			this->editBaseFolderBtn->Click += gcnew System::EventHandler(this, &Form1::editBaseFolderBtn_Click);
-			// 
-			// baseFolderLocation
-			// 
-			this->baseFolderLocation->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->baseFolderLocation->AutoEllipsis = true;
-			this->baseFolderLocation->Location = System::Drawing::Point(197, 292);
-			this->baseFolderLocation->Name = L"baseFolderLocation";
-			this->baseFolderLocation->Size = System::Drawing::Size(272, 18);
-			this->baseFolderLocation->TabIndex = 7;
-			this->baseFolderLocation->Text = L"./";
-			// 
-			// label3
-			// 
-			this->label3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(15, 292);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(111, 13);
-			this->label3->TabIndex = 8;
-			this->label3->Text = L"Base Image Directory:";
-			// 
 			// calibrationBtn
 			// 
 			this->calibrationBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->calibrationBtn->Location = System::Drawing::Point(363, 356);
+			this->calibrationBtn->Location = System::Drawing::Point(363, 332);
 			this->calibrationBtn->Name = L"calibrationBtn";
 			this->calibrationBtn->Size = System::Drawing::Size(108, 23);
 			this->calibrationBtn->TabIndex = 9;
@@ -342,7 +306,7 @@ private: bool reconOn;
 			// ipBox
 			// 
 			this->ipBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->ipBox->Location = System::Drawing::Point(157, 358);
+			this->ipBox->Location = System::Drawing::Point(157, 334);
 			this->ipBox->Name = L"ipBox";
 			this->ipBox->Size = System::Drawing::Size(73, 20);
 			this->ipBox->TabIndex = 10;
@@ -352,7 +316,7 @@ private: bool reconOn;
 			// 
 			this->label4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(131, 361);
+			this->label4->Location = System::Drawing::Point(131, 337);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(20, 13);
 			this->label4->TabIndex = 11;
@@ -364,7 +328,7 @@ private: bool reconOn;
 			this->label5->AutoSize = true;
 			this->label5->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label5->Location = System::Drawing::Point(15, 361);
+			this->label5->Location = System::Drawing::Point(15, 337);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(75, 13);
 			this->label5->TabIndex = 12;
@@ -376,7 +340,7 @@ private: bool reconOn;
 			this->label9->AutoSize = true;
 			this->label9->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label9->Location = System::Drawing::Point(15, 390);
+			this->label9->Location = System::Drawing::Point(15, 366);
 			this->label9->Name = L"label9";
 			this->label9->Size = System::Drawing::Size(97, 13);
 			this->label9->TabIndex = 22;
@@ -386,7 +350,7 @@ private: bool reconOn;
 			// 
 			this->label10->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(131, 390);
+			this->label10->Location = System::Drawing::Point(131, 366);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(20, 13);
 			this->label10->TabIndex = 21;
@@ -395,7 +359,7 @@ private: bool reconOn;
 			// recon_ip_box
 			// 
 			this->recon_ip_box->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->recon_ip_box->Location = System::Drawing::Point(157, 387);
+			this->recon_ip_box->Location = System::Drawing::Point(157, 363);
 			this->recon_ip_box->Name = L"recon_ip_box";
 			this->recon_ip_box->Size = System::Drawing::Size(73, 20);
 			this->recon_ip_box->TabIndex = 20;
@@ -404,7 +368,7 @@ private: bool reconOn;
 			// recon_port_box
 			// 
 			this->recon_port_box->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->recon_port_box->Location = System::Drawing::Point(281, 387);
+			this->recon_port_box->Location = System::Drawing::Point(281, 363);
 			this->recon_port_box->Name = L"recon_port_box";
 			this->recon_port_box->Size = System::Drawing::Size(38, 20);
 			this->recon_port_box->TabIndex = 19;
@@ -414,7 +378,7 @@ private: bool reconOn;
 			// 
 			this->label11->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label11->AutoSize = true;
-			this->label11->Location = System::Drawing::Point(246, 390);
+			this->label11->Location = System::Drawing::Point(246, 366);
 			this->label11->Name = L"label11";
 			this->label11->Size = System::Drawing::Size(29, 13);
 			this->label11->TabIndex = 18;
@@ -424,7 +388,7 @@ private: bool reconOn;
 			// 
 			this->label12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label12->AutoSize = true;
-			this->label12->Location = System::Drawing::Point(260, 321);
+			this->label12->Location = System::Drawing::Point(260, 297);
 			this->label12->Name = L"label12";
 			this->label12->Size = System::Drawing::Size(58, 13);
 			this->label12->TabIndex = 24;
@@ -433,16 +397,16 @@ private: bool reconOn;
 			// tileBox
 			// 
 			this->tileBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->tileBox->Location = System::Drawing::Point(324, 318);
+			this->tileBox->Location = System::Drawing::Point(324, 294);
 			this->tileBox->Name = L"tileBox";
 			this->tileBox->Size = System::Drawing::Size(145, 20);
-			this->tileBox->TabIndex = 23;
+			this->tileBox->TabIndex = 41;
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(483, 419);
+			this->ClientSize = System::Drawing::Size(483, 395);
 			this->Controls->Add(this->label12);
 			this->Controls->Add(this->tileBox);
 			this->Controls->Add(this->label9);
@@ -454,9 +418,6 @@ private: bool reconOn;
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->ipBox);
 			this->Controls->Add(this->calibrationBtn);
-			this->Controls->Add(this->label3);
-			this->Controls->Add(this->baseFolderLocation);
-			this->Controls->Add(this->editBaseFolderBtn);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->setNameBox);
 			this->Controls->Add(this->console);
@@ -530,7 +491,7 @@ private: bool reconOn;
 					this->recon_port_box->Enabled = false;
 					running = true;
 					connectBtn->Text = "Stop";
-					this->calibrationBtn->Enabled = false;
+					//this->calibrationBtn->Enabled = false;
 				}
 				else
 				{
@@ -544,7 +505,7 @@ private: bool reconOn;
 					this->recon_port_box->Enabled = true;
 					running = false;
 					connectBtn->Text = "Connect";
-					this->calibrationBtn->Enabled = true;
+					//this->calibrationBtn->Enabled = true;
 				}
 			 }
 
@@ -762,12 +723,6 @@ private: bool reconOn;
 				return numImages;
 			}
 
-			int getLatestImages(IplImage**& imagesBuffer, int numImages)
-			{
-				return getImages(imagesBuffer, numImages, this->baseFolderLocation->Text + "/" + this->setNameBox->Text,
-					this->setNameBox->Text + "_*.tif");
-			}
-
 			//Compares FileInfo objects backwards to produce a list where the biggest
 			//numbered images are first.
 			public: ref class FileInfoNameComparer : IComparer
@@ -779,15 +734,6 @@ private: bool reconOn;
 					return objX->Name->CompareTo(objY->Name)* -1;
 				}
 			};
-			
-			private: System::Void editBaseFolderBtn_Click(System::Object^  sender, System::EventArgs^  e) 
-			{
-				System::Windows::Forms::DialogResult result = folderBrowserDialog1->ShowDialog();
-				if ( result == ::DialogResult::OK )
-				{
-					this->baseFolderLocation->Text = folderBrowserDialog1->SelectedPath;
-				}
-			}
 			
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{

@@ -219,7 +219,7 @@ public: String^ reconPattern;
 			this->setNameBox->Location = System::Drawing::Point(75, 329);
 			this->setNameBox->Name = L"setNameBox";
 			this->setNameBox->Size = System::Drawing::Size(139, 20);
-			this->setNameBox->TabIndex = 4;
+			this->setNameBox->TabIndex = 40;
 			// 
 			// label2
 			// 
@@ -307,7 +307,7 @@ public: String^ reconPattern;
 			this->tileBox->Location = System::Drawing::Point(76, 357);
 			this->tileBox->Name = L"tileBox";
 			this->tileBox->Size = System::Drawing::Size(138, 20);
-			this->tileBox->TabIndex = 25;
+			this->tileBox->TabIndex = 41;
 			// 
 			// manualReconBtn
 			// 
@@ -430,11 +430,15 @@ public: String^ reconPattern;
 									&iAddrSize);
 					if (sClient == INVALID_SOCKET)
 					{
-						printf("accept() failed: %d\n", WSAGetLastError());
+						sprintf(buffer, "accept() failed: %d\n", WSAGetLastError());
+						outMessage += gcnew System::String(buffer);
+						worker->ReportProgress( 0 );
 						return;
 					}
-					printf("Accepted client: %s:%d\n",
+					sprintf(buffer, "Accepted client: %s:%d\n",
 						inet_ntoa(recon_ptrs->client.sin_addr), ntohs(recon_ptrs->client.sin_port));
+						outMessage += gcnew System::String(buffer);
+							worker->ReportProgress( 0 );
 						
 					while(true)
 					{
@@ -649,6 +653,9 @@ public: String^ reconPattern;
 										   gray_decoded_cols, gray_decoded_rows, gray_mask,
 										   points, colors, depth_map, mask);
 
+				double min_val, max_val;
+				cvMinMaxLoc(depth_map, &min_val, &max_val);
+				
 				// Display and save the depth map.
 				if(sl_params->display)
 					displayDepthMap(depth_map, gray_mask, sl_params);
