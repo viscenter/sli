@@ -78,6 +78,15 @@ namespace projectorController {
 			sl_data->gray_nrows = 0;
 			sl_data->gray_colshift = 0;
 			sl_data->gray_rowshift = 0;
+
+			generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
+						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
+						sl_params->scan_cols, sl_params->scan_rows);
+
+			sl_data->proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
+			int proj_border_cols, proj_border_rows;
+			if(generateChessboard(sl_params, sl_data->proj_chessboard, proj_border_cols, proj_border_rows) == -1)
+				console->Text += "Calibration Checkerboard creation failed!\r\n";
 			
 			WSADATA wsd;
 			if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
@@ -621,34 +630,22 @@ private: bool reconOn;
 			
 			System::String^ startPattern()
 			{
-				if(!sl_data->proj_gray_codes)
-				{
-					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
-						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
-						sl_params->scan_cols, sl_params->scan_rows);
-				}
-
 				sl_data->patternNum = 0;
 				
-				cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-				cvShowImage("projWindow", sl_data->proj_frame);
+				nextPattern();
+				//cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
+				//cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				//cvShowImage("projWindow", sl_data->proj_frame);
 				
 				return "Pattern Sequence Started\r\n";
 			}
 
 			System::String^ nextPattern()
 			{
-				static bool inverseTime = true;
-				if(!sl_data->proj_gray_codes)
-				{
-					generateGrayCodes(sl_params->proj_w, sl_params->proj_h, sl_data->proj_gray_codes, 
-						sl_data->gray_ncols, sl_data->gray_nrows, sl_data->gray_colshift, sl_data->gray_rowshift, 
-						sl_params->scan_cols, sl_params->scan_rows);
-				}
+				static bool inverseTime = false;
 				
 				bool last = false;
-				if(inverseTime || sl_data->patternNum == 0)
+				if(inverseTime)
 				{
 					cvSubRS(sl_data->proj_gray_codes[sl_data->patternNum], cvScalar(255), sl_data->proj_frame);
 					sl_data->patternNum = (sl_data->patternNum+1)%(sl_data->gray_ncols + sl_data->gray_nrows+1);
@@ -660,7 +657,7 @@ private: bool reconOn;
 					cvCopy(sl_data->proj_gray_codes[sl_data->patternNum], sl_data->proj_frame);
 					inverseTime = true;
 				}
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				//cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
 
 				if(last)  //TODO: Figure out how to remember what images to open for reconstruction!
@@ -675,17 +672,8 @@ private: bool reconOn;
 
 			System::String^ displayCheckerboard()
 			{
-				
-				if(sl_data->proj_chessboard == NULL)
-				{
-					sl_data->proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-					int proj_border_cols, proj_border_rows;
-					if(generateChessboard(sl_params, sl_data->proj_chessboard, proj_border_cols, proj_border_rows) == -1)
-						return "Calibration Checkerboard creation failed!\r\n";
-				}
-				
 				cvCopy(sl_data->proj_chessboard, sl_data->proj_frame);
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				//cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
 
 				return "Displaying Calibration Checkerboard\r\n";
@@ -694,7 +682,7 @@ private: bool reconOn;
 			System::String^ displayBlank()
 			{
 				cvSet(sl_data->proj_frame, cvScalar(255));
-				cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
+				//cvScale(sl_data->proj_frame, sl_data->proj_frame, 2.*(sl_params->proj_gain/100.), 0);
 				cvShowImage("projWindow", sl_data->proj_frame);
 
 				return "Displaying Blank Image\r\n";

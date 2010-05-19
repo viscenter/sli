@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\cvaux\include&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\OpenCV\cvaux\include&quot;;&quot;C:\Program Files (x86)\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files (x86)\OpenCV\cxcore\include&quot;;&quot;C:\Program Files (x86)\OpenCV\cv\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"

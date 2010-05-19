@@ -46,8 +46,17 @@ namespace reconstructionController {
 
 			if(sl_calib->procam_extrinsic_calib)
 			{
+				String^ myString = "Projector at: ";
+				char temp[40];
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
+				myString += gcnew String(temp) + ", ";
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
+				myString += gcnew String(temp) + ", ";
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
+				myString += gcnew String(temp) + " inches";
+				
 				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-				this->extrinsicStatusLbl->Text = "Calibrated!";
+				this->extrinsicStatusLbl->Text = myString;
 			}
 		}
 
@@ -1262,8 +1271,17 @@ namespace reconstructionController {
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
 			this->projStatusLbl->Text = "Projector calibration was successful. " + "("+successes+"/"+n_boards/2+")";
 
+			String^ myString = "Projector at: ";
+			char temp[40];
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
+			myString += gcnew String(temp) + ", ";
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
+			myString += gcnew String(temp) + ", ";
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
+			myString += gcnew String(temp) + " inches";
+
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->extrinsicStatusLbl->Text = "Calibrated!";
+			this->extrinsicStatusLbl->Text = myString;
 
 			if(calibrate_both)
 			{
@@ -1606,9 +1624,18 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			delete[] cam_calibImages;
 			delete[] proj_calibImages;
 
+			String^ myString = "Projector at: ";
+			char temp[40];
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
+			myString += gcnew String(temp) + ", ";
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
+			myString += gcnew String(temp) + ", ";
+			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
+			myString += gcnew String(temp) + " inches";
+
 			// Return without errors.
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->extrinsicStatusLbl->Text = "Projector-camera alignment was successful.";
+			this->extrinsicStatusLbl->Text = myString;
 			return;		 
 		 }
 };

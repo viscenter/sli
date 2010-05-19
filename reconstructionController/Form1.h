@@ -467,6 +467,8 @@ public: String^ reconPattern;
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
 						
+						Sleep(5000); 
+
 						outMessage += "Starting reconstruction...";
 						worker->ReportProgress( 0 );
 						
