@@ -27,11 +27,6 @@
 //   July 2009
 #ifndef CALIBRATE_PROCAM
 #define CALIBRATE_PROCAM
-// Display the camera calibration results to the console.
-void displayCamCalib(struct slCalib* sl_calib);
-
-// Display the projector calibration results to the console.
-void displayProjCalib(struct slCalib* sl_calib);
 
 // Generate a chessboard pattern for projector calibration.
 int generateChessboard(struct slParams* sl_params, IplImage*& board, int& border_cols, int& border_rows);
@@ -39,15 +34,6 @@ int generateChessboard(struct slParams* sl_params, IplImage*& board, int& border
 // Detect chessboard corners (with subpixel refinement).
 // Note: Returns 1 if chessboard is found, 0 otherwise.
 int detectChessboard(IplImage* frame, CvSize board_size, CvPoint2D32f* corners, int* corner_count CV_DEFAULT(NULL));
-
-// Run camera calibration.
-int runCameraCalibration(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib);
-
-// Run projector-camera calibration (including intrinsic and extrinsic parameters).
-int runProjectorCalibration(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib, bool calibrate_both);
-
-// Run projector-camera extrinsic calibration.
-int runProCamExtrinsicCalibration(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib);
 
 // Evaluate geometry of projector-camera optical rays and planes.
 int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib);

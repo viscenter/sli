@@ -133,71 +133,6 @@ void intersectLineWithLine3D(const float* q1,
 		p[i] = ( (q1[i]+s*v1[i]) + (q2[i]+t*v2[i]) )/2;
 }
 
-// Define camera capture (support Logitech QuickCam 9000 raw-mode).
-IplImage* cvQueryFrame2(CvCapture* capture, struct slParams* sl_params, bool return_raw){
-	IplImage* cam_frame = cvQueryFrame(capture);
-	if(sl_params->Logitech_9000)
-		cvCvtLogitech9000Raw(cam_frame, return_raw);
-	return cam_frame;
-}
-
-
-// Define "safe" camera capture.
-// Note: This function will capture a single snapshot after a given instant.
-IplImage* cvQueryFrameSafe(CvCapture* capture, struct slParams* sl_params, bool return_raw){
-	cvQueryFrame2(capture, sl_params, return_raw);
-	return cvQueryFrame2(capture, sl_params, return_raw);
-}
-
-// Capture live image stream (e.g., for adjusting object placement).
-int camPreview(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib){
-
-	// Create a window to display captured frames.
-	IplImage* cam_frame  = cvQueryFrame2(capture, sl_params);
-	IplImage* proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-	cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
-	cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
-	cvCreateTrackbar("Proj. Gain", "camWindow", &sl_params->proj_gain, 100, NULL);
-	HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-	BringWindowToTop(camWindow);
-	cvWaitKey(1);
-
-	// Capture live image stream.
-	int cvKey = -1, cvKey_temp = -1;
-	while(1){
-
-		// Project white image.
-		cvSet(proj_frame, cvScalar(255));
-		cvScale(proj_frame, proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-		cvShowImage("projWindow", proj_frame);
-		cvKey_temp = cvWaitKey(1);
-		if(cvKey_temp != -1) 
-			cvKey = cvKey_temp;
-
-		// Capture next frame and update display window.
-		cam_frame = cvQueryFrame2(capture, sl_params);
-		cvScale(cam_frame, cam_frame, 2.*(sl_params->cam_gain/100.), 0);
-		cvShowImageResampled("camWindow", cam_frame, sl_params->window_w, sl_params->window_h);
-		cvKey_temp = cvWaitKey(10);
-		if(cvKey_temp != -1) 
-			cvKey = cvKey_temp;
-		
-		// Exit on user interaction.
-		if(cvKey != -1)
-			break;
-	}
-
-	// Project black image.
-	cvZero(proj_frame);
-	cvShowImage("projWindow", proj_frame);
-	cvKey_temp = cvWaitKey(1);
-
-	// Return without errors.
-	cvDestroyWindow("camWindow");
-	cvReleaseImage(&proj_frame);
-	return 0;
-}
-
 // Shade a grayscale image using the "winter" colormap (similar to Matlab's). 
 void colorizeWinter(IplImage* src, IplImage*& dst, IplImage* mask){
 
@@ -233,8 +168,8 @@ void cvShowImageResampled(char* name,
 	cvReleaseImage(&resampled_image);
 }
 
-// Save a VRML-formatted point cloud.
-int savePointsVRML(char* filename, 
+// Save a PLY-formatted point cloud.
+int savePointsPLY(char* filename, 
 				   CvMat* points,
 				   CvMat* normals,
 				   CvMat* colors,
@@ -243,72 +178,35 @@ int savePointsVRML(char* filename,
 	// Open output file and create header.
 	FILE* pFile = fopen(filename, "w");
 	if(pFile == NULL){
-		fprintf(stderr,"ERROR: Cannot open VRML file!\n");
+		fprintf(stderr,"ERROR: Cannot open PLY file!\n");
 		return -1;
 	}
-	fprintf(pFile, "#VRML V2.0 utf8\n");
-	fprintf(pFile, "Shape {\n");
-	fprintf(pFile, " geometry IndexedFaceSet {\n");
+	
+	int numPoints = 0;
+	for(int c=0; c<points->cols; c++)
+			if(mask == NULL || mask->data.fl[c] != 0)
+				numPoints++;
 
-	// Output points (i.e., indexed face set vertices).
-	// Note: Flip y-component for compatibility with Java-based viewer.
+	fprintf(pFile, "ply\nformat ascii 1.0\n");
+	fprintf(pFile, "element vertex %d\nproperty float x\nproperty float y\nproperty float z\n", numPoints);
+	//fprintf(pFile, "property float nx\n property float ny\n property float nz\n");
+	fprintf(pFile, "end_header\n");
+
 	if(points != NULL){
-		fprintf(pFile, "  coord Coordinate {\n");
-		fprintf(pFile, "   point [\n");
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				for(int r=0; r<points->rows; r++){
-					if(r != 1)
-						fprintf(pFile, "    %f ",  points->data.fl[c + points->cols*r]);
-					else
-						fprintf(pFile, "    %f ", -points->data.fl[c + points->cols*r]);
+					fprintf(pFile, "%f ",  points->data.fl[c + points->cols*r]);
 				}
+				//for(int r=0; r<normals->rows; r++)
+					//fprintf(pFile, "%f ", -normals->data.fl[c + normals->cols*r]);
 				fprintf(pFile, "\n");
 			}
 		}
-		fprintf(pFile, "   ]\n");
-		fprintf(pFile, "  }\n");
-	}
+	 }
 
-	// Output normals (if provided).
-	// Note: Flips normals, for compatibility with Java-based viewer.
-	if(normals != NULL){
-		fprintf(pFile, "  normalPerVertex TRUE\n");
-		fprintf(pFile, "  normal Normal {\n");
-		fprintf(pFile, "   vector [\n");
-		for(int c=0; c<normals->cols; c++){
-			if(mask == NULL || mask->data.fl[c] != 0){
-				for(int r=0; r<normals->rows; r++)
-					fprintf(pFile, "    %f ", -normals->data.fl[c + normals->cols*r]);
-				fprintf(pFile, "\n");
-			}
-		}
-		fprintf(pFile, "   ]\n");
-		fprintf(pFile, "  }\n");
-	}
-
-	// Output colors (if provided).
-	// Note: Assumes input is an 8-bit RGB color array.
-	if(colors != NULL){
-		fprintf(pFile, "  colorPerVertex TRUE\n");
-		fprintf(pFile, "  color Color {\n");
-		fprintf(pFile, "   color [\n");
-		for(int c=0; c<colors->cols; c++){
-			if(mask == NULL || mask->data.fl[c] != 0){
-				for(int r=0; r<colors->rows; r++)
-					fprintf(pFile, "    %f ", colors->data.fl[c + colors->cols*r]);
-				fprintf(pFile, "\n");
-			}
-		}
-		fprintf(pFile, "   ]\n");
-		fprintf(pFile, "  }\n");
-	}
-
-	// Create footer and close file.
-	fprintf(pFile, " }\n");
-	fprintf(pFile, "}\n");
 	if(fclose(pFile) != 0){
-		printf("ERROR: Cannot close VRML file!\n");
+		printf("ERROR: Cannot close PLY file!\n");
 		return -1;
 	}
 
@@ -325,7 +223,6 @@ void writeConfiguration(const char* filename, struct slParams* sl_params){
 	// Write output directory and object (or sequence) name.
 	cvStartWriteStruct(fs, "output", CV_NODE_MAP);
 	cvWriteString(fs, "output_directory",          sl_params->outdir, 1);
-	cvWriteString(fs, "object_name",               sl_params->object, 1);
 	cvWriteInt(fs,    "save_intermediate_results", sl_params->save);
 	cvEndWriteStruct(fs);
 	
@@ -333,7 +230,6 @@ void writeConfiguration(const char* filename, struct slParams* sl_params){
 	cvStartWriteStruct(fs, "camera", CV_NODE_MAP);
 	cvWriteInt(fs, "width",                           sl_params->cam_w);
 	cvWriteInt(fs, "height",                          sl_params->cam_h);
-	cvWriteInt(fs, "Logitech_Quickcam_9000_raw_mode", sl_params->Logitech_9000);
 	cvEndWriteStruct(fs);
 
 	// Write projector parameters.
@@ -405,14 +301,12 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	// Read output directory and object (or sequence) name.
 	CvFileNode* m = cvGetFileNodeByName(fs, 0, "output");
 	strcpy(sl_params->outdir, cvReadStringByName(fs, m, "output_directory", "./output"));
-	strcpy(sl_params->object, cvReadStringByName(fs, m, "object_name", "./output"));
 	sl_params->save = (cvReadIntByName(fs, m, "save_intermediate_results", 0) != 0);
 
 	// Read camera parameters.
 	m = cvGetFileNodeByName(fs, 0, "camera");
 	sl_params->cam_w         =  cvReadIntByName(fs, m, "width",                          1804);
 	sl_params->cam_h         =  cvReadIntByName(fs, m, "height",                         1353);
-	sl_params->Logitech_9000 = (cvReadIntByName(fs, m, "Logitech_Quickcam_9000_raw_mode",  0) != 0);
 
 	// Read projector parameters.
 	m = cvGetFileNodeByName(fs, 0, "projector");
@@ -474,22 +368,4 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Close file storage for XML-formatted configuration file.
 	cvReleaseFileStorage(&fs);
-}
-
-// In-place conversion of a 10-bit raw image to an 8-bit BGR image.
-// Note: Only works with Logitech QuickCam 9000 in 10-bit raw-mode (with a Bayer BGGR mosaic).
-//       See: http://www.quickcamteam.net/documentation/how-to/how-to-enable-raw-streaming-on-logitech-webcams
-void cvCvtLogitech9000Raw(IplImage* image, bool return_raw){
-	IplImage* raw_image = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-	for(int r=0; r<image->height; r++){
-		uchar* image_data     = (uchar*)(image->imageData     + r*image->widthStep);
-		uchar* raw_image_data = (uchar*)(raw_image->imageData + r*raw_image->widthStep);
-		for(int c=0; c<image->width; c++)
-			raw_image_data[c] = uchar((255./1023.)*(image_data[3*c] + 256*image_data[3*c+1]));
-	}
-	if(return_raw)
-		cvMerge(raw_image, raw_image, raw_image, NULL, image);
-	else
-		cvCvtColor(raw_image, image, CV_BayerBG2BGR);
-	cvReleaseImage(&raw_image);
 }

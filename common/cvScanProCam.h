@@ -25,17 +25,12 @@
 //   July 2009
 #ifndef SCAN_PROCAM
 #define SCAN_PROCAM
-// Run the background capture (used to eliminate background points from reconstructions).
-int runBackgroundCapture(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib);
 
 int generateGrayCodes(int width, int height, 
 					  IplImage**& gray_codes, 
 					  int& n_cols, int& n_rows,
 					  int& col_shift, int& row_shift, 
 					  bool sl_scan_cols, bool sl_scan_rows);
-
-// Run the structured light scanner.
-int runStructuredLight(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib, int scan_index);
 
 int decodeGrayCodes(int proj_width, int proj_height,
 					IplImage**& gray_codes, 

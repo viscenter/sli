@@ -556,6 +556,7 @@ private: bool reconOn;
 							worker->ReportProgress( 0 );
 							break;
 						}
+						//IMPORTANT!: DIVIDE INCOMING ON \n in case multi are stuck together!
 						if(szBuffer[ret-1] == '\n')
 							szBuffer[ret-1] = '\0';
 						else

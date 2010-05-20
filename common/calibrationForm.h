@@ -722,7 +722,6 @@ namespace reconstructionController {
 				// Return without errors.
 				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Green;
 				this->cameraStatusLbl->Text = "Camera calibration was successful. (" + successes + "/" + n_boards/2 + ")";
-				displayCamCalib(sl_calib);
 				return; 
 			 }
 

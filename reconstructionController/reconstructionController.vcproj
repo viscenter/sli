@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\OpenCV\cvaux\include&quot;;&quot;C:\Program Files (x86)\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files (x86)\OpenCV\cxcore\include&quot;;&quot;C:\Program Files (x86)\OpenCV\cv\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\OpenCV\cvaux\include&quot;;&quot;C:\Program Files\OpenCV\otherlibs\highgui&quot;;&quot;C:\Program Files\OpenCV\cxcore\include&quot;;&quot;C:\Program Files\OpenCV\cv\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;C:\Program Files (x86)\OpenCV\lib\cv.lib&quot; &quot;C:\Program Files (x86)\OpenCV\lib\cxcore.lib&quot; &quot;C:\Program Files (x86)\OpenCV\lib\highgui.lib&quot; Ole32.lib $(NOINHERIT)"
+				AdditionalDependencies="&quot;C:\Program Files\OpenCV\lib\cv.lib&quot; &quot;C:\Program Files\OpenCV\lib\cxcore.lib&quot; &quot;C:\Program Files\OpenCV\lib\highgui.lib&quot; Ole32.lib $(NOINHERIT)"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"

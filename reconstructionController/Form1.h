@@ -375,10 +375,10 @@ public: String^ reconPattern;
 					
 					helper->RunWorkerAsync();
 					portBox->Enabled = false;
-					this->setNameBox->Enabled = false;
-					this->tileBox->Enabled = false;
-					this->manualReconBtn->Enabled = false;
-					this->calibrationBtn->Enabled = false;
+					//this->setNameBox->Enabled = false;
+					//this->tileBox->Enabled = false;
+					//this->manualReconBtn->Enabled = false;
+					//this->calibrationBtn->Enabled = false;
 					running = true;
 					connectBtn->Text = "Stop";
 				}
@@ -387,10 +387,10 @@ public: String^ reconPattern;
 					helper->CancelAsync();
 					closesocket(sClient);
 					portBox->Enabled = true;
-					this->setNameBox->Enabled = true;
-					this->tileBox->Enabled = true;
-					this->manualReconBtn->Enabled = true;
-					this->calibrationBtn->Enabled = true;
+					//this->setNameBox->Enabled = true;
+					//this->tileBox->Enabled = true;
+					//this->manualReconBtn->Enabled = true;
+					//this->calibrationBtn->Enabled = true;
 					running = false;
 					connectBtn->Text = "Listen";
 					
@@ -430,12 +430,12 @@ public: String^ reconPattern;
 									&iAddrSize);
 					if (sClient == INVALID_SOCKET)
 					{
-						sprintf(buffer, "accept() failed: %d\n", WSAGetLastError());
+						sprintf(buffer, "accept() failed: %d\r\n", WSAGetLastError());
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
 						return;
 					}
-					sprintf(buffer, "Accepted client: %s:%d\n",
+					sprintf(buffer, "Accepted client: %s:%d\r\n",
 						inet_ntoa(recon_ptrs->client.sin_addr), ntohs(recon_ptrs->client.sin_port));
 						outMessage += gcnew System::String(buffer);
 							worker->ReportProgress( 0 );
@@ -467,26 +467,33 @@ public: String^ reconPattern;
 						outMessage += gcnew System::String(buffer);
 						worker->ReportProgress( 0 );
 						
-						Sleep(5000); 
-
-						outMessage += "Starting reconstruction...";
+						outMessage += "Starting reconstruction...\r\n";
 						worker->ReportProgress( 0 );
-						
-						int numImages = checkImages(this->baseFolderLocation->Text, gcnew System::String(szBuffer)+"_*.tif");
-						if(numImages >= 22)
+
+						for(int i=0; i<5; i++)
 						{
-							this->reconPattern = gcnew System::String(szBuffer);
-							outMessage += "Found " + numImages + " images of " + reconPattern + "\r\n";
-							outMessage += "Starting reconstruction...\r\n";
-							worker->ReportProgress( 0 );
-							Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
-							newThread->Start(this);
-						}
-						else
-						{
-							outMessage += "Only " + numImages + " images were found.\r\n";
-							outMessage += "22 are needed for reconstruction.\r\n";
-							worker->ReportProgress( 0 );
+							Sleep(4000);
+							int numImages = checkImages(this->baseFolderLocation->Text, gcnew System::String(szBuffer)+"_*.tif");
+							if(numImages >= 22)
+							{
+								this->reconPattern = gcnew System::String(szBuffer);
+								outMessage += "Found " + numImages + " images of " + reconPattern + "\r\n";
+								outMessage += "Starting reconstruction...\r\n";
+								worker->ReportProgress( 0 );
+								Thread^ newThread = gcnew Thread(gcnew ParameterizedThreadStart(reconstructSurface));
+								newThread->Start(this);
+								break;
+							}
+							else
+							{
+								outMessage += "Only " + numImages + " images were found.\r\n";
+								outMessage += "22 are needed for reconstruction.\r\n";
+								if(i<4)
+									outMessage += "Trying again in 4 seconds...\r\n";
+								else
+									outMessage += "Aborting reconstruction...\r\n";
+								worker->ReportProgress( 0 );
+							}
 						}
 					}
 					return;
@@ -623,7 +630,7 @@ public: String^ reconPattern;
 				sl_params->scan_cols, sl_params->scan_rows);
 
 				IplImage** cam_gray_codes;
-				int numImages = theForm->getLatestImages(cam_gray_codes, 50);
+				int numImages = theForm->getLatestImages(cam_gray_codes, 22);
 
 				IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
 				IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
@@ -694,9 +701,9 @@ public: String^ reconPattern;
 
 				// Save the point cloud.
 				//printf("Saving the point cloud...\n");
-				sprintf(str, "%s\\%s.wrl", outputDir, baseName.c_str());
-				if(savePointsVRML(str, points, NULL, colors, mask)){
-					MessageBox::Show("Scanning was not successful and must be repeated!", "Reconstruction Error", 
+				sprintf(str, "%s\\%s.ply", outputDir, baseName.c_str());
+				if(savePointsPLY(str, points, NULL, colors, mask)){
+					MessageBox::Show("Saving the reconstructed point cloud failed!", "Reconstruction Error", 
 						MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 					return;
 				}
