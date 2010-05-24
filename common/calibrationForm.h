@@ -1366,7 +1366,7 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			IplImage* proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 			cvSet(proj_frame, cvScalar(255.0));
 			cvScale(proj_frame, proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-			cvShowImage("projWindow", proj_frame);
+			cvShowImage("camWindow", proj_frame);
 			cvWaitKey(1);
 
 			// Allocate storage for grayscale images.

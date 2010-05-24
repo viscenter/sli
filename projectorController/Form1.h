@@ -556,57 +556,62 @@ private: bool reconOn;
 							worker->ReportProgress( 0 );
 							break;
 						}
-						//IMPORTANT!: DIVIDE INCOMING ON \n in case multi are stuck together!
-						if(szBuffer[ret-1] == '\n')
-							szBuffer[ret-1] = '\0';
-						else
-							szBuffer[ret] = '\0';
+						szBuffer[ret] = '\0';
 						
-						sprintf(buffer, "Received [%d bytes]: '%s'\r\n", ret, szBuffer);
-						outMessage += gcnew System::String(buffer);
-						worker->ReportProgress( 0 );
+						char* inMessage;
+						inMessage = strtok(szBuffer, "\n");
 
-						if(szBuffer[0] == 'V')
+						while(inMessage != NULL)
 						{
-							outMessage += sendMessage(sClient, "UBW FW D Version 1.4.3.eqpi\r\n");
+
+							sprintf(buffer, "Received: '%s'\r\n", inMessage);
+							outMessage += gcnew System::String(buffer);
 							worker->ReportProgress( 0 );
-						}
-						else if(szBuffer[0] == 'W')
-						{
-							outMessage += sendMessage(sClient, "1337_20100101_0099_eqpi\r\n");//ProjectorClient\r\n");
-							worker->ReportProgress( 0 );
-						}
-						/*else if(!strcmp(szBuffer, "O,64,0,0"))
-						{
-							projectorOff();
-							outMessage += "Turning projector off...\r\n";
-							worker->ReportProgress( 0 );
-						}
-						else if(!strcmp(szBuffer, "O,1,0,0"))
-						{
-							projectorOn();
-							outMessage += "Turning projector on...\r\n";
-							worker->ReportProgress( 0 );
-						}*/
-						else if(!strcmp(szBuffer, "O,128,0,0"))
-						{
-							outMessage += displayCheckerboard();
-							worker->ReportProgress(0);
-						}
-						else if(!strcmp(szBuffer, "O,0,64,0"))   //Normally UV
-						{
-							outMessage += displayBlank();
-							worker->ReportProgress(0);
-						}
-						else if(!strcmp(szBuffer, "O,0,128,0"))  //Royal Blue
-						{
-							outMessage += startPattern();
-							worker->ReportProgress( 0 );
-						}
-						else if(!strcmp(szBuffer, "O,0,32,0"))  //Blue
-						{
-							outMessage += nextPattern();
-							worker->ReportProgress( 0 );
+
+							if(inMessage[0] == 'V')
+							{
+								outMessage += sendMessage(sClient, "UBW FW D Version 1.4.3.eqpi\r\n");
+								worker->ReportProgress( 0 );
+							}
+							else if(inMessage[0] == 'W')
+							{
+								outMessage += sendMessage(sClient, "1337_20100101_0099_eqpi\r\n");//ProjectorClient\r\n");
+								worker->ReportProgress( 0 );
+							}
+							/*else if(!strcmp(szBuffer, "O,64,0,0"))
+							{
+								projectorOff();
+								outMessage += "Turning projector off...\r\n";
+								worker->ReportProgress( 0 );
+							}
+							else if(!strcmp(szBuffer, "O,1,0,0"))
+							{
+								projectorOn();
+								outMessage += "Turning projector on...\r\n";
+								worker->ReportProgress( 0 );
+							}*/
+							else if(!strcmp(inMessage, "O,128,0,0"))
+							{
+								outMessage += displayCheckerboard();
+								worker->ReportProgress(0);
+							}
+							else if(!strcmp(inMessage, "O,0,64,0"))   //Normally UV
+							{
+								outMessage += displayBlank();
+								worker->ReportProgress(0);
+							}
+							else if(!strcmp(inMessage, "O,0,128,0"))  //Royal Blue
+							{
+								outMessage += startPattern();
+								worker->ReportProgress( 0 );
+							}
+							else if(!strcmp(inMessage, "O,0,32,0"))  //Blue
+							{
+								outMessage += nextPattern();
+								worker->ReportProgress( 0 );
+							}
+
+							inMessage = strtok(NULL, "\n");
 						}
 					}
 					return;
