@@ -225,3 +225,295 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	// Return without errors.
 	return 0;
 }
+
+static int dbCmp( const void* _a, const void* _b )
+{
+    double a = *(const double*)_a;
+    double b = *(const double*)_b;
+
+    return (a > b) - (a < b);
+}
+
+void recalibrateExtrinsics(struct slParams* sl_params, struct slCalib* sl_calib, int n_boards, CvMat* cam_image_points, CvMat* cam_object_points, CvMat* cam_point_counts,
+						   CvMat* proj_image_points, CvMat* proj_object_points, CvMat* proj_point_counts, CvMat* proj_rotation_vectors, CvMat* proj_translation_vectors)
+{
+	
+	int cam_board_n = sl_params->cam_board_w*sl_params->cam_board_h;
+	int proj_board_n = sl_params->proj_board_w*sl_params->proj_board_h;
+
+	const int NINTRINSIC = 9;
+	CvMat* npoints = 0;
+	CvMat* err = 0;
+	CvMat* J_LR = 0;
+	CvMat* Je = 0;
+	CvMat* Ji = 0;
+	CvMat* imagePoints[2] = {0,0};
+	CvMat* cam_objectPoints = 0;
+	CvMat* proj_objectPoints = 0;
+	CvMat* RT0 = 0;
+	CvLevMarq solver;
+	int nparams = 6*(n_boards+1);
+	double A[2][9], dk[2][5]={{0,0,0,0,0},{0,0,0,0,0}}, rlr[9];
+	CvMat K[2], Dist[2], om_LR, T_LR;
+	CvMat R_LR = cvMat(3, 3, CV_64F, rlr);
+	int i, p, ni = 0, ofs = 0;
+	
+	err = cvCreateMat( cam_board_n*2, 1, CV_64F );
+	Je = cvCreateMat( cam_board_n*2, 6, CV_64F );
+	J_LR = cvCreateMat( cam_board_n*2, 6, CV_64F );
+	Ji = cvCreateMat( cam_board_n*2, NINTRINSIC, CV_64F );
+	cvZero( Ji );
+
+
+	cam_objectPoints = cvCreateMat( cam_object_points->rows, cam_object_points->cols, CV_64FC(CV_MAT_CN(cam_object_points->type)));
+    cvConvert( cam_object_points, cam_objectPoints );
+    cvReshape( cam_objectPoints, cam_objectPoints, 3, 1 );
+
+	proj_objectPoints = cvCreateMat( proj_object_points->rows, proj_object_points->cols, CV_64FC(CV_MAT_CN(proj_object_points->type)));
+    cvConvert( proj_object_points, proj_objectPoints );
+    cvReshape( proj_objectPoints, proj_objectPoints, 3, 1 );
+
+    for(int k = 0; k < 2; k++ )
+    {
+        const CvMat* points = k == 0 ? cam_image_points : proj_image_points;
+        const CvMat* cameraMatrix = k == 0 ? sl_calib->cam_intrinsic : sl_calib->proj_intrinsic;
+        const CvMat* distCoeffs = k == 0 ? sl_calib->cam_distortion : sl_calib->proj_distortion;
+
+        int cn = CV_MAT_CN(cam_image_points->type);
+        /*CV_ASSERT( (CV_MAT_DEPTH(cam_image_points->type) == CV_32F ||
+                CV_MAT_DEPTH(cam_image_points->type) == CV_64F) &&
+               ((cam_image_points->rows == pointsTotal && cam_image_points->cols*cn == 2) ||
+                (cam_image_points->rows == 1 && cam_image_points->cols == pointsTotal && cn == 2)) );*/
+
+        K[k] = cvMat(3,3,CV_64F,A[k]);
+        Dist[k] = cvMat(1,5,CV_64F,dk[k]);
+
+        imagePoints[k] = cvCreateMat( points->rows, points->cols, CV_64FC(CV_MAT_CN(points->type)));
+        cvConvert( points, imagePoints[k] );
+        cvReshape( imagePoints[k], imagePoints[k], 2, 1 );
+
+        cvConvert( cameraMatrix, &K[k] );
+
+        CvMat tdist = cvMat( distCoeffs->rows, distCoeffs->cols,
+        CV_MAKETYPE(CV_64F,CV_MAT_CN(distCoeffs->type)), Dist[k].data.db );
+        cvConvert( distCoeffs, &tdist );
+    }
+
+
+	RT0 = cvCreateMat( 6, n_boards, CV_64F );
+	solver.init( nparams, 0, cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5));
+
+	for( i = ofs = 0; i < n_boards; ofs += ni, i++ )
+    {
+       
+        CvMat objpt_i, imgpt_i;
+        double _om[2][3], r[2][9], t[2][3];
+        CvMat om[2], R[2], T[2];
+
+		ni = cam_board_n;
+		objpt_i = cvMat(1, ni, CV_64FC3, cam_objectPoints->data.db + ofs*3);
+        imgpt_i = cvMat(1, ni, CV_64FC2, imagePoints[0]->data.db + ofs*2);
+        om[0] = cvMat(3, 1, CV_64F, _om[0]);
+        R[0] = cvMat(3, 3, CV_64F, r[0]);
+        T[0] = cvMat(3, 1, CV_64F, t[0]);
+
+        cvFindExtrinsicCameraParams2( &objpt_i, &imgpt_i, &K[0], &Dist[0], &om[0], &T[0] );
+        cvRodrigues2( &om[0], &R[0] );
+        // save initial om_left and T_left
+        solver.param->data.db[(i+1)*6] = _om[0][0];
+        solver.param->data.db[(i+1)*6 + 1] = _om[0][1];
+        solver.param->data.db[(i+1)*6 + 2] = _om[0][2];
+        solver.param->data.db[(i+1)*6 + 3] = t[0][0];
+        solver.param->data.db[(i+1)*6 + 4] = t[0][1];
+        solver.param->data.db[(i+1)*6 + 5] = t[0][2];
+
+		ni = proj_board_n;
+		objpt_i = cvMat(1, ni, CV_64FC3, proj_objectPoints->data.db + ofs*3);
+        imgpt_i = cvMat(1, ni, CV_64FC2, imagePoints[1]->data.db + ofs*2);
+        om[1] = cvMat(3, 1, CV_64F, _om[1]);
+        R[1] = cvMat(3, 3, CV_64F, r[1]);
+        T[1] = cvMat(3, 1, CV_64F, t[1]);
+
+        cvFindExtrinsicCameraParams2( &objpt_i, &imgpt_i, &K[1], &Dist[1], &om[1], &T[1] );
+        cvRodrigues2( &om[1], &R[1] );
+
+        cvGEMM( &R[1], &R[0], 1, 0, 0, &R[0], CV_GEMM_B_T );
+        cvGEMM( &R[0], &T[0], -1, &T[1], 1, &T[1] );
+        cvRodrigues2( &R[0], &T[0] );
+        RT0->data.db[i] = t[0][0];
+        RT0->data.db[i + n_boards] = t[0][1];
+        RT0->data.db[i + n_boards*2] = t[0][2];
+        RT0->data.db[i + n_boards*3] = t[1][0];
+        RT0->data.db[i + n_boards*4] = t[1][1];
+        RT0->data.db[i + n_boards*5] = t[1][2];
+    }
+
+    // find the medians and save the first 6 parameters
+    for( i = 0; i < 6; i++ )
+    {
+        qsort( RT0->data.db + i*n_boards, n_boards, CV_ELEM_SIZE(RT0->type), dbCmp );
+        solver.param->data.db[i] = n_boards % 2 != 0 ? RT0->data.db[i*n_boards + n_boards/2] :
+            (RT0->data.db[i*n_boards + n_boards/2 - 1] + RT0->data.db[i*n_boards + n_boards/2])*0.5;
+    }
+
+    om_LR = cvMat(3, 1, CV_64F, solver.param->data.db);
+    T_LR = cvMat(3, 1, CV_64F, solver.param->data.db + 3);
+
+    while(true)
+    {
+        const CvMat* param = 0;
+        CvMat tmpimagePoints;
+        CvMat *JtJ = 0, *JtErr = 0;
+        double* errNorm = 0;
+        double _omR[3], _tR[3];
+        double _dr3dr1[9], _dr3dr2[9], /*_dt3dr1[9],*/ _dt3dr2[9], _dt3dt1[9], _dt3dt2[9];
+        CvMat dr3dr1 = cvMat(3, 3, CV_64F, _dr3dr1);
+        CvMat dr3dr2 = cvMat(3, 3, CV_64F, _dr3dr2);
+        //CvMat dt3dr1 = cvMat(3, 3, CV_64F, _dt3dr1);
+        CvMat dt3dr2 = cvMat(3, 3, CV_64F, _dt3dr2);
+        CvMat dt3dt1 = cvMat(3, 3, CV_64F, _dt3dt1);
+        CvMat dt3dt2 = cvMat(3, 3, CV_64F, _dt3dt2);
+        CvMat om[2], T[2];
+        CvMat dpdrot_hdr, dpdt_hdr, dpdf_hdr, dpdc_hdr, dpdk_hdr;
+        CvMat *dpdrot = &dpdrot_hdr, *dpdt = &dpdt_hdr, *dpdf = 0, *dpdc = 0, *dpdk = 0;
+		CvMat objpt_i, imgpt_i;
+
+        if( !solver.updateAlt( param, JtJ, JtErr, errNorm ))
+            break;
+
+        cvRodrigues2( &om_LR, &R_LR );
+        om[1] = cvMat(3,1,CV_64F,_omR);
+        T[1] = cvMat(3,1,CV_64F,_tR);
+
+        for( i = ofs = 0; i < n_boards; ofs += ni, i++ )
+        {
+            ni = cam_board_n;
+            CvMat _part;
+
+            om[0] = cvMat(3,1,CV_64F,solver.param->data.db+(i+1)*6);
+            T[0] = cvMat(3,1,CV_64F,solver.param->data.db+(i+1)*6+3);
+
+            if( JtJ || JtErr )
+                cvComposeRT( &om[0], &T[0], &om_LR, &T_LR, &om[1], &T[1], &dr3dr1, 0,
+                             &dr3dr2, 0, 0, &dt3dt1, &dt3dr2, &dt3dt2 );
+            else
+                cvComposeRT( &om[0], &T[0], &om_LR, &T_LR, &om[1], &T[1] );
+
+            
+            err->rows = Je->rows = J_LR->rows = Ji->rows = ni*2;
+            cvReshape( err, &tmpimagePoints, 2, 1 );
+
+            cvGetCols( Ji, &dpdf_hdr, 0, 2 );
+            cvGetCols( Ji, &dpdc_hdr, 2, 4 );
+            cvGetCols( Ji, &dpdk_hdr, 4, NINTRINSIC );
+            cvGetCols( Je, &dpdrot_hdr, 0, 3 );
+            cvGetCols( Je, &dpdt_hdr, 3, 6 );
+
+            double maxErr, l2err;
+			objpt_i = cvMat(1, ni, CV_64FC3, cam_objectPoints->data.db + ofs*3);
+            imgpt_i = cvMat(1, ni, CV_64FC2, imagePoints[0]->data.db + ofs*2);
+
+            if( JtJ || JtErr )
+                cvProjectPoints2( &objpt_i, &om[0], &T[0], &K[0], &Dist[0],
+                        &tmpimagePoints, dpdrot, dpdt, dpdf, dpdc, dpdk, 0);
+            else
+                cvProjectPoints2( &objpt_i, &om[0], &T[0], &K[0], &Dist[0], &tmpimagePoints );
+            cvSub( &tmpimagePoints, &imgpt_i, &tmpimagePoints );
+
+            l2err = cvNorm( &tmpimagePoints, 0, CV_L2 );
+            maxErr = cvNorm( &tmpimagePoints, 0, CV_C );
+
+            if( JtJ || JtErr )
+            {
+                int iofs = (n_boards+1)*6, eofs = (i+1)*6;
+                assert( JtJ && JtErr );
+
+                cvGetSubRect( JtJ, &_part, cvRect(eofs, eofs, 6, 6) );
+                cvGEMM( Je, Je, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+                cvGetRows( JtErr, &_part, eofs, eofs + 6 );
+                cvGEMM( Je, err, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+            }
+
+            if( errNorm )
+                *errNorm += l2err*l2err;
+
+
+			
+			//projector Time
+			objpt_i = cvMat(1, ni, CV_64FC3, proj_objectPoints->data.db + ofs*3);
+            imgpt_i = cvMat(1, ni, CV_64FC2, imagePoints[1]->data.db + ofs*2);
+
+            if( JtJ || JtErr )
+                cvProjectPoints2( &objpt_i, &om[1], &T[1], &K[1], &Dist[1],
+                        &tmpimagePoints, dpdrot, dpdt, dpdf, dpdc, dpdk, 0);
+            else
+                cvProjectPoints2( &objpt_i, &om[1], &T[1], &K[1], &Dist[1], &tmpimagePoints );
+            cvSub( &tmpimagePoints, &imgpt_i, &tmpimagePoints );
+
+            l2err = cvNorm( &tmpimagePoints, 0, CV_L2 );
+            maxErr = cvNorm( &tmpimagePoints, 0, CV_C );
+
+            if( JtJ || JtErr )
+            {
+                int iofs = (n_boards+1)*6 + NINTRINSIC, eofs = (i+1)*6;
+                assert( JtJ && JtErr );
+
+                for( p = 0; p < ni*2; p++ )
+                {
+                    CvMat de3dr3 = cvMat( 1, 3, CV_64F, Je->data.ptr + Je->step*p );
+                    CvMat de3dt3 = cvMat( 1, 3, CV_64F, de3dr3.data.db + 3 );
+                    CvMat de3dr2 = cvMat( 1, 3, CV_64F, J_LR->data.ptr + J_LR->step*p );
+                    CvMat de3dt2 = cvMat( 1, 3, CV_64F, de3dr2.data.db + 3 );
+                    double _de3dr1[3], _de3dt1[3];
+                    CvMat de3dr1 = cvMat( 1, 3, CV_64F, _de3dr1 );
+                    CvMat de3dt1 = cvMat( 1, 3, CV_64F, _de3dt1 );
+
+                    cvMatMul( &de3dr3, &dr3dr1, &de3dr1 );
+                    cvMatMul( &de3dt3, &dt3dt1, &de3dt1 );
+
+                    cvMatMul( &de3dr3, &dr3dr2, &de3dr2 );
+                    cvMatMulAdd( &de3dt3, &dt3dr2, &de3dr2, &de3dr2 );
+
+                    cvMatMul( &de3dt3, &dt3dt2, &de3dt2 );
+
+                    cvCopy( &de3dr1, &de3dr3 );
+                    cvCopy( &de3dt1, &de3dt3 );
+                }
+
+                cvGetSubRect( JtJ, &_part, cvRect(0, 0, 6, 6) );
+                cvGEMM( J_LR, J_LR, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+                cvGetSubRect( JtJ, &_part, cvRect(eofs, 0, 6, 6) );
+                cvGEMM( J_LR, Je, 1, 0, 0, &_part, CV_GEMM_A_T );
+
+                cvGetRows( JtErr, &_part, 0, 6 );
+                cvGEMM( J_LR, err, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+                cvGetSubRect( JtJ, &_part, cvRect(eofs, eofs, 6, 6) );
+                cvGEMM( Je, Je, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+                cvGetRows( JtErr, &_part, eofs, eofs + 6 );
+                cvGEMM( Je, err, 1, &_part, 1, &_part, CV_GEMM_A_T );
+
+            }
+
+            if( errNorm )
+                *errNorm += l2err*l2err;
+        }
+    }
+
+    cvRodrigues2( &om_LR, &R_LR );
+    if( proj_rotation_vectors->rows == 1 || proj_rotation_vectors->cols == 1 )
+        cvConvert( &om_LR, proj_rotation_vectors );
+    else
+        cvConvert( &R_LR, proj_rotation_vectors );
+    cvConvert( &T_LR, proj_translation_vectors );
+
+    cvReleaseMat( &err );
+    cvReleaseMat( &J_LR );
+    cvReleaseMat( &Je );
+    cvReleaseMat( &Ji );
+    cvReleaseMat( &RT0 );
+	}

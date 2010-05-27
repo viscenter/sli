@@ -1128,6 +1128,16 @@ namespace reconstructionController {
 				cvSave(str, sl_calib->proj_intrinsic);
 				sprintf(str,"%s\\proj_distortion.xml", calibDir);
 				cvSave(str, sl_calib->proj_distortion);
+
+				CvMat* proj_rotation_vector    = cvCreateMat(3, 3, CV_32FC1);
+  				CvMat* proj_translation_vector = cvCreateMat(3, 1, CV_32FC1);
+				recalibrateExtrinsics(sl_params, sl_calib, successes, cam_image_points2, cam_object_points2, cam_point_counts2, 
+						proj_image_points2, proj_object_points2, proj_point_counts2, proj_rotation_vector, proj_translation_vector);
+
+				sprintf(str,"%s\\proj_rotation_vector.xml", calibDir);
+				cvSave(str, proj_rotation_vector);
+				sprintf(str,"%s\\proj_translation_vector.xml", calibDir);
+				cvSave(str, proj_translation_vector);
 				sprintf(str,"%s\\proj_rotation_vectors.xml", calibDir);
 				cvSave(str, proj_rotation_vectors);
 				sprintf(str,"%s\\proj_translation_vectors.xml", calibDir);
@@ -1185,9 +1195,9 @@ namespace reconstructionController {
 				sprintf(str, "%s\\cam_extrinsic.xml", calibDir);
 				cvSave(str, sl_calib->cam_extrinsic);
 				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 0, i) = (float)cvmGet(proj_rotation_vectors, 0, i);
+					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 0, i) = (float)cvmGet(proj_rotation_vector, 0, i);
 				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 1, i) = (float)cvmGet(proj_translation_vectors, 0, i);
+					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 1, i) = (float)cvmGet(proj_translation_vector, i, 0);
 				sprintf(str, "%s\\proj_extrinsic.xml", calibDir);
 				cvSave(str, sl_calib->proj_extrinsic);
 				sprintf(str,"%s\\config.xml", calibDir);
@@ -1310,7 +1320,7 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				this->extrinsicStatusLbl->Text = "ERROR: Camera and projector must be calibrated first!";
 				return;
 			}
-
+			
 			// Define number of calibration boards (one for now).
 			int n_boards = 1;
 

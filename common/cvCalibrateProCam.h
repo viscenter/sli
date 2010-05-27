@@ -38,4 +38,7 @@ int detectChessboard(IplImage* frame, CvSize board_size, CvPoint2D32f* corners, 
 // Evaluate geometry of projector-camera optical rays and planes.
 int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib);
 
+
+void recalibrateExtrinsics(struct slParams* sl_params, struct slCalib* sl_calib, int n_boards, CvMat* cam_image_points, CvMat* cam_object_points, CvMat* cam_point_counts,
+						   CvMat* proj_image_points, CvMat* proj_object_points, CvMat* proj_point_counts, CvMat* proj_rotation_vectors, CvMat* proj_translation_vectors);
 #endif
