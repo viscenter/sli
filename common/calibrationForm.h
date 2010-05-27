@@ -446,8 +446,9 @@ namespace reconstructionController {
 			// openFileDialog1
 			// 
 			this->openFileDialog1->DefaultExt = L"tif";
-			this->openFileDialog1->FileName = L"openFileDialog1";
+			this->openFileDialog1->FileName = L"image.tif";
 			this->openFileDialog1->Filter = L"Tif Images (*.tif)|*.tif";
+			this->openFileDialog1->RestoreDirectory = true;
 			this->openFileDialog1->Title = L"Image Selection";
 			// 
 			// calibrationForm
@@ -1362,13 +1363,6 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			BringWindowToTop(camWindow);
 			cvWaitKey(1);
 
-			// Create a window to display projector image.
-			IplImage* proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-			cvSet(proj_frame, cvScalar(255.0));
-			cvScale(proj_frame, proj_frame, 2.*(sl_params->proj_gain/100.), 0);
-			cvShowImage("camWindow", proj_frame);
-			cvWaitKey(1);
-
 			// Allocate storage for grayscale images.
 			IplImage* cam_frame_1_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
 			IplImage* cam_frame_2_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
@@ -1573,7 +1567,6 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				cvReleaseImage(&cam_frame_1);
 				cvReleaseImage(&cam_frame_2);
 				cvReleaseImage(&cam_frame_3);
-				cvReleaseImage(&proj_frame);
 				cvReleaseImage(&cam_frame_1_gray);
 				cvReleaseImage(&cam_frame_2_gray);
 				for(int i=0; i<n_boards; i++){
@@ -1611,7 +1604,6 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			cvReleaseImage(&cam_frame_1);
 			cvReleaseImage(&cam_frame_2);
 			cvReleaseImage(&cam_frame_3);
-			cvReleaseImage(&proj_frame);
 			cvReleaseImage(&cam_frame_1_gray);
 			cvReleaseImage(&cam_frame_2_gray);
 			for(int i=0; i<n_boards; i++){

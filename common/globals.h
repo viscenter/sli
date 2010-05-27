@@ -112,13 +112,13 @@ struct slParams{
 
 	// Output options.
 	char outdir[1024];	            // base output directory
-	char object[1024];              // object name
+	//char object[1024];              // object name
 	bool save;                      // enable/disable saving of image sequence
 
 	// Camera options.
 	int  cam_w;                     // camera columns
 	int  cam_h;                     // camera rows
-	bool Logitech_9000;             // enable/disable Logitech QuickCam 9000 raw-mode (should be disabled for all other cameras)
+	//bool Logitech_9000;             // enable/disable Logitech QuickCam 9000 raw-mode (should be disabled for all other cameras)
 
 	// Projector options.
 	int  proj_w;                    // projector columns
