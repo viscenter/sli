@@ -28,6 +28,9 @@
 #include "globals.h"
 #include "cvScanProCam.h"
 #include "cvUtilProCam.h"
+#include <map>
+
+using namespace std;
 
 // Generate Gray codes.
 int generateGrayCodes(int width, int height, 
@@ -419,4 +422,61 @@ int reconstructStructuredLight(struct slParams* sl_params,
 
 	// Return without errors.
 	return 0;
+}
+
+int round(float r) {
+    return (int) (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
+}
+
+void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat* proj_points)
+{
+	int cam_nelems                 = sl_params->cam_w*sl_params->cam_h;
+	int proj_nelems                = sl_params->proj_w*sl_params->proj_h;
+	CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
+	CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
+	CvMat* reproj_points = cvCreateMat(2, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+	
+	multimap<int,int> bins;
+	multimap<int,int>::iterator it;
+
+	cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
+	for(int i=0; i<3; i++)
+		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
+
+	cvProjectPoints2(orig_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
+	
+	for(int r=0; r<sl_params->cam_h; r++)
+	{
+		for(int c=0; c<sl_params->cam_w; c++)
+		{
+			bins.insert(pair<int,int>(round(reproj_points->data.fl[c+r*sl_params->cam_w]), c+r*sl_params->cam_w));
+		}
+	}
+
+	for(int r=0; r<sl_params->proj_h; r++)
+	{
+		for(int c=0; c<sl_params->proj_w; c++)
+		{
+			proj_points->data.fl[c+r*sl_params->proj_w] = 0.0f;
+			proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] = 0.0f;
+			proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] = 0.0f;
+			
+			int count = 0;
+			for (it=bins.equal_range(c+r*sl_params->proj_w).first; it!=bins.equal_range(c+r*sl_params->proj_w).second; ++it)
+			{
+				proj_points->data.fl[c+r*sl_params->proj_w] += orig_points->data.fl[(*it).second];
+				proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] += orig_points->data.fl[(*it).second+cam_nelems];
+				proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] += orig_points->data.fl[(*it).second+cam_nelems*2];
+				count++;
+			}
+			
+			proj_points->data.fl[c+r*sl_params->proj_w] /= count;
+			proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] /= count;
+			proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] /= count;
+		}
+	}
+	
+	cvReleaseMat(&proj_rotation);
+	cvReleaseMat(&proj_translation);
+	cvReleaseMat(&reproj_points);
 }

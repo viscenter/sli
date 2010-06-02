@@ -61,5 +61,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 							   CvMat*&    depth_map,
 							   CvMat*&    mask);
 
+void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat* proj_points);
+
 
 #endif

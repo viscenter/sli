@@ -304,11 +304,11 @@ private: bool reconOn;
 			// calibrationBtn
 			// 
 			this->calibrationBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->calibrationBtn->Location = System::Drawing::Point(363, 332);
+			this->calibrationBtn->Location = System::Drawing::Point(380, 332);
 			this->calibrationBtn->Name = L"calibrationBtn";
-			this->calibrationBtn->Size = System::Drawing::Size(108, 23);
+			this->calibrationBtn->Size = System::Drawing::Size(91, 23);
 			this->calibrationBtn->TabIndex = 9;
-			this->calibrationBtn->Text = L"Calibration Controls";
+			this->calibrationBtn->Text = L"Display Blank";
 			this->calibrationBtn->UseVisualStyleBackColor = true;
 			this->calibrationBtn->Click += gcnew System::EventHandler(this, &Form1::calibrationBtn_Click);
 			// 
@@ -731,8 +731,10 @@ private: bool reconOn;
 			
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
-				calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
-				calibrationWindow->Visible = true;
+				cvSet(sl_data->proj_frame, cvScalar(50, 50, 50));
+				cvShowImage("projWindow", sl_data->proj_frame);
+				//calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
+				//calibrationWindow->Visible = true;
 			}
 			
 			private: bool loadSLConfigXML(slParams* sl_params, slCalib* sl_calib)
@@ -753,7 +755,7 @@ private: bool reconOn;
 				// Create fullscreen window (for controlling projector display).
 				cvNamedWindow("projWindow", CV_WINDOW_AUTOSIZE);
 				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
-				cvSet(sl_data->proj_frame, cvScalar(0, 0, 0));
+				cvSet(sl_data->proj_frame, cvScalar(50, 50, 50));
 				cvShowImage("projWindow", sl_data->proj_frame);
 				cvMoveWindow("projWindow", -sl_params->proj_w-7, -33);
 				cvWaitKey(1);

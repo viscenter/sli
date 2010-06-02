@@ -196,7 +196,7 @@ int savePointsPLY(char* filename,
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				for(int r=0; r<points->rows; r++){
-					fprintf(pFile, "%f ",  points->data.fl[c + points->cols*r]);
+						fprintf(pFile, "%f ",  points->data.fl[c + points->cols*r]);
 				}
 				//for(int r=0; r<normals->rows; r++)
 					//fprintf(pFile, "%f ", -normals->data.fl[c + normals->cols*r]);

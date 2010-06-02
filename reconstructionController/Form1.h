@@ -13,7 +13,7 @@
 #define DEFAULT_PORT_NUM 7272
 #define BUFFER_SIZE 1024
 #define DEFAULT_BASE_FOLDER "X:/windowsDocuments/"
-#define DEFAULT_SET_NAME "laserTests"
+#define DEFAULT_SET_NAME ""
 #define CONFIG_FILE "./config.xml"
 
 using namespace std;
@@ -54,6 +54,7 @@ namespace reconstructionController {
 			else
 				console->Text += "Configuration File Read Successfully!\r\n";
 			
+			this->outputDirLbl->Text = gcnew String(recon_indir->data.sl_params.outdir);
 			this->baseFolderLocation->Text = DEFAULT_BASE_FOLDER;
 			this->setNameBox->Text = DEFAULT_SET_NAME;
 			this->portBox->Text = "" + DEFAULT_PORT_NUM;
@@ -147,6 +148,10 @@ private: System::Windows::Forms::Label^  label12;
 private: System::Windows::Forms::TextBox^  tileBox;
 private: System::Windows::Forms::Button^  manualReconBtn;
 public: String^ reconPattern;
+private: System::Windows::Forms::Label^  label4;
+public: 
+private: System::Windows::Forms::Label^  outputDirLbl;
+private: System::Windows::Forms::Button^  editOutputDirBtn;
 
 
 	protected: 
@@ -181,12 +186,15 @@ public: String^ reconPattern;
 			this->label12 = (gcnew System::Windows::Forms::Label());
 			this->tileBox = (gcnew System::Windows::Forms::TextBox());
 			this->manualReconBtn = (gcnew System::Windows::Forms::Button());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->outputDirLbl = (gcnew System::Windows::Forms::Label());
+			this->editOutputDirBtn = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(405, 381);
+			this->connectBtn->Location = System::Drawing::Point(406, 397);
 			this->connectBtn->Name = L"connectBtn";
 			this->connectBtn->Size = System::Drawing::Size(63, 23);
 			this->connectBtn->TabIndex = 1;
@@ -210,13 +218,13 @@ public: String^ reconPattern;
 			this->console->Name = L"console";
 			this->console->ReadOnly = true;
 			this->console->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->console->Size = System::Drawing::Size(456, 262);
+			this->console->Size = System::Drawing::Size(457, 260);
 			this->console->TabIndex = 1;
 			// 
 			// setNameBox
 			// 
 			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->setNameBox->Location = System::Drawing::Point(75, 329);
+			this->setNameBox->Location = System::Drawing::Point(77, 345);
 			this->setNameBox->Name = L"setNameBox";
 			this->setNameBox->Size = System::Drawing::Size(139, 20);
 			this->setNameBox->TabIndex = 40;
@@ -225,7 +233,7 @@ public: String^ reconPattern;
 			// 
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(12, 332);
+			this->label2->Location = System::Drawing::Point(12, 348);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 5;
@@ -234,7 +242,7 @@ public: String^ reconPattern;
 			// editBaseFolderBtn
 			// 
 			this->editBaseFolderBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->editBaseFolderBtn->Location = System::Drawing::Point(129, 282);
+			this->editBaseFolderBtn->Location = System::Drawing::Point(130, 311);
 			this->editBaseFolderBtn->Name = L"editBaseFolderBtn";
 			this->editBaseFolderBtn->Size = System::Drawing::Size(59, 23);
 			this->editBaseFolderBtn->TabIndex = 6;
@@ -246,7 +254,7 @@ public: String^ reconPattern;
 			// 
 			this->baseFolderLocation->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->baseFolderLocation->AutoEllipsis = true;
-			this->baseFolderLocation->Location = System::Drawing::Point(194, 287);
+			this->baseFolderLocation->Location = System::Drawing::Point(195, 316);
 			this->baseFolderLocation->Name = L"baseFolderLocation";
 			this->baseFolderLocation->Size = System::Drawing::Size(272, 18);
 			this->baseFolderLocation->TabIndex = 7;
@@ -256,7 +264,7 @@ public: String^ reconPattern;
 			// 
 			this->label3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(12, 287);
+			this->label3->Location = System::Drawing::Point(13, 316);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(111, 13);
 			this->label3->TabIndex = 8;
@@ -264,7 +272,7 @@ public: String^ reconPattern;
 			// 
 			// calibrationBtn
 			// 
-			this->calibrationBtn->Location = System::Drawing::Point(360, 332);
+			this->calibrationBtn->Location = System::Drawing::Point(361, 366);
 			this->calibrationBtn->Name = L"calibrationBtn";
 			this->calibrationBtn->Size = System::Drawing::Size(108, 23);
 			this->calibrationBtn->TabIndex = 9;
@@ -276,7 +284,7 @@ public: String^ reconPattern;
 			// 
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(276, 386);
+			this->label1->Location = System::Drawing::Point(276, 402);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(60, 13);
 			this->label1->TabIndex = 2;
@@ -285,7 +293,7 @@ public: String^ reconPattern;
 			// portBox
 			// 
 			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(349, 383);
+			this->portBox->Location = System::Drawing::Point(349, 399);
 			this->portBox->Name = L"portBox";
 			this->portBox->Size = System::Drawing::Size(38, 20);
 			this->portBox->TabIndex = 3;
@@ -295,7 +303,7 @@ public: String^ reconPattern;
 			// 
 			this->label12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label12->AutoSize = true;
-			this->label12->Location = System::Drawing::Point(12, 360);
+			this->label12->Location = System::Drawing::Point(13, 376);
 			this->label12->Name = L"label12";
 			this->label12->Size = System::Drawing::Size(58, 13);
 			this->label12->TabIndex = 26;
@@ -304,14 +312,14 @@ public: String^ reconPattern;
 			// tileBox
 			// 
 			this->tileBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->tileBox->Location = System::Drawing::Point(76, 357);
+			this->tileBox->Location = System::Drawing::Point(77, 373);
 			this->tileBox->Name = L"tileBox";
 			this->tileBox->Size = System::Drawing::Size(138, 20);
 			this->tileBox->TabIndex = 41;
 			// 
 			// manualReconBtn
 			// 
-			this->manualReconBtn->Location = System::Drawing::Point(12, 386);
+			this->manualReconBtn->Location = System::Drawing::Point(15, 399);
 			this->manualReconBtn->Name = L"manualReconBtn";
 			this->manualReconBtn->Size = System::Drawing::Size(121, 23);
 			this->manualReconBtn->TabIndex = 27;
@@ -319,11 +327,45 @@ public: String^ reconPattern;
 			this->manualReconBtn->UseVisualStyleBackColor = true;
 			this->manualReconBtn->Click += gcnew System::EventHandler(this, &Form1::manualReconBtn_Click);
 			// 
+			// label4
+			// 
+			this->label4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(13, 284);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(87, 13);
+			this->label4->TabIndex = 44;
+			this->label4->Text = L"Output Directory:";
+			// 
+			// outputDirLbl
+			// 
+			this->outputDirLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->outputDirLbl->AutoEllipsis = true;
+			this->outputDirLbl->Location = System::Drawing::Point(195, 284);
+			this->outputDirLbl->Name = L"outputDirLbl";
+			this->outputDirLbl->Size = System::Drawing::Size(272, 18);
+			this->outputDirLbl->TabIndex = 43;
+			this->outputDirLbl->Text = L"./";
+			// 
+			// editOutputDirBtn
+			// 
+			this->editOutputDirBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->editOutputDirBtn->Location = System::Drawing::Point(130, 279);
+			this->editOutputDirBtn->Name = L"editOutputDirBtn";
+			this->editOutputDirBtn->Size = System::Drawing::Size(59, 23);
+			this->editOutputDirBtn->TabIndex = 42;
+			this->editOutputDirBtn->Text = L"Edit";
+			this->editOutputDirBtn->UseVisualStyleBackColor = true;
+			this->editOutputDirBtn->Click += gcnew System::EventHandler(this, &Form1::editOutputDirBtn_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(480, 416);
+			this->ClientSize = System::Drawing::Size(481, 432);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->outputDirLbl);
+			this->Controls->Add(this->editOutputDirBtn);
 			this->Controls->Add(this->manualReconBtn);
 			this->Controls->Add(this->label12);
 			this->Controls->Add(this->tileBox);
@@ -470,9 +512,9 @@ public: String^ reconPattern;
 						outMessage += "Starting reconstruction...\r\n";
 						worker->ReportProgress( 0 );
 
-						for(int i=0; i<5; i++)
+						for(int i=0; i<4; i++)
 						{
-							Sleep(4000);
+							Sleep(10000);
 							int numImages = checkImages(this->baseFolderLocation->Text, gcnew System::String(szBuffer)+"_*.tif");
 							if(numImages >= 22)
 							{
@@ -489,7 +531,7 @@ public: String^ reconPattern;
 								outMessage += "Only " + numImages + " images were found.\r\n";
 								outMessage += "22 are needed for reconstruction.\r\n";
 								if(i<4)
-									outMessage += "Trying again in 4 seconds...\r\n";
+									outMessage += "Trying again in 10 seconds...\r\n";
 								else
 									outMessage += "Aborting reconstruction...\r\n";
 								worker->ReportProgress( 0 );
@@ -708,6 +750,20 @@ public: String^ reconPattern;
 					return;
 				}
 
+				sprintf(str,"%s\\proj_intrinsic.xml", outputDir);	
+				cvSave(str, sl_calib->proj_intrinsic);
+				sprintf(str,"%s\\proj_distortion.xml", outputDir);
+				cvSave(str, sl_calib->proj_distortion);
+				sprintf(str,"%s\\cam_intrinsic.xml", outputDir);	
+				cvSave(str, sl_calib->cam_intrinsic);
+				sprintf(str,"%s\\cam_distortion.xml", outputDir);
+				cvSave(str, sl_calib->cam_distortion);
+				sprintf(str, "%s\\cam_extrinsic.xml", outputDir);
+				cvSave(str, sl_calib->cam_extrinsic);
+				sprintf(str, "%s\\proj_extrinsic.xml", outputDir);
+				cvSave(str, sl_calib->proj_extrinsic);
+
+
 				// Free allocated resources.
 				cvReleaseImage(&gray_decoded_cols);
 				cvReleaseImage(&gray_decoded_rows);
@@ -746,6 +802,16 @@ private: System::Void manualReconBtn_Click(System::Object^  sender, System::Even
 				 console->ScrollToCaret();
 			 }
 
+		 }
+private: System::Void editOutputDirBtn_Click(System::Object^  sender, System::EventArgs^  e) 
+		 {
+				System::Windows::Forms::DialogResult result = folderBrowserDialog1->ShowDialog();
+				if ( result == ::DialogResult::OK )
+				{
+					this->outputDirLbl->Text = folderBrowserDialog1->SelectedPath;
+					strcpy(recon_indir->data.sl_params.outdir, gc2std(folderBrowserDialog1->SelectedPath).c_str());
+					
+				}
 		 }
 };
 }

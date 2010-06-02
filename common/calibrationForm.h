@@ -962,6 +962,7 @@ namespace reconstructionController {
   				CvMat* cam_translation_vectors  = cvCreateMat(successes, 3, CV_32FC1);
 				CvMat* proj_object_points2      = cvCreateMat(successes*proj_board_n, 3, CV_32FC1);
 				CvMat* proj_image_points2       = cvCreateMat(successes*proj_board_n, 2, CV_32FC1);
+				CvMat* proj_image_points3       = cvCreateMat(successes*proj_board_n, 2, CV_32FC1);
 				CvMat* proj_point_counts2       = cvCreateMat(successes, 1, CV_32SC1);
 				CvMat* proj_rotation_vectors    = cvCreateMat(successes, 3, CV_32FC1);
   				CvMat* proj_translation_vectors = cvCreateMat(successes, 3, CV_32FC1);
@@ -974,6 +975,13 @@ namespace reconstructionController {
 					CV_MAT_ELEM(*cam_object_points2, float, i, 1) =	CV_MAT_ELEM(*cam_object_points, float, i, 1);
 					CV_MAT_ELEM(*cam_object_points2, float, i, 2) = CV_MAT_ELEM(*cam_object_points, float, i, 2);
 				}
+				
+				for(int i=0; i<successes*proj_board_n; ++i)
+				{
+					CV_MAT_ELEM(*proj_image_points3,  float, i, 0) = CV_MAT_ELEM(*proj_image_points,  float, i, 0);
+					CV_MAT_ELEM(*proj_image_points3,  float, i, 1) = CV_MAT_ELEM(*proj_image_points,  float, i, 1);
+				}
+
 				for(int i=0; i<successes; ++i)
 					CV_MAT_ELEM(*cam_point_counts2, int, i, 0) = CV_MAT_ELEM(*cam_point_counts, int, i, 0);
 				
@@ -1129,10 +1137,17 @@ namespace reconstructionController {
 				sprintf(str,"%s\\proj_distortion.xml", calibDir);
 				cvSave(str, sl_calib->proj_distortion);
 
-				CvMat* proj_rotation_vector    = cvCreateMat(3, 3, CV_32FC1);
+				CvMat* proj_rotation_matrix   = cvCreateMat(3, 3, CV_32FC1);
   				CvMat* proj_translation_vector = cvCreateMat(3, 1, CV_32FC1);
 				recalibrateExtrinsics(sl_params, sl_calib, successes, cam_image_points2, cam_object_points2, cam_point_counts2, 
-						proj_image_points2, proj_object_points2, proj_point_counts2, proj_rotation_vector, proj_translation_vector);
+						proj_image_points2, proj_object_points2, proj_point_counts2, proj_rotation_matrix, proj_translation_vector);
+				
+				/*cvStereoCalibrate(proj_object_points2, proj_image_points3, proj_image_points2, proj_point_counts2, sl_calib->cam_intrinsic, sl_calib->cam_distortion,
+					sl_calib->proj_intrinsic, sl_calib->proj_distortion, frame_size, proj_rotation_matrix, proj_translation_vector, NULL, NULL, 
+					cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5), CV_CALIB_FIX_INTRINSIC);*/
+
+				CvMat* proj_rotation_vector   = cvCreateMat(1, 3, CV_32FC1);
+				cvRodrigues2( proj_rotation_matrix, proj_rotation_vector );
 
 				sprintf(str,"%s\\proj_rotation_vector.xml", calibDir);
 				cvSave(str, proj_rotation_vector);
@@ -1220,6 +1235,9 @@ namespace reconstructionController {
 				cvReleaseMat(&cam_image_points_00);
 				cvReleaseMat(&cam_rotation_vector_00);
   				cvReleaseMat(&cam_translation_vector_00);
+				cvReleaseMat(&proj_rotation_matrix);
+				cvReleaseMat(&proj_translation_vector);
+				cvReleaseMat(&proj_rotation_vector);
 			}
 			else{
 				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;

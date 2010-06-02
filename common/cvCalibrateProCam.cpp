@@ -128,7 +128,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	// Note: All positions are in coordinate system of the first camera.
 	cvSet(sl_calib->cam_center, cvScalar(0));
 	cvGEMM(proj_rotation, proj_translation, -1, NULL, 0, sl_calib->proj_center, CV_GEMM_A_T);
-	cvGEMM(cam_rotation, sl_calib->proj_center, 1, cam_translation, 1, sl_calib->proj_center, 0);
+	//cvGEMM(cam_rotation, sl_calib->proj_center, 1, cam_translation, 1, sl_calib->proj_center, 0);
 
 	// Pre-compute optical rays for each camera pixel.
 	int    cam_nelems        = sl_params->cam_w*sl_params->cam_h;
@@ -168,7 +168,8 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 
 	// Rotate projector optical rays into the camera coordinate system.
 	CvMat* R = cvCreateMat(3, 3, CV_32FC1);
-	cvGEMM(cam_rotation, proj_rotation, 1, NULL, 0, R, CV_GEMM_B_T);
+	cvTranspose(proj_rotation, R);
+	//cvGEMM(cam_rotation, proj_rotation, 1, NULL, 0, R, CV_GEMM_B_T);
 	cvGEMM(R, sl_calib->proj_rays, 1, NULL, 0, sl_calib->proj_rays, 0);
 	cvReleaseMat(&R);
 
