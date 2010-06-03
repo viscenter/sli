@@ -699,10 +699,15 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 				CvMat *colors    = cvCreateMat(3, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
 				CvMat *depth_map = cvCreateMat(sl_params->cam_h, sl_params->cam_w, CV_32FC1);
 				CvMat *mask      = cvCreateMat(1, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+
+				CvMat *resampled_points = cvCreateMat(3, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+
 				reconstructStructuredLight(sl_params, sl_calib, 
 										   cam_gray_codes[0],
 										   gray_decoded_cols, gray_decoded_rows, gray_mask,
 										   points, colors, depth_map, mask);
+				
+				downsamplePoints(sl_params, sl_calib, points, mask, resampled_points, depth_map);
 
 				double min_val, max_val;
 				cvMinMaxLoc(depth_map, &min_val, &max_val);
@@ -744,7 +749,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 				// Save the point cloud.
 				//printf("Saving the point cloud...\n");
 				sprintf(str, "%s\\%s.ply", outputDir, baseName.c_str());
-				if(savePointsPLY(str, points, NULL, colors, mask)){
+				if(savePointsPLY(str, resampled_points, NULL, NULL, mask)){
 					MessageBox::Show("Saving the reconstructed point cloud failed!", "Reconstruction Error", 
 						MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 					return;

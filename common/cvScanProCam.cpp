@@ -424,20 +424,18 @@ int reconstructStructuredLight(struct slParams* sl_params,
 	return 0;
 }
 
-int round(float r) {
-    return (int) (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
-}
-
-void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat* proj_points)
+void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat*& mask, CvMat*& resample_points, CvMat*& depth_map)
 {
 	int cam_nelems                 = sl_params->cam_w*sl_params->cam_h;
 	int proj_nelems                = sl_params->proj_w*sl_params->proj_h;
 	CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
 	CvMat* reproj_points = cvCreateMat(2, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
+	CvMat* proj_points = cvCreateMat(3, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+	CvMat* proj_mask = cvCreateMat(1, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
 	
-	multimap<int,int> bins;
-	multimap<int,int>::iterator it;
+	multimap<pair<int,int>,int> bins;
+	multimap<pair<int,int>,int>::iterator it;
 
 	cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 	for(int i=0; i<3; i++)
@@ -449,20 +447,19 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 	{
 		for(int c=0; c<sl_params->cam_w; c++)
 		{
-			bins.insert(pair<int,int>(round(reproj_points->data.fl[c+r*sl_params->cam_w]), c+r*sl_params->cam_w));
+			if(mask->data.fl[c+r*sl_params->cam_w] != 0)
+				bins.insert(pair<pair<int,int>,int>(pair<int,int>(cvRound(CV_MAT_ELEM(*reproj_points, float, 0, c+r*sl_params->cam_w)), cvRound(CV_MAT_ELEM(*reproj_points, float, 1, c+r*sl_params->cam_w))), c+r*sl_params->cam_w));
 		}
 	}
+	cvReleaseMat(&reproj_points);
 
+	cvZero(proj_points);
 	for(int r=0; r<sl_params->proj_h; r++)
 	{
 		for(int c=0; c<sl_params->proj_w; c++)
 		{
-			proj_points->data.fl[c+r*sl_params->proj_w] = 0.0f;
-			proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] = 0.0f;
-			proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] = 0.0f;
-			
 			int count = 0;
-			for (it=bins.equal_range(c+r*sl_params->proj_w).first; it!=bins.equal_range(c+r*sl_params->proj_w).second; ++it)
+			for (it=bins.equal_range(pair<int,int>(c, r)).first; it!=bins.equal_range(pair<int,int>(c, r)).second; ++it)
 			{
 				proj_points->data.fl[c+r*sl_params->proj_w] += orig_points->data.fl[(*it).second];
 				proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] += orig_points->data.fl[(*it).second+cam_nelems];
@@ -470,13 +467,57 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 				count++;
 			}
 			
-			proj_points->data.fl[c+r*sl_params->proj_w] /= count;
-			proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] /= count;
-			proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] /= count;
+			if(count)
+			{
+				proj_mask->data.fl[c+r*sl_params->proj_w] = 1;
+				proj_points->data.fl[c+r*sl_params->proj_w] /= count;
+				proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] /= count;
+				proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] /= count;
+			}
+			else
+			{
+				proj_mask->data.fl[c+r*sl_params->proj_w] = 0;
+			}
+		}
+	}
+
+	cvZero(proj_rotation);
+	cvZero(proj_translation);
+	reproj_points = cvCreateMat(2, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+
+	cvProjectPoints2(proj_points, proj_rotation, proj_translation, sl_calib->cam_intrinsic, sl_calib->cam_distortion, reproj_points);
+	
+	int x,y;
+	for(int r=0; r<sl_params->proj_h; r++)
+	{
+		for(int c=0; c<sl_params->proj_w; c++)
+		{
+			if(proj_mask->data.fl[c+r*sl_params->proj_w] != 0)
+			{
+				x = cvRound(CV_MAT_ELEM(*reproj_points, float, 0, c+r*sl_params->proj_w));
+				y = cvRound(CV_MAT_ELEM(*reproj_points, float, 1, c+r*sl_params->proj_w));
+				
+				cvZero(mask);
+				if((x >= 0 && x < sl_params->cam_w) && (y >=0 && y < sl_params->cam_h))
+				{
+					resample_points->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w];
+					resample_points->data.fl[x+y*sl_params->cam_w+cam_nelems] = proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems];
+					resample_points->data.fl[x+y*sl_params->cam_w+2*cam_nelems] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
+					if(depth_map)
+						depth_map->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
+					mask->data.fl[x+y*sl_params->cam_w] = 1;
+				}
+				else
+				{
+					mask->data.fl[x+y*sl_params->cam_w] = 0;
+				}
+			}
 		}
 	}
 	
 	cvReleaseMat(&proj_rotation);
 	cvReleaseMat(&proj_translation);
 	cvReleaseMat(&reproj_points);
+	cvReleaseMat(&proj_points);
+	cvReleaseMat(&proj_mask);
 }

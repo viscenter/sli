@@ -16,7 +16,7 @@
 #define RECON_PORT 7272
 
 #define BUFFER_SIZE 1024
-#define DEFAULT_SET_NAME "laserTests"
+#define DEFAULT_SET_NAME ""
 #define CONFIG_FILE "./config.xml"
 
 using namespace std;
