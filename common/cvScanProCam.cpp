@@ -426,57 +426,87 @@ int reconstructStructuredLight(struct slParams* sl_params,
 
 void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat*& mask, CvMat*& resample_points, CvMat*& depth_map)
 {
-	int cam_nelems                 = sl_params->cam_w*sl_params->cam_h;
-	int proj_nelems                = sl_params->proj_w*sl_params->proj_h;
+	//depth_map = NULL;
+	int cam_nelems = sl_params->cam_w*sl_params->cam_h;
+	int proj_nelems = sl_params->proj_w*sl_params->proj_h;
 	CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
 	CvMat* reproj_points = cvCreateMat(2, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
 	CvMat* proj_points = cvCreateMat(3, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
 	CvMat* proj_mask = cvCreateMat(1, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
-	
-	multimap<pair<int,int>,int> bins;
-	multimap<pair<int,int>,int>::iterator it;
+	CvMat* bins = cvCreateMat(10, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+	CvMat* counts = cvCreateMat(1, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+	cvZero(counts);
 
 	cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 	for(int i=0; i<3; i++)
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 
 	cvProjectPoints2(orig_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
-	
+	int x,y, temp, newCount;
 	for(int r=0; r<sl_params->cam_h; r++)
 	{
 		for(int c=0; c<sl_params->cam_w; c++)
 		{
 			if(mask->data.fl[c+r*sl_params->cam_w] != 0)
-				bins.insert(pair<pair<int,int>,int>(pair<int,int>(cvRound(CV_MAT_ELEM(*reproj_points, float, 0, c+r*sl_params->cam_w)), cvRound(CV_MAT_ELEM(*reproj_points, float, 1, c+r*sl_params->cam_w))), c+r*sl_params->cam_w));
+			{
+				x = cvRound(CV_MAT_ELEM(*reproj_points, float, 0, c+r*sl_params->cam_w));
+				y = cvRound(CV_MAT_ELEM(*reproj_points, float, 1, c+r*sl_params->cam_w));
+				if((x >= 0 && x < sl_params->proj_w) && (y >=0 && y < sl_params->proj_h) && (counts->data.fl[x + y*sl_params->proj_w] < 10))
+				{
+					newCount = (int)counts->data.fl[x + y*sl_params->proj_w];
+					while(newCount > 0)
+					{
+						if(orig_points->data.fl[c+r*sl_params->cam_w+cam_nelems*2] < orig_points->data.fl[(int)bins->data.fl[x + y*sl_params->proj_w + (newCount-1)*proj_nelems]+cam_nelems*2])
+							bins->data.fl[x + y*sl_params->proj_w + newCount*proj_nelems] = bins->data.fl[x + y*sl_params->proj_w + (newCount-1)*proj_nelems];
+						else
+							break;
+						newCount--;
+					}
+					bins->data.fl[x + y*sl_params->proj_w + newCount*proj_nelems] = c+r*sl_params->cam_w;
+					counts->data.fl[x + y*sl_params->proj_w] = counts->data.fl[x + y*sl_params->proj_w]+1;
+				}
+			}
 		}
 	}
 	cvReleaseMat(&reproj_points);
 
-	cvZero(proj_points);
+	//cvZero(proj_points);
 	for(int r=0; r<sl_params->proj_h; r++)
 	{
 		for(int c=0; c<sl_params->proj_w; c++)
 		{
-			int count = 0;
-			for (it=bins.equal_range(pair<int,int>(c, r)).first; it!=bins.equal_range(pair<int,int>(c, r)).second; ++it)
+			int theIndex = c+r*sl_params->proj_w;
+			/*for (int count = 0; count < counts->data.fl[theIndex]; count++)
 			{
-				proj_points->data.fl[c+r*sl_params->proj_w] += orig_points->data.fl[(*it).second];
-				proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] += orig_points->data.fl[(*it).second+cam_nelems];
-				proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] += orig_points->data.fl[(*it).second+cam_nelems*2];
-				count++;
-			}
+				proj_points->data.fl[theIndex] += orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]];
+				proj_points->data.fl[theIndex+proj_nelems] += orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]+cam_nelems];
+				proj_points->data.fl[theIndex+2*proj_nelems] += orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]+cam_nelems*2];
+			}*/
 			
-			if(count)
+			if(counts->data.fl[theIndex])
 			{
-				proj_mask->data.fl[c+r*sl_params->proj_w] = 1;
-				proj_points->data.fl[c+r*sl_params->proj_w] /= count;
-				proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems] /= count;
-				proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems] /= count;
+				int count = counts->data.fl[theIndex] / 2;
+				proj_mask->data.fl[theIndex] = 1;
+				
+				proj_points->data.fl[theIndex] = orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]];
+				proj_points->data.fl[theIndex+proj_nelems] = orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]+cam_nelems];
+				proj_points->data.fl[theIndex+2*proj_nelems] = orig_points->data.fl[(int)bins->data.fl[theIndex + count*proj_nelems]+cam_nelems*2];
+				
+				if(count % 2 && count > 1)
+				{
+					proj_points->data.fl[theIndex] = (proj_points->data.fl[theIndex] + orig_points->data.fl[(int)bins->data.fl[theIndex + (count+1)*proj_nelems]])/ 2.0f;
+					proj_points->data.fl[theIndex+proj_nelems] = (proj_points->data.fl[theIndex+proj_nelems] + orig_points->data.fl[(int)bins->data.fl[theIndex + (count+1)*proj_nelems]+cam_nelems])/2.0f;
+					proj_points->data.fl[theIndex+2*proj_nelems] = (proj_points->data.fl[theIndex+2*proj_nelems] + orig_points->data.fl[(int)bins->data.fl[theIndex + (count+1)*proj_nelems]+cam_nelems*2])/2.0f;
+				}
+				
+			//	proj_points->data.fl[theIndex] /= counts->data.fl[theIndex];
+			//	proj_points->data.fl[theIndex+proj_nelems] /= counts->data.fl[theIndex];
+			//	proj_points->data.fl[theIndex+2*proj_nelems] /= counts->data.fl[theIndex];
 			}
 			else
 			{
-				proj_mask->data.fl[c+r*sl_params->proj_w] = 0;
+				proj_mask->data.fl[theIndex] = 0;
 			}
 		}
 	}
@@ -487,7 +517,7 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 
 	cvProjectPoints2(proj_points, proj_rotation, proj_translation, sl_calib->cam_intrinsic, sl_calib->cam_distortion, reproj_points);
 	
-	int x,y;
+	cvZero(mask);
 	for(int r=0; r<sl_params->proj_h; r++)
 	{
 		for(int c=0; c<sl_params->proj_w; c++)
@@ -497,14 +527,13 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 				x = cvRound(CV_MAT_ELEM(*reproj_points, float, 0, c+r*sl_params->proj_w));
 				y = cvRound(CV_MAT_ELEM(*reproj_points, float, 1, c+r*sl_params->proj_w));
 				
-				cvZero(mask);
 				if((x >= 0 && x < sl_params->cam_w) && (y >=0 && y < sl_params->cam_h))
 				{
 					resample_points->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w];
 					resample_points->data.fl[x+y*sl_params->cam_w+cam_nelems] = proj_points->data.fl[c+r*sl_params->proj_w+proj_nelems];
 					resample_points->data.fl[x+y*sl_params->cam_w+2*cam_nelems] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
-					if(depth_map)
-						depth_map->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
+					//if(depth_map)
+					//	depth_map->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
 					mask->data.fl[x+y*sl_params->cam_w] = 1;
 				}
 				else

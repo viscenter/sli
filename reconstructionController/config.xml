@@ -33,7 +33,7 @@
   <reconstruct_columns>1</reconstruct_columns>
   <reconstruct_rows>0</reconstruct_rows>
   <frame_delay_ms>200</frame_delay_ms>
-  <minimum_contrast_threshold>8</minimum_contrast_threshold>
+  <minimum_contrast_threshold>10</minimum_contrast_threshold>
   <minimum_distance_mm>900.</minimum_distance_mm>
   <maximum_distance_mm>1100.</maximum_distance_mm>
   <maximum_distance_variation_mm>10.</maximum_distance_variation_mm>
