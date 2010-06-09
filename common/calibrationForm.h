@@ -833,12 +833,16 @@ namespace reconstructionController {
 
 
 			// Create a window to display capture frames.
-			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
-			cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
-			cvCreateTrackbar("Proj. Gain",  "camWindow", &sl_params->proj_gain,  100, NULL);
-			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-			BringWindowToTop(camWindow);
-			cvWaitKey(1);
+			//cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+			//cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
+			//cvCreateTrackbar("Proj. Gain",  "camWindow", &sl_params->proj_gain,  100, NULL);
+			//HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
+			//BringWindowToTop(camWindow);
+			//cvWaitKey(1);
+			sl_params->cam_gain = 35;
+			sl_params->proj_gain = 53;
+			bool projGainEdit = false;
+
 
 			// Allocate storage for grayscale images.
 			IplImage* cam_frame_1_gray = cvCreateImage(frame_size, IPL_DEPTH_8U, 1);
@@ -847,13 +851,15 @@ namespace reconstructionController {
 			// Capture live image stream, until "ESC" is pressed or calibration is complete.
 			int successes = 0;
 			bool goodFrame;
+			bool skip = false;
 			int cvKey = -1;
 			for(int num=0; num<n_boards; num+=2)
 			{
 				goodFrame = false;
+				skip = false;
 				// Get next available "safe" frame.
-				cvCopyImage(imagesBuffer[num], cam_frame_1);
-				cvScale(cam_frame_1, cam_frame_1, 2.*(sl_params->cam_gain/100.), 0);
+				//cvCopyImage(imagesBuffer[num], cam_frame_1);
+				cvScale(imagesBuffer[num], cam_frame_1, 2.*(sl_params->cam_gain/100.), 0);
 				
 
 				// Find camera chessboard corners.
@@ -864,8 +870,8 @@ namespace reconstructionController {
 
 				// If camera chessboard is found, attempt to detect projector chessboard.
 				if(cam_corner_count == cam_board_n){
-					cvCopyImage(imagesBuffer[num+1], cam_frame_2);
-					cvScale(cam_frame_2, cam_frame_2, 2.*(sl_params->proj_gain/100.), 0);
+					//cvCopyImage(imagesBuffer[num+1], cam_frame_2);
+					cvScale(imagesBuffer[num+1], cam_frame_2, 2.*(sl_params->proj_gain/100.), 0);
 
 					// Convert frames to grayscale and apply background subtraction.
 					cvCvtColor(cam_frame_1, cam_frame_1_gray, CV_RGB2GRAY);
@@ -886,9 +892,23 @@ namespace reconstructionController {
 					// Display current projector tracking results.
 					if(!proj_found)
 					{
-						cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
-						cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
-						cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+						//cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
+						//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
+						//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+						sl_params->cam_gain -= 5;
+						if(sl_params->cam_gain < 5)
+						{
+							if(projGainEdit)
+							{
+								skip = true;
+							}
+							else
+							{
+								projGainEdit = true;
+								sl_params->proj_gain = 65;
+								sl_params->cam_gain = 35;
+							}
+						}
 					}
 
 					// If chessboard is detected, then update calibration lists.
@@ -924,32 +944,44 @@ namespace reconstructionController {
 				else
 				{	
 					// Camera chessboard not found, display current camera tracking results.
-					cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
-					cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
+					//cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
+					//cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
+					sl_params->cam_gain -= 5;
+					if(sl_params->cam_gain < 5)
+						skip = true;
 				}
 
 				// Free allocated resources.
 				delete[] cam_corners;
 
 				// Process user input.
-				if(!proj_found || !cam_found)
+				if(!proj_found && !skip)
 				{
-					int cvKey = cvWaitKey(0);
-					if(cvKey==27)
-						break;
-					else if(cvKey=='r')
-					{
+					//if(cvKey==27)
+					//	break;
+					//else if(cvKey=='r')
+					//{
 						num-=2;
 						if(goodFrame)
 						{
 							successes--;
 						}
-					}
+					//}
+				}
+				else
+				{
+					this->projStatusLbl->ForeColor = System::Drawing::Color::Blue;
+					this->projStatusLbl->Text = "Analyzed:" + (num+2)/2 + " of " + num/2;
+					cvWaitKey(0);
+
+					projGainEdit = false;
+					sl_params->cam_gain = 35;
+					sl_params->proj_gain = 53;
 				}
 			}
 
 			// Close the display window.
-			cvDestroyWindow("camWindow");
+			//cvDestroyWindow("camWindow");
 
 			// Calibrate projector, if minimum number of frames are available.
 			if(successes >= 2){
