@@ -16,7 +16,7 @@
 <distortion_model>
   <enable_tangential_camera>1</enable_tangential_camera>
   <enable_6th_order_radial_camera>0</enable_6th_order_radial_camera>
-  <enable_tangential_projector>1</enable_tangential_projector>
+  <enable_tangential_projector>0</enable_tangential_projector>
   <enable_6th_order_radial_projector>0</enable_6th_order_radial_projector></distortion_model>
 <camera_chessboard>
   <interior_horizontal_corners>8</interior_horizontal_corners>
@@ -26,14 +26,14 @@
 <projector_chessboard>
   <interior_horizontal_corners>8</interior_horizontal_corners>
   <interior_vertical_corners>6</interior_vertical_corners>
-  <square_width_pixels>50</square_width_pixels>
-  <square_height_pixels>50</square_height_pixels></projector_chessboard>
+  <square_width_pixels>55</square_width_pixels>
+  <square_height_pixels>55</square_height_pixels></projector_chessboard>
 <scanning_and_reconstruction>
   <mode>1</mode>
-  <reconstruct_columns>1</reconstruct_columns>
-  <reconstruct_rows>0</reconstruct_rows>
+  <reconstruct_columns>0</reconstruct_columns>
+  <reconstruct_rows>1</reconstruct_rows>
   <frame_delay_ms>200</frame_delay_ms>
-  <minimum_contrast_threshold>10</minimum_contrast_threshold>
+  <minimum_contrast_threshold>8</minimum_contrast_threshold>
   <minimum_distance_mm>900.</minimum_distance_mm>
   <maximum_distance_mm>1100.</maximum_distance_mm>
   <maximum_distance_variation_mm>10.</maximum_distance_variation_mm>

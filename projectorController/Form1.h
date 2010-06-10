@@ -7,7 +7,6 @@
 #include "../common/cvCalibrateProCam.h"
 #include "../common/cvScanProCam.h"
 #include "../common/cvUtilProCam.h"
-#include "../common/calibrationForm.h"
 #include "../common/globals.h"
 
 #define PHOTOSHOOT_IP "127.0.0.1"

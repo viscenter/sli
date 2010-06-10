@@ -58,6 +58,13 @@ namespace reconstructionController {
 				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
 				this->extrinsicStatusLbl->Text = myString;
 			}
+
+			helper = gcnew System::ComponentModel::BackgroundWorker();
+			helper->DoWork += gcnew DoWorkEventHandler( this, &calibrationForm::helper_DoWork );
+			helper->RunWorkerCompleted += gcnew RunWorkerCompletedEventHandler( this, &calibrationForm::helper_RunWorkerCompleted );
+			helper->ProgressChanged += gcnew ProgressChangedEventHandler( this, &calibrationForm::helper_ProgressChanged );
+			helper->WorkerReportsProgress = true;
+			helper->WorkerSupportsCancellation = true;
 		}
 
 	protected:
@@ -66,6 +73,10 @@ namespace reconstructionController {
 		/// </summary>
 		~calibrationForm()
 		{
+			if(helper->IsBusy)
+			{
+				helper->CancelAsync();
+			}
 			if (components)
 			{
 				delete components;
@@ -108,7 +119,8 @@ namespace reconstructionController {
 	private: System::Windows::Forms::Button^  extrinsicEditBtn2;
 	private: System::Windows::Forms::Label^  extrinsicDirLbl2;
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
-
+	private: System::String^ outMessage;
+	private: BackgroundWorker^ helper;
 
 
 
@@ -833,12 +845,12 @@ namespace reconstructionController {
 
 
 			// Create a window to display capture frames.
-			//cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
 			//cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
 			//cvCreateTrackbar("Proj. Gain",  "camWindow", &sl_params->proj_gain,  100, NULL);
-			//HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-			//BringWindowToTop(camWindow);
-			//cvWaitKey(1);
+			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
+			BringWindowToTop(camWindow);
+			cvWaitKey(1);
 			sl_params->cam_gain = 35;
 			sl_params->proj_gain = 53;
 			bool projGainEdit = false;
@@ -913,7 +925,7 @@ namespace reconstructionController {
 
 					// If chessboard is detected, then update calibration lists.
 					if(proj_corner_count == proj_board_n){
-
+						
 						// Add camera calibration data.
 						for(int i=successes*cam_board_n, j=0; j<cam_board_n; ++i,++j){
 							CV_MAT_ELEM(*cam_image_points,  float, i, 0) = cam_corners[j].x;
@@ -971,8 +983,8 @@ namespace reconstructionController {
 				else
 				{
 					this->projStatusLbl->ForeColor = System::Drawing::Color::Blue;
-					this->projStatusLbl->Text = "Analyzed:" + (num+2)/2 + " of " + num/2;
-					cvWaitKey(0);
+					this->projStatusLbl->Text = "Analyzed:" + (num+2)/2 + " of " + n_boards/2;
+					//cvWaitKey(0);
 
 					projGainEdit = false;
 					sl_params->cam_gain = 35;
@@ -981,7 +993,7 @@ namespace reconstructionController {
 			}
 
 			// Close the display window.
-			//cvDestroyWindow("camWindow");
+			cvDestroyWindow("camWindow");
 
 			// Calibrate projector, if minimum number of frames are available.
 			if(successes >= 2){
@@ -1689,5 +1701,21 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			this->extrinsicStatusLbl->Text = myString;
 			return;		 
 		 }
+
+		public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
+		 {
+
+		 }
+
+		public: void helper_ProgressChanged( Object^ /*sender*/, ProgressChangedEventArgs^ e )
+		 {
+			
+		 }
+
+		public: void helper_DoWork(Object^ sender, DoWorkEventArgs^ e )
+		 {
+
+		 }
+
 };
 }
