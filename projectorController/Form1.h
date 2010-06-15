@@ -30,7 +30,6 @@ namespace projectorController {
 	using namespace System::Drawing;
 	using namespace System::Threading;
 	using namespace System::IO;
-	using namespace reconstructionController;
 
 	/// <summary>
 	/// Summary for Form1

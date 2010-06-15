@@ -119,8 +119,12 @@ namespace reconstructionController {
 	private: System::Windows::Forms::Button^  extrinsicEditBtn2;
 	private: System::Windows::Forms::Label^  extrinsicDirLbl2;
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
-	private: System::String^ outMessage;
 	private: BackgroundWorker^ helper;
+	private: int helperType;
+	private: System::String^ cameraStatus;
+	private: System::String^ projectorStatus;
+	private: System::String^ extrinsicStatus;
+
 
 
 
@@ -741,24 +745,40 @@ namespace reconstructionController {
 
 
 	private: System::Void projectorStartBtn_Click(System::Object^  sender, System::EventArgs^  e) 
-		 {
-			bool calibrate_both = this->checkBox1->Checked;
-			 // Reset projector (and camera) calibration status (will be set again, if successful.
-			sl_calib->proj_intrinsic_calib   = false;
+		{
+			this->cameraStartBtn->Enabled = false;
+			this->cameraEditBtn->Enabled = false;
+			this->projEditBtn->Enabled = false;
+			this->projectorStartBtn->Enabled = false;
+			this->extrinsicEditBtn2->Enabled = false;
+			this->extrensicEditBtn->Enabled = false;
+			this->extrinsicStartBtn->Enabled = false;
+			this->checkBox1->Enabled = false;
+
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-			this->projStatusLbl->Text = "Not Calibrated";
+			this->projStatusLbl->Text = "Starting Calibration...";
+			projectorStatus = "Not Calibrated";
 
 			sl_calib->procam_extrinsic_calib = false;
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
 			this->extrinsicStatusLbl->Text = "Not Calibrated";
+			extrinsicStatus = "Not Calibrated";
 
-			if(calibrate_both)
+			if(this->checkBox1->Checked)
 			{
 				sl_calib->cam_intrinsic_calib = false;
 				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
 				this->cameraStatusLbl->Text = "Not Calibrated";
+				cameraStatus = "Not Calibrated";
 			}
+			helperType = 2;
+			helper->RunWorkerAsync();
+		}
 
+	private: void extrinsicCalibrationRun(BackgroundWorker^ worker)
+		{
+			bool calibrate_both = this->checkBox1->Checked;
+			 
 			// Create camera calibration directory (clear previous calibration first).
 			char str[1024], calibDir[1024];
 			if(calibrate_both){
@@ -770,15 +790,15 @@ namespace reconstructionController {
 				sprintf(str, "rd /s /q \"%s\"", calibDir);
 				system(str);
 				if(_mkdir(calibDir) != 0){
-					this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-					this->projStatusLbl->Text = "ERROR: Cannot open output directory!";
+					projectorStatus = "ERROR: Cannot open output directory!";
+					worker->ReportProgress( 0 );
 					return;
 				}
 			}
 			else{
 				if(!sl_calib->cam_intrinsic_calib){
-					this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-					this->projStatusLbl->Text = "ERROR: Camera must be calibrated first!";
+					projectorStatus = "ERROR: Camera must be calibrated first!";
+					worker->ReportProgress( 0 );
 					return;
 				}
 			}
@@ -791,16 +811,16 @@ namespace reconstructionController {
 			sprintf(str, "rd /s /q \"%s\"", calibDir);
 			system(str);
 			if(_mkdir(calibDir) != 0){
-				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->projStatusLbl->Text = "ERROR: Cannot open output directory!";
+				projectorStatus = "ERROR: Cannot open output directory!";
+				worker->ReportProgress( 0 );
 				return;
 			}
 			
 			IplImage* proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 			int proj_border_cols, proj_border_rows;
 			if(generateChessboard(sl_params, proj_chessboard, proj_border_cols, proj_border_rows) == -1){
-				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->projStatusLbl->Text = "Chessboard Generation failed.";
+				projectorStatus = "Chessboard Generation failed.";
+				worker->ReportProgress( 0 );
 				return;
 			}
 			cvReleaseImage(&proj_chessboard);
@@ -808,8 +828,8 @@ namespace reconstructionController {
 			IplImage** imagesBuffer;
 			int n_boards = getImages2(imagesBuffer, 100, this->projectorCalibrationDirLbl->Text, "*.tif");
 			if(n_boards<4){
-				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->projStatusLbl->Text = "ERROR: At least two images are required!";
+				projectorStatus = "ERROR: At least two images are required!";
+				worker->ReportProgress( 0 );
 				for(int i=0; i<n_boards; i++)
 					cvReleaseImage(&imagesBuffer[i]);
 				if(n_boards)
@@ -845,12 +865,12 @@ namespace reconstructionController {
 
 
 			// Create a window to display capture frames.
-			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+			//cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
 			//cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
 			//cvCreateTrackbar("Proj. Gain",  "camWindow", &sl_params->proj_gain,  100, NULL);
-			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-			BringWindowToTop(camWindow);
-			cvWaitKey(1);
+			//HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
+			//BringWindowToTop(camWindow);
+			//cvWaitKey(1);
 			sl_params->cam_gain = 35;
 			sl_params->proj_gain = 53;
 			bool projGainEdit = false;
@@ -982,8 +1002,8 @@ namespace reconstructionController {
 				}
 				else
 				{
-					this->projStatusLbl->ForeColor = System::Drawing::Color::Blue;
-					this->projStatusLbl->Text = "Analyzed:" + (num+2)/2 + " of " + n_boards/2;
+					projectorStatus = "Analyzed:" + (num+2)/2 + " of " + n_boards/2;
+					worker->ReportProgress( 0 );
 					//cvWaitKey(0);
 
 					projGainEdit = false;
@@ -993,7 +1013,7 @@ namespace reconstructionController {
 			}
 
 			// Close the display window.
-			cvDestroyWindow("camWindow");
+			//cvDestroyWindow("camWindow");
 
 			// Calibrate projector, if minimum number of frames are available.
 			if(successes >= 2){
@@ -1284,8 +1304,8 @@ namespace reconstructionController {
 				cvReleaseMat(&proj_rotation_vector);
 			}
 			else{
-				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->projStatusLbl->Text = "ERROR: At least two detected chessboards are required!";
+				projectorStatus = "ERROR: At least two detected chessboards are required!";
+				worker->ReportProgress( 0 );
 				cvReleaseMat(&cam_image_points);
 				cvReleaseMat(&cam_object_points);
 				cvReleaseMat(&cam_point_counts);
@@ -1339,30 +1359,14 @@ namespace reconstructionController {
 			delete[] imagesBuffer;
 
 			// Return without errors.
+			cameraStatus = "Calibrated!";
+			projectorStatus = "Projector calibration was successful. " + "("+successes+"/"+n_boards/2+")";
+			sl_calib->proj_intrinsic_calib   = true;
 			
-			this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->projStatusLbl->Text = "Projector calibration was successful. " + "("+successes+"/"+n_boards/2+")";
-
-			String^ myString = "Projector at: ";
-			char temp[40];
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
-			myString += gcnew String(temp) + ", ";
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
-			myString += gcnew String(temp) + ", ";
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
-			myString += gcnew String(temp) + " inches";
-
-			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->extrinsicStatusLbl->Text = myString;
-
-			if(calibrate_both)
-			{
-				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Green;
-				this->cameraStatusLbl->Text = "Calibrated!";
-			}
-
 			return;
 		 }
+
+
 private: System::Void extrinsicEditBtn2_Click(System::Object^  sender, System::EventArgs^  e) 
 		 {
 				System::Windows::Forms::DialogResult result = openFileDialog1->ShowDialog();
@@ -1588,40 +1592,54 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 
 			// Close the display window.
 			cvDestroyWindow("camWindow");
-
+			
+			double l2err = 0.0;
+			double maxErr = 0.0;
 			// Calibrate projector-camera alignment, if a single frame is available.
 			if(successes == 1){
 				
-				// Estimate extrinsic camera parameters.
-				cvFindExtrinsicCameraParams2(
-					cam_object_points, cam_image_points, 
-					sl_calib->cam_intrinsic, sl_calib->cam_distortion,
-					cam_rotation_vectors, cam_translation_vectors);
+				CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
+				CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
+				CvMat* reproj_points = cvCreateMat(proj_board_n, 2, CV_32FC1);
+				
+				/*CvMat* imagePoints = cvCreateMat( proj_image_points->rows, proj_image_points->cols, CV_32FC(CV_MAT_CN(proj_image_points->type)));
+				cvConvert(proj_image_points, imagePoints);
+				cvReshape(imagePoints, imagePoints, 2, 1 );
 
-				// Estimate extrinsic projector parameters.
-				cvFindExtrinsicCameraParams2(
-					proj_object_points, proj_image_points, 
-					sl_calib->proj_intrinsic, sl_calib->proj_distortion,
-					proj_rotation_vectors, proj_translation_vectors);
+				CvMat* objectPoints = cvCreateMat( proj_object_points->rows, proj_object_points->cols, CV_32FC(CV_MAT_CN(proj_object_points->type)));
+				cvConvert( proj_object_points, objectPoints );
+				cvReshape( objectPoints, objectPoints, 3, 1 );*/
 
-				// Save extrinsic calibration of projector-camera system.
-				// Note: First calibration image is used to define extrinsic calibration.
+				cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 0, i) = (float)cvmGet(cam_rotation_vectors, 0, i);
-				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 1, i) = (float)cvmGet(cam_translation_vectors, 0, i);
+					cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
+
+				cvProjectPoints2(proj_object_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
+				
+				//cvSub( reproj_points, proj_image_points, reproj_points );
+				
+				/*CvMat* imagePoints = cvCreateMat( reproj_points->rows, reproj_points->cols, CV_32FC(CV_MAT_CN(reproj_points->type)));
+				cvConvert(reproj_points, imagePoints);
+				cvReshape(imagePoints, imagePoints, 2, 1 );*/
+
+				//l2err = cvNorm(imagePoints, 0, CV_L2 );
+				//maxErr = cvNorm(imagePoints, 0, CV_C );
+				
 				char str[1024], calibDir[1024];
 				sprintf(calibDir, "%s\\calib\\proj", sl_params->outdir);
-				sprintf(str, "%s\\cam_extrinsic.xml", calibDir);
-				cvSave(str, sl_calib->cam_extrinsic);
-				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 0, i) = (float)cvmGet(proj_rotation_vectors, 0, i);
-				for(int i=0; i<3; i++)
-					CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 1, i) = (float)cvmGet(proj_translation_vectors, 0, i);
-				sprintf(str, "%s\\proj_extrinsic.xml", calibDir);
-				cvSave(str, sl_calib->proj_extrinsic);
-				sprintf(str,"%s\\config.xml", calibDir);
-				writeConfiguration(str, sl_params);
+				sprintf(str, "%s\\reproj_output.xml", calibDir);
+				cvSave(str, reproj_points);
+
+				sprintf(str, "%s\\proj_point_output.xml", calibDir);
+				cvSave(str, proj_image_points);
+
+				sprintf(str, "%s\\orig_point_output.xml", calibDir);
+				cvSave(str, proj_object_points);
+
+				cvReleaseMat(&proj_rotation);
+				cvReleaseMat(&proj_translation);
+				cvReleaseMat(&reproj_points);
+				//cvReleaseMat(&imagePoints);
 			}
 			else{
 				// Free allocated resources.
@@ -1689,9 +1707,9 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 
 			String^ myString = "Projector at: ";
 			char temp[40];
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
+			sprintf(temp, "%.2g", l2err ); 
 			myString += gcnew String(temp) + ", ";
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
+			sprintf(temp, "%.2g", maxErr ); 
 			myString += gcnew String(temp) + ", ";
 			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
 			myString += gcnew String(temp) + " inches";
@@ -1702,19 +1720,68 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			return;		 
 		 }
 
-		public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
+		
+public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
 		 {
+			this->cameraStartBtn->Enabled = true;
+			this->cameraEditBtn->Enabled = true;
+			this->projEditBtn->Enabled = true;
+			this->projectorStartBtn->Enabled = true;
+			this->extrinsicEditBtn2->Enabled = true;
+			this->extrensicEditBtn->Enabled = true;
+			this->extrinsicStartBtn->Enabled = true;
+			this->checkBox1->Enabled = true;
+			
+			if(sl_calib->cam_intrinsic_calib && (helperType == 1 || (helperType == 2 && this->checkBox1->Checked)))
+			{
+				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Green;
+				this->cameraStatusLbl->Text = cameraStatus;
+			}
+
+			if(sl_calib->proj_intrinsic_calib && helperType == 2)
+			{
+				this->projStatusLbl->ForeColor = System::Drawing::Color::Green;
+				this->projStatusLbl->Text = projectorStatus;
+			}
+
+			if(sl_calib->procam_extrinsic_calib)
+			{
+				String^ myString = "Projector at: ";
+				char temp[40];
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[0] / 25.4 ); 
+				myString += gcnew String(temp) + ", ";
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[1] / 25.4 ); 
+				myString += gcnew String(temp) + ", ";
+				sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
+				myString += gcnew String(temp) + " inches";
+
+				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
+				this->extrinsicStatusLbl->Text = myString;
+			}
 
 		 }
 
 		public: void helper_ProgressChanged( Object^ /*sender*/, ProgressChangedEventArgs^ e )
 		 {
+			if(helperType == 1 || (helperType == 2 && this->checkBox1->Checked))
+			{
+				this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
+				this->cameraStatusLbl->Text = cameraStatus;
+			}
 			
+			if(helperType == 2)
+			{
+				this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
+				this->projStatusLbl->Text = projectorStatus;
+			}
 		 }
 
 		public: void helper_DoWork(Object^ sender, DoWorkEventArgs^ e )
 		 {
+				BackgroundWorker^ worker = dynamic_cast<BackgroundWorker^>(sender);
 
+				if(helperType == 2)
+					extrinsicCalibrationRun(worker);
 		 }
 
 };
