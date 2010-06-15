@@ -124,6 +124,9 @@ namespace reconstructionController {
 	private: System::String^ cameraStatus;
 	private: System::String^ projectorStatus;
 	private: System::String^ extrinsicStatus;
+private: System::Windows::Forms::Label^  testOutLbl;
+
+private: System::Windows::Forms::Label^  label4;
 
 
 
@@ -170,6 +173,8 @@ namespace reconstructionController {
 			this->extrinsicDirLbl = (gcnew System::Windows::Forms::Label());
 			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
 			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->testOutLbl = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			this->groupBox2->SuspendLayout();
 			this->groupBox3->SuspendLayout();
@@ -182,7 +187,7 @@ namespace reconstructionController {
 			this->cameraCalibrationDirLbl->AutoEllipsis = true;
 			this->cameraCalibrationDirLbl->Location = System::Drawing::Point(160, 25);
 			this->cameraCalibrationDirLbl->Name = L"cameraCalibrationDirLbl";
-			this->cameraCalibrationDirLbl->Size = System::Drawing::Size(243, 19);
+			this->cameraCalibrationDirLbl->Size = System::Drawing::Size(249, 19);
 			this->cameraCalibrationDirLbl->TabIndex = 0;
 			this->cameraCalibrationDirLbl->Text = L"./cameraCalibration/";
 			// 
@@ -198,7 +203,7 @@ namespace reconstructionController {
 			this->groupBox1->Controls->Add(this->cameraCalibrationDirLbl);
 			this->groupBox1->Location = System::Drawing::Point(12, 12);
 			this->groupBox1->Name = L"groupBox1";
-			this->groupBox1->Size = System::Drawing::Size(411, 76);
+			this->groupBox1->Size = System::Drawing::Size(417, 76);
 			this->groupBox1->TabIndex = 1;
 			this->groupBox1->TabStop = false;
 			this->groupBox1->Text = L"Camera Intrinsic Calibration";
@@ -211,7 +216,7 @@ namespace reconstructionController {
 			this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
 			this->cameraStatusLbl->Location = System::Drawing::Point(53, 52);
 			this->cameraStatusLbl->Name = L"cameraStatusLbl";
-			this->cameraStatusLbl->Size = System::Drawing::Size(249, 13);
+			this->cameraStatusLbl->Size = System::Drawing::Size(255, 13);
 			this->cameraStatusLbl->TabIndex = 5;
 			this->cameraStatusLbl->Text = L"Not Calibrated";
 			// 
@@ -228,7 +233,7 @@ namespace reconstructionController {
 			// cameraStartBtn
 			// 
 			this->cameraStartBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->cameraStartBtn->Location = System::Drawing::Point(308, 47);
+			this->cameraStartBtn->Location = System::Drawing::Point(314, 47);
 			this->cameraStartBtn->Name = L"cameraStartBtn";
 			this->cameraStartBtn->Size = System::Drawing::Size(97, 23);
 			this->cameraStartBtn->TabIndex = 3;
@@ -268,7 +273,7 @@ namespace reconstructionController {
 			this->groupBox2->Controls->Add(this->projectorCalibrationDirLbl);
 			this->groupBox2->Location = System::Drawing::Point(12, 100);
 			this->groupBox2->Name = L"groupBox2";
-			this->groupBox2->Size = System::Drawing::Size(409, 98);
+			this->groupBox2->Size = System::Drawing::Size(415, 98);
 			this->groupBox2->TabIndex = 6;
 			this->groupBox2->TabStop = false;
 			this->groupBox2->Text = L"Projector Intrinsic Calibration";
@@ -291,7 +296,7 @@ namespace reconstructionController {
 			this->projStatusLbl->ForeColor = System::Drawing::Color::Red;
 			this->projStatusLbl->Location = System::Drawing::Point(53, 74);
 			this->projStatusLbl->Name = L"projStatusLbl";
-			this->projStatusLbl->Size = System::Drawing::Size(249, 13);
+			this->projStatusLbl->Size = System::Drawing::Size(255, 13);
 			this->projStatusLbl->TabIndex = 5;
 			this->projStatusLbl->Text = L"Not Calibrated";
 			// 
@@ -308,7 +313,7 @@ namespace reconstructionController {
 			// projectorStartBtn
 			// 
 			this->projectorStartBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->projectorStartBtn->Location = System::Drawing::Point(306, 69);
+			this->projectorStartBtn->Location = System::Drawing::Point(312, 69);
 			this->projectorStartBtn->Name = L"projectorStartBtn";
 			this->projectorStartBtn->Size = System::Drawing::Size(97, 23);
 			this->projectorStartBtn->TabIndex = 3;
@@ -342,7 +347,7 @@ namespace reconstructionController {
 			this->projectorCalibrationDirLbl->AutoEllipsis = true;
 			this->projectorCalibrationDirLbl->Location = System::Drawing::Point(160, 25);
 			this->projectorCalibrationDirLbl->Name = L"projectorCalibrationDirLbl";
-			this->projectorCalibrationDirLbl->Size = System::Drawing::Size(243, 19);
+			this->projectorCalibrationDirLbl->Size = System::Drawing::Size(249, 19);
 			this->projectorCalibrationDirLbl->TabIndex = 0;
 			this->projectorCalibrationDirLbl->Text = L"./projectorCalibration/";
 			// 
@@ -350,21 +355,21 @@ namespace reconstructionController {
 			// 
 			this->groupBox3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->groupBox3->Controls->Add(this->testOutLbl);
 			this->groupBox3->Controls->Add(this->label3);
 			this->groupBox3->Controls->Add(this->extrinsicEditBtn2);
 			this->groupBox3->Controls->Add(this->extrinsicDirLbl2);
-			this->groupBox3->Controls->Add(this->extrinsicStatusLbl);
 			this->groupBox3->Controls->Add(this->label8);
 			this->groupBox3->Controls->Add(this->extrinsicStartBtn);
 			this->groupBox3->Controls->Add(this->label9);
 			this->groupBox3->Controls->Add(this->extrensicEditBtn);
 			this->groupBox3->Controls->Add(this->extrinsicDirLbl);
-			this->groupBox3->Location = System::Drawing::Point(12, 211);
+			this->groupBox3->Location = System::Drawing::Point(12, 234);
 			this->groupBox3->Name = L"groupBox3";
-			this->groupBox3->Size = System::Drawing::Size(409, 110);
+			this->groupBox3->Size = System::Drawing::Size(415, 110);
 			this->groupBox3->TabIndex = 7;
 			this->groupBox3->TabStop = false;
-			this->groupBox3->Text = L"Extrinsic Calibration";
+			this->groupBox3->Text = L"Calibration Test";
 			// 
 			// label3
 			// 
@@ -392,9 +397,9 @@ namespace reconstructionController {
 			this->extrinsicDirLbl2->AutoEllipsis = true;
 			this->extrinsicDirLbl2->Location = System::Drawing::Point(117, 55);
 			this->extrinsicDirLbl2->Name = L"extrinsicDirLbl2";
-			this->extrinsicDirLbl2->Size = System::Drawing::Size(286, 19);
+			this->extrinsicDirLbl2->Size = System::Drawing::Size(292, 19);
 			this->extrinsicDirLbl2->TabIndex = 6;
-			this->extrinsicDirLbl2->Text = L"./extrinsicCalibration/Pic2.tif";
+			this->extrinsicDirLbl2->Text = L"./Pic2.tif";
 			// 
 			// extrinsicStatusLbl
 			// 
@@ -402,9 +407,9 @@ namespace reconstructionController {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->extrinsicStatusLbl->AutoEllipsis = true;
 			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
-			this->extrinsicStatusLbl->Location = System::Drawing::Point(53, 86);
+			this->extrinsicStatusLbl->Location = System::Drawing::Point(138, 209);
 			this->extrinsicStatusLbl->Name = L"extrinsicStatusLbl";
-			this->extrinsicStatusLbl->Size = System::Drawing::Size(230, 13);
+			this->extrinsicStatusLbl->Size = System::Drawing::Size(283, 13);
 			this->extrinsicStatusLbl->TabIndex = 5;
 			this->extrinsicStatusLbl->Text = L"Not Calibrated";
 			// 
@@ -416,16 +421,16 @@ namespace reconstructionController {
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(40, 13);
 			this->label8->TabIndex = 4;
-			this->label8->Text = L"Status:";
+			this->label8->Text = L"Result:";
 			// 
 			// extrinsicStartBtn
 			// 
 			this->extrinsicStartBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->extrinsicStartBtn->Location = System::Drawing::Point(306, 81);
+			this->extrinsicStartBtn->Location = System::Drawing::Point(338, 81);
 			this->extrinsicStartBtn->Name = L"extrinsicStartBtn";
-			this->extrinsicStartBtn->Size = System::Drawing::Size(97, 23);
+			this->extrinsicStartBtn->Size = System::Drawing::Size(71, 23);
 			this->extrinsicStartBtn->TabIndex = 3;
-			this->extrinsicStartBtn->Text = L"Run Calibration";
+			this->extrinsicStartBtn->Text = L"Run Test";
 			this->extrinsicStartBtn->UseVisualStyleBackColor = true;
 			this->extrinsicStartBtn->Click += gcnew System::EventHandler(this, &calibrationForm::extrinsicStartBtn_Click);
 			// 
@@ -455,9 +460,9 @@ namespace reconstructionController {
 			this->extrinsicDirLbl->AutoEllipsis = true;
 			this->extrinsicDirLbl->Location = System::Drawing::Point(117, 25);
 			this->extrinsicDirLbl->Name = L"extrinsicDirLbl";
-			this->extrinsicDirLbl->Size = System::Drawing::Size(286, 19);
+			this->extrinsicDirLbl->Size = System::Drawing::Size(292, 19);
 			this->extrinsicDirLbl->TabIndex = 0;
-			this->extrinsicDirLbl->Text = L"./extrinsicCalibration/Pic1.tif";
+			this->extrinsicDirLbl->Text = L"./Pic1.tif";
 			// 
 			// openFileDialog1
 			// 
@@ -467,14 +472,40 @@ namespace reconstructionController {
 			this->openFileDialog1->RestoreDirectory = true;
 			this->openFileDialog1->Title = L"Image Selection";
 			// 
+			// label4
+			// 
+			this->label4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->label4->AutoSize = true;
+			this->label4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label4->Location = System::Drawing::Point(18, 209);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(115, 13);
+			this->label4->TabIndex = 9;
+			this->label4->Text = L"Projector Location:";
+			// 
+			// testOutLbl
+			// 
+			this->testOutLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left) 
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->testOutLbl->AutoEllipsis = true;
+			this->testOutLbl->ForeColor = System::Drawing::Color::Red;
+			this->testOutLbl->Location = System::Drawing::Point(52, 86);
+			this->testOutLbl->Name = L"testOutLbl";
+			this->testOutLbl->Size = System::Drawing::Size(254, 13);
+			this->testOutLbl->TabIndex = 10;
+			this->testOutLbl->Text = L"N/A";
+			// 
 			// calibrationForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(436, 333);
+			this->ClientSize = System::Drawing::Size(442, 356);
+			this->Controls->Add(this->label4);
 			this->Controls->Add(this->groupBox3);
 			this->Controls->Add(this->groupBox2);
 			this->Controls->Add(this->groupBox1);
+			this->Controls->Add(this->extrinsicStatusLbl);
 			this->Name = L"calibrationForm";
 			this->Text = L"Structured Light Calibration";
 			this->groupBox1->ResumeLayout(false);
@@ -484,6 +515,7 @@ namespace reconstructionController {
 			this->groupBox3->ResumeLayout(false);
 			this->groupBox3->PerformLayout();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -1377,13 +1409,11 @@ private: System::Void extrinsicEditBtn2_Click(System::Object^  sender, System::E
 		 }
 private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 		 {
-			// Reset projector-camera calibration status (will be set again, if successful).
-			sl_calib->procam_extrinsic_calib = false;
 
 			// Check that projector and camera have already been calibrated.
 			if(!sl_calib->cam_intrinsic_calib || !sl_calib->proj_intrinsic_calib){
-				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->extrinsicStatusLbl->Text = "ERROR: Camera and projector must be calibrated first!";
+				this->testOutLbl->ForeColor = System::Drawing::Color::Red;
+				this->testOutLbl->Text = "ERROR: Camera and projector must be calibrated first!";
 				return;
 			}
 			
@@ -1397,8 +1427,6 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			CvMat* cam_object_points       = cvCreateMat(n_boards*cam_board_n, 3, CV_32FC1);
 			CvMat* cam_point_counts        = cvCreateMat(n_boards, 1, CV_32SC1);
 			IplImage** cam_calibImages     = new IplImage* [n_boards];
-			CvMat* cam_rotation_vectors    = cvCreateMat(n_boards, 3, CV_32FC1);
-  			CvMat* cam_translation_vectors = cvCreateMat(n_boards, 3, CV_32FC1);
 
 			// Evaluate derived projector chessboard parameters and allocate storage.
 			int proj_board_n                = sl_params->proj_board_w*sl_params->proj_board_h;
@@ -1414,8 +1442,8 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			IplImage* proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 			int proj_border_cols, proj_border_rows;
 			if(generateChessboard(sl_params, proj_chessboard, proj_border_cols, proj_border_rows) == -1){
-				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->extrinsicStatusLbl->Text = "Chessboard Generation Failed!";
+				this->testOutLbl->ForeColor = System::Drawing::Color::Red;
+				this->testOutLbl->Text = "Chessboard Generation Failed!";
 				return;
 			}
 			
@@ -1432,19 +1460,23 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				proj_calibImages[i] = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
 
 			// Create a window to display captured frames.
-			cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+			/*cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
 			cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
 			cvCreateTrackbar("Proj. Gain", "camWindow", &sl_params->proj_gain, 100, NULL);
 			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
 			BringWindowToTop(camWindow);
-			cvWaitKey(1);
+			cvWaitKey(1);*/
 
 			// Allocate storage for grayscale images.
 			IplImage* cam_frame_1_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
 			IplImage* cam_frame_2_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
+			
+			sl_params->cam_gain = 35;
+			sl_params->proj_gain = 53;
 
 			int successes = 0;
 			int cvKey = -1;
+			bool projGainEdit = false;
 			while(true)
 			{
 				cvCopyImage(pic1, cam_frame_1);
@@ -1480,9 +1512,23 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 					// Display current projector tracking results.
 					if(!proj_found)
 					{
-						cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
-						cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
-						cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+						//cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
+						//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
+						//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+						sl_params->cam_gain -= 5;
+						if(sl_params->cam_gain < 5)
+						{
+							if(projGainEdit)
+							{
+								break;
+							}
+							else
+							{
+								projGainEdit = true;
+								sl_params->proj_gain = 65;
+								sl_params->cam_gain = 35;
+							}
+						}
 					}
 
 					// If chessboard is detected, then update calibration lists.
@@ -1496,6 +1542,7 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 							CV_MAT_ELEM(*cam_object_points, float, i, 1) = sl_params->cam_board_h_mm*float(j%sl_params->cam_board_w);
 							CV_MAT_ELEM(*cam_object_points, float, i, 2) = 0.0f;
 						}
+						
 						CV_MAT_ELEM(*cam_point_counts, int, successes, 0) = cam_board_n;
 						cvCopyImage(cam_frame_1, cam_calibImages[successes]);
 
@@ -1572,82 +1619,81 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				else
 				{	
 					// Camera chessboard not found, display current camera tracking results.
-					cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
-					cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
+					//cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
+					//cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
+					sl_params->cam_gain -= 5;
+					if(sl_params->cam_gain < 5)
+						break;
 				}
 
 				// Free allocated resources.
 				delete[] cam_corners;
 
 				// Process user input.
-				if(!proj_found || !cam_found)
-				{
-					int cvKey = cvWaitKey(0);
-					if(cvKey==27)
-						break;
-				}
-				else
+				if(proj_found && cam_found)
 					break;
 			}
 
 			// Close the display window.
-			cvDestroyWindow("camWindow");
+			//cvDestroyWindow("camWindow");
 			
 			double l2err = 0.0;
 			double maxErr = 0.0;
+			double avg = 0.0;
 			// Calibrate projector-camera alignment, if a single frame is available.
 			if(successes == 1){
 				
 				CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
 				CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
+				CvMat* cam_rotation_m    = cvCreateMat(3, 3, CV_32FC1);
+				CvMat* R    = cvCreateMat(3, 3, CV_32FC1);
 				CvMat* reproj_points = cvCreateMat(proj_board_n, 2, CV_32FC1);
+				CvMat* cam_rotation_vector    = cvCreateMat(1, 3, CV_32FC1);
+  				CvMat* cam_translation_vector = cvCreateMat(3, 1, CV_32FC1);
+								
+				cvFindExtrinsicCameraParams2(cam_object_points, cam_image_points, sl_calib->cam_intrinsic, sl_calib->cam_distortion, cam_rotation_vector, cam_translation_vector);
 				
-				/*CvMat* imagePoints = cvCreateMat( proj_image_points->rows, proj_image_points->cols, CV_32FC(CV_MAT_CN(proj_image_points->type)));
-				cvConvert(proj_image_points, imagePoints);
-				cvReshape(imagePoints, imagePoints, 2, 1 );
-
-				CvMat* objectPoints = cvCreateMat( proj_object_points->rows, proj_object_points->cols, CV_32FC(CV_MAT_CN(proj_object_points->type)));
-				cvConvert( proj_object_points, objectPoints );
-				cvReshape( objectPoints, objectPoints, 3, 1 );*/
-
 				cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 				for(int i=0; i<3; i++)
 					cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 
+				cvRodrigues2(cam_rotation_vector, cam_rotation_m, NULL);
+				cvTranspose(cam_rotation_m, R);
+				
+				for(int i=0; i<proj_board_n; i++)
+				{
+					float x = CV_MAT_ELEM(*proj_object_points, float, i, 0);
+					float y = CV_MAT_ELEM(*proj_object_points, float, i, 1);
+					float z = CV_MAT_ELEM(*proj_object_points, float, i, 2);
+					CV_MAT_ELEM(*proj_object_points, float, i, 0) = R->data.fl[0]*x + R->data.fl[1]*y + R->data.fl[2]*z + cam_translation_vector->data.fl[0];
+					CV_MAT_ELEM(*proj_object_points, float, i, 1) = R->data.fl[3]*x + R->data.fl[4]*y + R->data.fl[5]*z + cam_translation_vector->data.fl[1];
+					CV_MAT_ELEM(*proj_object_points, float, i, 2) = R->data.fl[6]*x + R->data.fl[7]*y + R->data.fl[8]*z + cam_translation_vector->data.fl[2];
+				}
+				
 				cvProjectPoints2(proj_object_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
 				
-				//cvSub( reproj_points, proj_image_points, reproj_points );
+				cvSub( reproj_points, proj_image_points, reproj_points );
 				
-				/*CvMat* imagePoints = cvCreateMat( reproj_points->rows, reproj_points->cols, CV_32FC(CV_MAT_CN(reproj_points->type)));
-				cvConvert(reproj_points, imagePoints);
-				cvReshape(imagePoints, imagePoints, 2, 1 );*/
+				for(int i=0; i<proj_board_n; i++)
+					avg += sqrt(pow(CV_MAT_ELEM(*reproj_points, float, i, 0), 2.0f) + pow(CV_MAT_ELEM(*reproj_points, float, i, 1), 2.0f));
+				avg /= proj_board_n;
 
-				//l2err = cvNorm(imagePoints, 0, CV_L2 );
-				//maxErr = cvNorm(imagePoints, 0, CV_C );
-				
-				char str[1024], calibDir[1024];
-				sprintf(calibDir, "%s\\calib\\proj", sl_params->outdir);
-				sprintf(str, "%s\\reproj_output.xml", calibDir);
-				cvSave(str, reproj_points);
-
-				sprintf(str, "%s\\proj_point_output.xml", calibDir);
-				cvSave(str, proj_image_points);
-
-				sprintf(str, "%s\\orig_point_output.xml", calibDir);
-				cvSave(str, proj_object_points);
+				l2err = cvNorm(reproj_points, 0, CV_L2 );
+				maxErr = cvNorm(reproj_points, 0, CV_C );
 
 				cvReleaseMat(&proj_rotation);
 				cvReleaseMat(&proj_translation);
 				cvReleaseMat(&reproj_points);
-				//cvReleaseMat(&imagePoints);
+				cvReleaseMat(&cam_rotation_vector);
+				cvReleaseMat(&cam_rotation_m);
+				cvReleaseMat(&R);
+  				cvReleaseMat(&cam_translation_vector);
 			}
 			else{
 				// Free allocated resources.
 				cvReleaseMat(&cam_image_points);
 				cvReleaseMat(&cam_object_points);
 				cvReleaseMat(&cam_point_counts);
-				cvReleaseMat(&cam_rotation_vectors);
-  				cvReleaseMat(&cam_translation_vectors);
 				cvReleaseMat(&proj_image_points);
 				cvReleaseMat(&proj_object_points);
 				cvReleaseMat(&proj_point_counts);
@@ -1668,23 +1714,15 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				delete[] cam_calibImages;
 				delete[] proj_calibImages;
 
-				this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
-				this->extrinsicStatusLbl->Text = "ERROR: At least one chessboard is required!";
+				this->testOutLbl->ForeColor = System::Drawing::Color::Red;
+				this->testOutLbl->Text = "ERROR: At least one chessboard is required!";
 				return;
 			}
-
-			// Set projector-camera calibration status.
-			sl_calib->procam_extrinsic_calib = true;
-
-			// Evaluate projector-camera geometry.
-			evaluateProCamGeometry(sl_params, sl_calib);
 
 			// Free allocated resources.
 			cvReleaseMat(&cam_image_points);
 			cvReleaseMat(&cam_object_points);
 			cvReleaseMat(&cam_point_counts);
-			cvReleaseMat(&cam_rotation_vectors);
-  			cvReleaseMat(&cam_translation_vectors);
 			cvReleaseMat(&proj_image_points);
 			cvReleaseMat(&proj_object_points);
 			cvReleaseMat(&proj_point_counts);
@@ -1705,22 +1743,35 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			delete[] cam_calibImages;
 			delete[] proj_calibImages;
 
-			String^ myString = "Projector at: ";
+			String^ myString = "";
 			char temp[40];
-			sprintf(temp, "%.2g", l2err ); 
+			sprintf(temp, "L2 Error: %.2g", l2err ); 
 			myString += gcnew String(temp) + ", ";
-			sprintf(temp, "%.2g", maxErr ); 
+			sprintf(temp, "Max Error: %.2g", maxErr ); 
 			myString += gcnew String(temp) + ", ";
-			sprintf(temp, "%.2g", sl_calib->proj_center->data.fl[2] / 25.4 ); 
-			myString += gcnew String(temp) + " inches";
-
+			sprintf(temp, "Avg Error: %.2g", avg ); 
+			myString += gcnew String(temp);
+			
 			// Return without errors.
-			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Green;
-			this->extrinsicStatusLbl->Text = myString;
+			this->testOutLbl->ForeColor = System::Drawing::Color::Green;
+			this->testOutLbl->Text = myString;
 			return;		 
 		 }
 
-		
+	public: void ComposeRotationTranslationTo3x4Matrix( CvMat* RotTrans , CvMat* Rot, CvMat*Trans ){
+		   cvmSet( RotTrans, 0, 0, cvmGet( Rot, 0, 0 ) );
+		   cvmSet( RotTrans, 0, 1, cvmGet( Rot, 0, 1 ) );
+		   cvmSet( RotTrans, 0, 2, cvmGet( Rot, 0, 2 ) );
+		   cvmSet( RotTrans, 1, 0, cvmGet( Rot, 1, 0 ) );
+		   cvmSet( RotTrans, 1, 1, cvmGet( Rot, 1, 1 ) );
+		   cvmSet( RotTrans, 1, 2, cvmGet( Rot, 1, 2 ) );
+		   cvmSet( RotTrans, 2, 0, cvmGet( Rot, 2, 0 ) );
+		   cvmSet( RotTrans, 2, 1, cvmGet( Rot, 2, 1 ) );
+		   cvmSet( RotTrans, 2, 2, cvmGet( Rot, 2, 2 ) );
+		   cvmSet( RotTrans, 0, 3, cvmGet( Trans, 0, 0 ) );
+		   cvmSet( RotTrans, 1, 3, cvmGet( Trans, 1, 0 ) );
+		   cvmSet( RotTrans, 2, 3, cvmGet( Trans, 2, 0 ) );
+		}
 public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
 		 {
 			this->cameraStartBtn->Enabled = true;
