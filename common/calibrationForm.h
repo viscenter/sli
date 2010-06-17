@@ -115,9 +115,9 @@ namespace reconstructionController {
 	private: slParams* sl_params;
 	private: slCalib* sl_calib;
 	private: System::Windows::Forms::CheckBox^  checkBox1;
-	private: System::Windows::Forms::Label^  label3;
-	private: System::Windows::Forms::Button^  extrinsicEditBtn2;
-	private: System::Windows::Forms::Label^  extrinsicDirLbl2;
+
+
+
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
 	private: BackgroundWorker^ helper;
 	private: int helperType;
@@ -162,19 +162,16 @@ private: System::Windows::Forms::Label^  label4;
 			this->projEditBtn = (gcnew System::Windows::Forms::Button());
 			this->projectorCalibrationDirLbl = (gcnew System::Windows::Forms::Label());
 			this->groupBox3 = (gcnew System::Windows::Forms::GroupBox());
-			this->label3 = (gcnew System::Windows::Forms::Label());
-			this->extrinsicEditBtn2 = (gcnew System::Windows::Forms::Button());
-			this->extrinsicDirLbl2 = (gcnew System::Windows::Forms::Label());
-			this->extrinsicStatusLbl = (gcnew System::Windows::Forms::Label());
+			this->testOutLbl = (gcnew System::Windows::Forms::Label());
 			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->extrinsicStartBtn = (gcnew System::Windows::Forms::Button());
 			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->extrensicEditBtn = (gcnew System::Windows::Forms::Button());
 			this->extrinsicDirLbl = (gcnew System::Windows::Forms::Label());
+			this->extrinsicStatusLbl = (gcnew System::Windows::Forms::Label());
 			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
 			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->label4 = (gcnew System::Windows::Forms::Label());
-			this->testOutLbl = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			this->groupBox2->SuspendLayout();
 			this->groupBox3->SuspendLayout();
@@ -356,68 +353,35 @@ private: System::Windows::Forms::Label^  label4;
 			this->groupBox3->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->groupBox3->Controls->Add(this->testOutLbl);
-			this->groupBox3->Controls->Add(this->label3);
-			this->groupBox3->Controls->Add(this->extrinsicEditBtn2);
-			this->groupBox3->Controls->Add(this->extrinsicDirLbl2);
 			this->groupBox3->Controls->Add(this->label8);
 			this->groupBox3->Controls->Add(this->extrinsicStartBtn);
 			this->groupBox3->Controls->Add(this->label9);
 			this->groupBox3->Controls->Add(this->extrensicEditBtn);
 			this->groupBox3->Controls->Add(this->extrinsicDirLbl);
-			this->groupBox3->Location = System::Drawing::Point(12, 234);
+			this->groupBox3->Location = System::Drawing::Point(12, 251);
 			this->groupBox3->Name = L"groupBox3";
-			this->groupBox3->Size = System::Drawing::Size(415, 110);
+			this->groupBox3->Size = System::Drawing::Size(415, 80);
 			this->groupBox3->TabIndex = 7;
 			this->groupBox3->TabStop = false;
 			this->groupBox3->Text = L"Calibration Test";
 			// 
-			// label3
+			// testOutLbl
 			// 
-			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(6, 55);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(48, 13);
-			this->label3->TabIndex = 8;
-			this->label3->Text = L"Image 2:";
-			// 
-			// extrinsicEditBtn2
-			// 
-			this->extrinsicEditBtn2->Location = System::Drawing::Point(61, 50);
-			this->extrinsicEditBtn2->Name = L"extrinsicEditBtn2";
-			this->extrinsicEditBtn2->Size = System::Drawing::Size(50, 23);
-			this->extrinsicEditBtn2->TabIndex = 7;
-			this->extrinsicEditBtn2->Text = L"Edit";
-			this->extrinsicEditBtn2->UseVisualStyleBackColor = true;
-			this->extrinsicEditBtn2->Click += gcnew System::EventHandler(this, &calibrationForm::extrinsicEditBtn2_Click);
-			// 
-			// extrinsicDirLbl2
-			// 
-			this->extrinsicDirLbl2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+			this->testOutLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left) 
 				| System::Windows::Forms::AnchorStyles::Right));
-			this->extrinsicDirLbl2->AutoEllipsis = true;
-			this->extrinsicDirLbl2->Location = System::Drawing::Point(117, 55);
-			this->extrinsicDirLbl2->Name = L"extrinsicDirLbl2";
-			this->extrinsicDirLbl2->Size = System::Drawing::Size(292, 19);
-			this->extrinsicDirLbl2->TabIndex = 6;
-			this->extrinsicDirLbl2->Text = L"./Pic2.tif";
-			// 
-			// extrinsicStatusLbl
-			// 
-			this->extrinsicStatusLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->extrinsicStatusLbl->AutoEllipsis = true;
-			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
-			this->extrinsicStatusLbl->Location = System::Drawing::Point(138, 209);
-			this->extrinsicStatusLbl->Name = L"extrinsicStatusLbl";
-			this->extrinsicStatusLbl->Size = System::Drawing::Size(283, 13);
-			this->extrinsicStatusLbl->TabIndex = 5;
-			this->extrinsicStatusLbl->Text = L"Not Calibrated";
+			this->testOutLbl->AutoEllipsis = true;
+			this->testOutLbl->ForeColor = System::Drawing::Color::Red;
+			this->testOutLbl->Location = System::Drawing::Point(52, 56);
+			this->testOutLbl->Name = L"testOutLbl";
+			this->testOutLbl->Size = System::Drawing::Size(254, 13);
+			this->testOutLbl->TabIndex = 10;
+			this->testOutLbl->Text = L"N/A";
 			// 
 			// label8
 			// 
 			this->label8->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(6, 86);
+			this->label8->Location = System::Drawing::Point(6, 56);
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(40, 13);
 			this->label8->TabIndex = 4;
@@ -426,7 +390,7 @@ private: System::Windows::Forms::Label^  label4;
 			// extrinsicStartBtn
 			// 
 			this->extrinsicStartBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->extrinsicStartBtn->Location = System::Drawing::Point(338, 81);
+			this->extrinsicStartBtn->Location = System::Drawing::Point(338, 51);
 			this->extrinsicStartBtn->Name = L"extrinsicStartBtn";
 			this->extrinsicStartBtn->Size = System::Drawing::Size(71, 23);
 			this->extrinsicStartBtn->TabIndex = 3;
@@ -464,6 +428,18 @@ private: System::Windows::Forms::Label^  label4;
 			this->extrinsicDirLbl->TabIndex = 0;
 			this->extrinsicDirLbl->Text = L"./Pic1.tif";
 			// 
+			// extrinsicStatusLbl
+			// 
+			this->extrinsicStatusLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left) 
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->extrinsicStatusLbl->AutoEllipsis = true;
+			this->extrinsicStatusLbl->ForeColor = System::Drawing::Color::Red;
+			this->extrinsicStatusLbl->Location = System::Drawing::Point(138, 219);
+			this->extrinsicStatusLbl->Name = L"extrinsicStatusLbl";
+			this->extrinsicStatusLbl->Size = System::Drawing::Size(283, 13);
+			this->extrinsicStatusLbl->TabIndex = 5;
+			this->extrinsicStatusLbl->Text = L"Not Calibrated";
+			// 
 			// openFileDialog1
 			// 
 			this->openFileDialog1->DefaultExt = L"tif";
@@ -478,29 +454,17 @@ private: System::Windows::Forms::Label^  label4;
 			this->label4->AutoSize = true;
 			this->label4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label4->Location = System::Drawing::Point(18, 209);
+			this->label4->Location = System::Drawing::Point(18, 219);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(115, 13);
 			this->label4->TabIndex = 9;
 			this->label4->Text = L"Projector Location:";
 			// 
-			// testOutLbl
-			// 
-			this->testOutLbl->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->testOutLbl->AutoEllipsis = true;
-			this->testOutLbl->ForeColor = System::Drawing::Color::Red;
-			this->testOutLbl->Location = System::Drawing::Point(52, 86);
-			this->testOutLbl->Name = L"testOutLbl";
-			this->testOutLbl->Size = System::Drawing::Size(254, 13);
-			this->testOutLbl->TabIndex = 10;
-			this->testOutLbl->Text = L"N/A";
-			// 
 			// calibrationForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(442, 356);
+			this->ClientSize = System::Drawing::Size(442, 343);
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->groupBox3);
 			this->Controls->Add(this->groupBox2);
@@ -1420,23 +1384,11 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			// Define number of calibration boards (one for now).
 			int n_boards = 1;
 
-			// Evaluate derived camera chessboard parameters and allocate storage.
-			int cam_board_n                = sl_params->cam_board_w*sl_params->cam_board_h;
-			CvSize cam_board_size          = cvSize(sl_params->cam_board_w, sl_params->cam_board_h);
-			CvMat* cam_image_points        = cvCreateMat(n_boards*cam_board_n, 2, CV_32FC1);
-			CvMat* cam_object_points       = cvCreateMat(n_boards*cam_board_n, 3, CV_32FC1);
-			CvMat* cam_point_counts        = cvCreateMat(n_boards, 1, CV_32SC1);
-			IplImage** cam_calibImages     = new IplImage* [n_boards];
-
 			// Evaluate derived projector chessboard parameters and allocate storage.
 			int proj_board_n                = sl_params->proj_board_w*sl_params->proj_board_h;
 			CvSize proj_board_size          = cvSize(sl_params->proj_board_w, sl_params->proj_board_h);
 			CvMat* proj_image_points        = cvCreateMat(n_boards*proj_board_n, 2, CV_32FC1);
-			CvMat* proj_object_points       = cvCreateMat(n_boards*proj_board_n, 3, CV_32FC1);
-			CvMat* proj_point_counts        = cvCreateMat(n_boards, 1, CV_32SC1);
-			IplImage** proj_calibImages     = new IplImage* [n_boards];
-			CvMat* proj_rotation_vectors    = cvCreateMat(n_boards, 3, CV_32FC1);
-  			CvMat* proj_translation_vectors = cvCreateMat(n_boards, 3, CV_32FC1);
+			CvMat* proj_image_points2        = cvCreateMat(proj_board_n, 2, CV_32FC1);
 
 			// Generate projector calibration chessboard pattern.
 			IplImage* proj_chessboard = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
@@ -1449,194 +1401,57 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			
 			// Initialize capture and allocate storage.
 			IplImage* pic1 = cvLoadImage(gc2std(this->extrinsicDirLbl->Text).c_str());
-			IplImage* pic2 = cvLoadImage(gc2std(this->extrinsicDirLbl2->Text).c_str());
-
 			IplImage* cam_frame_1 = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
-			IplImage* cam_frame_2 = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
-			IplImage* cam_frame_3 = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
-			for(int i=0; i<n_boards; i++)
-				cam_calibImages[i]  = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
-			for(int i=0; i<n_boards; i++)
-				proj_calibImages[i] = cvCreateImage(cvGetSize(pic1), pic1->depth, pic1->nChannels);
-
-			// Create a window to display captured frames.
-			/*cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
-			cvCreateTrackbar("Cam. Gain",  "camWindow", &sl_params->cam_gain,  100, NULL);
-			cvCreateTrackbar("Proj. Gain", "camWindow", &sl_params->proj_gain, 100, NULL);
-			HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
-			BringWindowToTop(camWindow);
-			cvWaitKey(1);*/
-
-			// Allocate storage for grayscale images.
-			IplImage* cam_frame_1_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
-			IplImage* cam_frame_2_gray = cvCreateImage(cvGetSize(pic1), IPL_DEPTH_8U, 1);
 			
-			sl_params->cam_gain = 35;
 			sl_params->proj_gain = 53;
 
 			int successes = 0;
-			int cvKey = -1;
-			bool projGainEdit = false;
+
 			while(true)
 			{
 				cvCopyImage(pic1, cam_frame_1);
-				cvScale(cam_frame_1, cam_frame_1, 2.*(sl_params->cam_gain/100.), 0);
+				cvScale(cam_frame_1, cam_frame_1, 2.*(sl_params->proj_gain/100.), 0);
 				
 				// Find camera chessboard corners.
-				CvPoint2D32f* cam_corners = new CvPoint2D32f[cam_board_n];
-				int cam_corner_count;
-				int proj_found = 0;
-				int cam_found =	detectChessboard(cam_frame_1, cam_board_size, cam_corners, &cam_corner_count);
+				CvPoint2D32f* proj_corners = new CvPoint2D32f[proj_board_n];
+				int proj_corner_count;
+				int proj_found = detectChessboard(cam_frame_1, proj_board_size, proj_corners, &proj_corner_count);
 
-				// If camera chessboard is found, attempt to detect projector chessboard.
-				if(cam_corner_count == cam_board_n){
-					cvCopyImage(pic2, cam_frame_2);
-					cvScale(cam_frame_2, cam_frame_2, 2.*(sl_params->proj_gain/100.), 0);
-
-					// Convert frames to grayscale and apply background subtraction.
-					cvCvtColor(cam_frame_1, cam_frame_1_gray, CV_RGB2GRAY);
-					cvCvtColor(cam_frame_2, cam_frame_2_gray, CV_RGB2GRAY);
-					cvSub(cam_frame_1_gray, cam_frame_2_gray, cam_frame_2_gray);
-
-					// Invert chessboard image.
-					double min_val, max_val;
-					cvMinMaxLoc(cam_frame_2_gray, &min_val, &max_val);
-					cvConvertScale(cam_frame_2_gray, cam_frame_2_gray, 
-						-255.0/(max_val-min_val), 255.0+((255.0*min_val)/(max_val-min_val)));
-
-					// Find projector chessboard corners.
-					CvPoint2D32f* proj_corners = new CvPoint2D32f[proj_board_n];
-					int proj_corner_count;
-					proj_found = detectChessboard(cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
-					
-					// Display current projector tracking results.
-					if(!proj_found)
-					{
-						//cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
-						//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
-						//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
-						sl_params->cam_gain -= 5;
-						if(sl_params->cam_gain < 5)
-						{
-							if(projGainEdit)
-							{
-								break;
-							}
-							else
-							{
-								projGainEdit = true;
-								sl_params->proj_gain = 65;
-								sl_params->cam_gain = 35;
-							}
-						}
-					}
-
-					// If chessboard is detected, then update calibration lists.
-					if(proj_corner_count == proj_board_n){
-
-						// Add camera calibration data.
-						for(int i=successes*cam_board_n, j=0; j<cam_board_n; ++i,++j){
-							CV_MAT_ELEM(*cam_image_points,  float, i, 0) = cam_corners[j].x;
-							CV_MAT_ELEM(*cam_image_points,  float, i, 1) = cam_corners[j].y;
-							CV_MAT_ELEM(*cam_object_points, float, i, 0) = sl_params->cam_board_w_mm*float(j/sl_params->cam_board_w);
-							CV_MAT_ELEM(*cam_object_points, float, i, 1) = sl_params->cam_board_h_mm*float(j%sl_params->cam_board_w);
-							CV_MAT_ELEM(*cam_object_points, float, i, 2) = 0.0f;
-						}
-						
-						CV_MAT_ELEM(*cam_point_counts, int, successes, 0) = cam_board_n;
-						cvCopyImage(cam_frame_1, cam_calibImages[successes]);
-
-						// Evaluate undistorted image pixels for both the camera and the projector chessboard corners.
-						CvMat* cam_dist_image_points    = cvCreateMat(cam_board_n,  1, CV_32FC2);
-						CvMat* cam_undist_image_points  = cvCreateMat(cam_board_n,  1, CV_32FC2);
-						CvMat* proj_dist_image_points   = cvCreateMat(proj_board_n, 1, CV_32FC2);
-						CvMat* proj_undist_image_points = cvCreateMat(proj_board_n, 1, CV_32FC2);
-						for(int i=0; i<cam_board_n; ++i)
-							cvSet1D(cam_dist_image_points,  i, cvScalar(float(cam_corners[i].x), float(cam_corners[i].y)));
-						for(int i=0; i<proj_board_n; ++i)
-							cvSet1D(proj_dist_image_points, i, cvScalar(float(proj_corners[i].x), float(proj_corners[i].y)));
-						cvUndistortPoints(cam_dist_image_points, cam_undist_image_points, 
-							sl_calib->cam_intrinsic, sl_calib->cam_distortion, NULL, NULL);
-						cvUndistortPoints(proj_dist_image_points, proj_undist_image_points, 
-							sl_calib->cam_intrinsic, sl_calib->cam_distortion, NULL, NULL);
-						cvReleaseMat(&cam_dist_image_points);
-						cvReleaseMat(&proj_dist_image_points);
-
-						// Estimate homography that maps undistorted image pixels to positions on the chessboard.
-						CvMat* homography = cvCreateMat(3, 3, CV_32FC1);
-						CvMat* cam_src    = cvCreateMat(cam_board_n, 3, CV_32FC1);
-						CvMat* cam_dst    = cvCreateMat(cam_board_n, 3, CV_32FC1);
-						for(int i=0; i<cam_board_n; ++i){
-							CvScalar pd = cvGet1D(cam_undist_image_points, i);
-							CV_MAT_ELEM(*cam_src, float, i, 0) = (float)pd.val[0];
-							CV_MAT_ELEM(*cam_src, float, i, 1) = (float)pd.val[1];
-							CV_MAT_ELEM(*cam_src, float, i, 2) = 1.0;
-							CV_MAT_ELEM(*cam_dst, float, i, 0) = CV_MAT_ELEM(*cam_object_points, float, cam_board_n*successes+i, 0);
-							CV_MAT_ELEM(*cam_dst, float, i, 1) = CV_MAT_ELEM(*cam_object_points, float, cam_board_n*successes+i, 1);
-							CV_MAT_ELEM(*cam_dst, float, i, 2) = 1.0;
-						}
-						cvReleaseMat(&cam_undist_image_points);
-						cvFindHomography(cam_src, cam_dst, homography);
-						cvReleaseMat(&cam_src);
-						cvReleaseMat(&cam_dst);
-
-						// Map undistorted projector image corners to positions on the chessboard plane.
-						CvMat* proj_src = cvCreateMat(proj_board_n, 1, CV_32FC2);
-						CvMat* proj_dst = cvCreateMat(proj_board_n, 1, CV_32FC2);
-						for(int i=0; i<proj_board_n; i++)
-							cvSet1D(proj_src, i, cvGet1D(proj_undist_image_points, i));
-						cvReleaseMat(&proj_undist_image_points);
-						cvPerspectiveTransform(proj_src, proj_dst, homography);
-						cvReleaseMat(&homography);
-						cvReleaseMat(&proj_src);
-						
-						// Add projector calibration data.
-						for(int i=successes*proj_board_n, j=0; j<proj_board_n; ++i,++j){
-							CvScalar pd = cvGet2D(proj_dst, j, 0);
-							if(!sl_params->proj_invert){
-								CV_MAT_ELEM(*proj_image_points,  float, i, 0) = sl_params->proj_board_w_pixels*float(j%sl_params->proj_board_w) + (float)proj_border_cols + (float)sl_params->proj_board_w_pixels - (float)0.5;
-								CV_MAT_ELEM(*proj_image_points,  float, i, 1) = sl_params->proj_board_h_pixels*float(j/sl_params->proj_board_w) + (float)proj_border_rows + (float)sl_params->proj_board_h_pixels - (float)0.5;
-							}
-							else{
-								CV_MAT_ELEM(*proj_image_points,  float, i, 0) = sl_params->proj_board_w_pixels*float((proj_board_n-j-1)%sl_params->proj_board_w) + (float)proj_border_cols + (float)sl_params->proj_board_w_pixels - (float)0.5;
-								CV_MAT_ELEM(*proj_image_points,  float, i, 1) = sl_params->proj_board_h_pixels*float((proj_board_n-j-1)/sl_params->proj_board_w) + (float)proj_border_rows + (float)sl_params->proj_board_h_pixels - (float)0.5;
-							}
-							CV_MAT_ELEM(*proj_object_points, float, i, 0) = (float)pd.val[0];
-							CV_MAT_ELEM(*proj_object_points, float, i, 1) = (float)pd.val[1];
-							CV_MAT_ELEM(*proj_object_points, float, i, 2) = 0.0f;
-						}
-						CV_MAT_ELEM(*proj_point_counts, int, successes, 0) = proj_board_n;
-						cvCopyImage(cam_frame_2, proj_calibImages[successes]);
-						cvReleaseMat(&proj_dst);
-
-						// Update display.
-						successes++;
-					}
-
-					// Free allocated resources.
-					delete[] proj_corners;
+				if(!proj_found)
+				{
+					sl_params->proj_gain -= 5;
+					if(sl_params->proj_gain < 5)
+							break;
 				}
-				else
-				{	
-					// Camera chessboard not found, display current camera tracking results.
-					//cvDrawChessboardCorners(cam_frame_1, cam_board_size, cam_corners, cam_corner_count, cam_found);
-					//cvShowImageResampled("camWindow", cam_frame_1, sl_params->window_w, sl_params->window_h);
-					sl_params->cam_gain -= 5;
-					if(sl_params->cam_gain < 5)
-						break;
+				if(proj_corner_count == proj_board_n){
+
+					for(int j=0; j<proj_board_n; ++j){
+						CV_MAT_ELEM(*proj_image_points2,  float, j, 0) = proj_corners[j].x;
+						CV_MAT_ELEM(*proj_image_points2,  float, j, 1) = proj_corners[j].y;
+					}
+					
+					// Add projector calibration data.
+					for(int i=successes*proj_board_n, j=0; j<proj_board_n; ++i,++j){
+						if(!sl_params->proj_invert){
+							CV_MAT_ELEM(*proj_image_points,  float, i, 0) = sl_params->proj_board_w_pixels*float(j%sl_params->proj_board_w) + (float)proj_border_cols + (float)sl_params->proj_board_w_pixels - (float)0.5;
+							CV_MAT_ELEM(*proj_image_points,  float, i, 1) = sl_params->proj_board_h_pixels*float(j/sl_params->proj_board_w) + (float)proj_border_rows + (float)sl_params->proj_board_h_pixels - (float)0.5;
+						}
+						else{
+							CV_MAT_ELEM(*proj_image_points,  float, i, 0) = sl_params->proj_board_w_pixels*float((proj_board_n-j-1)%sl_params->proj_board_w) + (float)proj_border_cols + (float)sl_params->proj_board_w_pixels - (float)0.5;
+							CV_MAT_ELEM(*proj_image_points,  float, i, 1) = sl_params->proj_board_h_pixels*float((proj_board_n-j-1)/sl_params->proj_board_w) + (float)proj_border_rows + (float)sl_params->proj_board_h_pixels - (float)0.5;
+						}
+					}
+					successes++;
 				}
 
 				// Free allocated resources.
-				delete[] cam_corners;
-
+				delete[] proj_corners;
+				
 				// Process user input.
-				if(proj_found && cam_found)
+				if(proj_found)
 					break;
 			}
 
-			// Close the display window.
-			//cvDestroyWindow("camWindow");
-			
 			double l2err = 0.0;
 			double maxErr = 0.0;
 			double avg = 0.0;
@@ -1645,32 +1460,33 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				
 				CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
 				CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
-				CvMat* cam_rotation_m    = cvCreateMat(3, 3, CV_32FC1);
-				CvMat* R    = cvCreateMat(3, 3, CV_32FC1);
 				CvMat* reproj_points = cvCreateMat(proj_board_n, 2, CV_32FC1);
-				CvMat* cam_rotation_vector    = cvCreateMat(1, 3, CV_32FC1);
-  				CvMat* cam_translation_vector = cvCreateMat(3, 1, CV_32FC1);
-								
-				cvFindExtrinsicCameraParams2(cam_object_points, cam_image_points, sl_calib->cam_intrinsic, sl_calib->cam_distortion, cam_rotation_vector, cam_translation_vector);
+				CvMat* proj_points = cvCreateMat(proj_board_n, 3, CV_32FC1);
 				
+				int cam_nelems = sl_params->cam_w*sl_params->cam_h;
+				
+				float point_rows[3];
+				float depth_rows;
+				for(int j=0; j<proj_board_n; j++)
+				{
+					float q[3], v[3], w[4];
+					int rc = (sl_params->cam_w)*cvRound(CV_MAT_ELEM(*proj_image_points2, float, j, 1))+cvRound(CV_MAT_ELEM(*proj_image_points2, float, j, 0));
+					for(int i=0; i<3; i++){
+						q[i] = sl_calib->cam_center->data.fl[i];
+						v[i] = sl_calib->cam_rays->data.fl[rc+cam_nelems*i];
+					}
+					for(int i=0; i<4; i++)
+						w[i] = sl_calib->proj_row_planes->data.fl[4*(int)CV_MAT_ELEM(*proj_image_points, float, j, 1)+i];
+					intersectLineWithPlane3D(q, v, w, point_rows, depth_rows);
+					
+					for(int i=0; i<3; i++)
+						CV_MAT_ELEM(*proj_points, float, j, i) = point_rows[i];
+				}
+					
 				cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 				for(int i=0; i<3; i++)
 					cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
-
-				cvRodrigues2(cam_rotation_vector, cam_rotation_m, NULL);
-				cvTranspose(cam_rotation_m, R);
-				
-				for(int i=0; i<proj_board_n; i++)
-				{
-					float x = CV_MAT_ELEM(*proj_object_points, float, i, 0);
-					float y = CV_MAT_ELEM(*proj_object_points, float, i, 1);
-					float z = CV_MAT_ELEM(*proj_object_points, float, i, 2);
-					CV_MAT_ELEM(*proj_object_points, float, i, 0) = R->data.fl[0]*x + R->data.fl[1]*y + R->data.fl[2]*z + cam_translation_vector->data.fl[0];
-					CV_MAT_ELEM(*proj_object_points, float, i, 1) = R->data.fl[3]*x + R->data.fl[4]*y + R->data.fl[5]*z + cam_translation_vector->data.fl[1];
-					CV_MAT_ELEM(*proj_object_points, float, i, 2) = R->data.fl[6]*x + R->data.fl[7]*y + R->data.fl[8]*z + cam_translation_vector->data.fl[2];
-				}
-				
-				cvProjectPoints2(proj_object_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
+				cvProjectPoints2(proj_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
 				
 				cvSub( reproj_points, proj_image_points, reproj_points );
 				
@@ -1684,64 +1500,29 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 				cvReleaseMat(&proj_rotation);
 				cvReleaseMat(&proj_translation);
 				cvReleaseMat(&reproj_points);
-				cvReleaseMat(&cam_rotation_vector);
-				cvReleaseMat(&cam_rotation_m);
-				cvReleaseMat(&R);
-  				cvReleaseMat(&cam_translation_vector);
+				cvReleaseMat(&proj_points);
+
 			}
 			else{
 				// Free allocated resources.
-				cvReleaseMat(&cam_image_points);
-				cvReleaseMat(&cam_object_points);
-				cvReleaseMat(&cam_point_counts);
+				
 				cvReleaseMat(&proj_image_points);
-				cvReleaseMat(&proj_object_points);
-				cvReleaseMat(&proj_point_counts);
-				cvReleaseMat(&proj_rotation_vectors);
-  				cvReleaseMat(&proj_translation_vectors);
+				cvReleaseMat(&proj_image_points2);
 				cvReleaseImage(&proj_chessboard);
 				cvReleaseImage(&cam_frame_1);
-				cvReleaseImage(&cam_frame_2);
-				cvReleaseImage(&cam_frame_3);
-				cvReleaseImage(&cam_frame_1_gray);
-				cvReleaseImage(&cam_frame_2_gray);
-				for(int i=0; i<n_boards; i++){
-					cvReleaseImage(&cam_calibImages[i]);
-					cvReleaseImage(&proj_calibImages[i]);
-				}
 				cvReleaseImage(&pic1);
-				cvReleaseImage(&pic2);
-				delete[] cam_calibImages;
-				delete[] proj_calibImages;
-
+				
 				this->testOutLbl->ForeColor = System::Drawing::Color::Red;
 				this->testOutLbl->Text = "ERROR: At least one chessboard is required!";
 				return;
 			}
 
 			// Free allocated resources.
-			cvReleaseMat(&cam_image_points);
-			cvReleaseMat(&cam_object_points);
-			cvReleaseMat(&cam_point_counts);
 			cvReleaseMat(&proj_image_points);
-			cvReleaseMat(&proj_object_points);
-			cvReleaseMat(&proj_point_counts);
-			cvReleaseMat(&proj_rotation_vectors);
-  			cvReleaseMat(&proj_translation_vectors);
+			cvReleaseMat(&proj_image_points2);
 			cvReleaseImage(&proj_chessboard);
 			cvReleaseImage(&cam_frame_1);
-			cvReleaseImage(&cam_frame_2);
-			cvReleaseImage(&cam_frame_3);
-			cvReleaseImage(&cam_frame_1_gray);
-			cvReleaseImage(&cam_frame_2_gray);
-			for(int i=0; i<n_boards; i++){
-				cvReleaseImage(&cam_calibImages[i]);
-				cvReleaseImage(&proj_calibImages[i]);
-			}
 			cvReleaseImage(&pic1);
-			cvReleaseImage(&pic2);
-			delete[] cam_calibImages;
-			delete[] proj_calibImages;
 
 			String^ myString = "";
 			char temp[40];

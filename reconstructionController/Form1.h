@@ -428,6 +428,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 				{
 					helper->CancelAsync();
 					closesocket(sClient);
+					closesocket(sListen);
 					portBox->Enabled = true;
 					//this->setNameBox->Enabled = true;
 					//this->tileBox->Enabled = true;
@@ -515,7 +516,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 						for(int i=0; i<4; i++)
 						{
 							Sleep(10000);
-							int numImages = checkImages(this->baseFolderLocation->Text, gcnew System::String(szBuffer)+"_*.tif");
+							int numImages = checkImages(this->baseFolderLocation->Text+"/"+gcnew System::String(szBuffer)+"/Processed", gcnew System::String(szBuffer)+"_*.tif");
 							if(numImages >= 22)
 							{
 								this->reconPattern = gcnew System::String(szBuffer);
@@ -560,7 +561,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 
 			int getLatestImages(IplImage**& imagesBuffer, int numImages)
 			{
-				return getImages2(imagesBuffer, numImages, this->baseFolderLocation->Text, this->reconPattern + "_*.tif");
+				return getImages2(imagesBuffer, numImages, this->baseFolderLocation->Text+"/"+this->reconPattern+"/Processed", this->reconPattern + "_*.tif");
 			}
 
 			private: System::Void editBaseFolderBtn_Click(System::Object^  sender, System::EventArgs^  e) 
@@ -788,7 +789,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 			}
 private: System::Void manualReconBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 		 {
-			 int numImages = checkImages(this->baseFolderLocation->Text, this->setNameBox->Text + this->tileBox->Text + "_*.tif");
+			 int numImages = checkImages(this->baseFolderLocation->Text+"/"+this->setNameBox->Text + this->tileBox->Text+"/Processed", this->setNameBox->Text + this->tileBox->Text + "_*.tif");
 			 if(numImages >= 22)
 			 {
 				 this->reconPattern = this->setNameBox->Text + this->tileBox->Text;
