@@ -1758,20 +1758,6 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 			return;		 
 		 }
 
-	public: void ComposeRotationTranslationTo3x4Matrix( CvMat* RotTrans , CvMat* Rot, CvMat*Trans ){
-		   cvmSet( RotTrans, 0, 0, cvmGet( Rot, 0, 0 ) );
-		   cvmSet( RotTrans, 0, 1, cvmGet( Rot, 0, 1 ) );
-		   cvmSet( RotTrans, 0, 2, cvmGet( Rot, 0, 2 ) );
-		   cvmSet( RotTrans, 1, 0, cvmGet( Rot, 1, 0 ) );
-		   cvmSet( RotTrans, 1, 1, cvmGet( Rot, 1, 1 ) );
-		   cvmSet( RotTrans, 1, 2, cvmGet( Rot, 1, 2 ) );
-		   cvmSet( RotTrans, 2, 0, cvmGet( Rot, 2, 0 ) );
-		   cvmSet( RotTrans, 2, 1, cvmGet( Rot, 2, 1 ) );
-		   cvmSet( RotTrans, 2, 2, cvmGet( Rot, 2, 2 ) );
-		   cvmSet( RotTrans, 0, 3, cvmGet( Trans, 0, 0 ) );
-		   cvmSet( RotTrans, 1, 3, cvmGet( Trans, 1, 0 ) );
-		   cvmSet( RotTrans, 2, 3, cvmGet( Trans, 2, 0 ) );
-		}
 public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e )
 		 {
 			this->cameraStartBtn->Enabled = true;
