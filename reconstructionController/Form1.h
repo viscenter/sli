@@ -750,7 +750,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 				// Save the point cloud.
 				//printf("Saving the point cloud...\n");
 				sprintf(str, "%s\\%s.ply", outputDir, baseName.c_str());
-				if(savePointsPLY(str, resampled_points, NULL, NULL, mask)){
+				if(savePointsPLY(str, resampled_points, NULL, NULL, mask, sl_params->cam_w, sl_params->cam_h)){
 					MessageBox::Show("Saving the reconstructed point cloud failed!", "Reconstruction Error", 
 						MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 					return;

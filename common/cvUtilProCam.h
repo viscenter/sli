@@ -39,7 +39,7 @@ void colorizeWinter(IplImage* src, IplImage*& dst, IplImage* mask);
 void cvShowImageResampled(char* name, IplImage* image, int width, int height);
 
 // Save a PLY-formatted point cloud.
-int savePointsPLY(char* filename, CvMat* points, CvMat* normals, CvMat* colors, CvMat* mask);
+int savePointsPLY(char* filename, CvMat* points, CvMat* normals, CvMat* colors, CvMat* mask, int n_cols, int n_rows);
 
 // Save XML-formatted configuration file.
 void writeConfiguration(const char* filename, struct slParams* sl_params);

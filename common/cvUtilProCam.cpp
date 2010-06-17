@@ -173,15 +173,20 @@ int savePointsPLY(char* filename,
 				   CvMat* points,
 				   CvMat* normals,
 				   CvMat* colors,
-				   CvMat* mask){
+				   CvMat* mask,
+				   int n_cols,
+				   int n_rows){
 
 	// Open output file and create header.
 	FILE* pFile = fopen(filename, "w");
-	if(pFile == NULL){
-		fprintf(stderr,"ERROR: Cannot open PLY file!\n");
-		return -1;
-	}
-	
+
+	char filename2[1024];
+	strcpy(filename2, filename);
+	strcat(filename2, ".texture");
+	FILE* pFile2 = fopen(filename2, "w");
+
+	int cam_nelems = n_cols*n_rows;
+		
 	int numPoints = 0;
 	for(int c=0; c<points->cols; c++)
 			if(mask == NULL || mask->data.fl[c] != 0)
@@ -193,19 +198,29 @@ int savePointsPLY(char* filename,
 	fprintf(pFile, "end_header\n");
 
 	if(points != NULL){
-		for(int c=0; c<points->cols; c++){
-			if(mask == NULL || mask->data.fl[c] != 0){
-				for(int r=0; r<points->rows; r++){
-						fprintf(pFile, "%f ",  points->data.fl[c + points->cols*r]);
+		for(int row=0; row<n_rows; row++)
+		{
+			for(int col=0; col<n_cols; col++)
+			{
+				if(mask == NULL || mask->data.fl[col+row*n_cols] != 0){
+					for(int r=0; r<points->rows; r++){
+						fprintf(pFile, "%f ", points->data.fl[col+row*n_cols + r*cam_nelems]);
+					}
+					//for(int r=0; r<normals->rows; r++)
+						//fprintf(pFile, "%f ", -normals->data.fl[c + normals->cols*r]);
+					fprintf(pFile, "\n");
+					fprintf(pFile2, "%f %f\n", (float)col/(float)n_cols, (float)row/(float)n_rows);
 				}
-				//for(int r=0; r<normals->rows; r++)
-					//fprintf(pFile, "%f ", -normals->data.fl[c + normals->cols*r]);
-				fprintf(pFile, "\n");
 			}
 		}
 	 }
 
 	if(fclose(pFile) != 0){
+		printf("ERROR: Cannot close PLY file!\n");
+		return -1;
+	}
+
+	if(fclose(pFile2) != 0){
 		printf("ERROR: Cannot close PLY file!\n");
 		return -1;
 	}

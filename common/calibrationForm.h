@@ -746,7 +746,6 @@ private: System::Windows::Forms::Label^  label4;
 			this->cameraEditBtn->Enabled = false;
 			this->projEditBtn->Enabled = false;
 			this->projectorStartBtn->Enabled = false;
-			this->extrinsicEditBtn2->Enabled = false;
 			this->extrensicEditBtn->Enabled = false;
 			this->extrinsicStartBtn->Enabled = false;
 			this->checkBox1->Enabled = false;
@@ -1363,14 +1362,6 @@ private: System::Windows::Forms::Label^  label4;
 		 }
 
 
-private: System::Void extrinsicEditBtn2_Click(System::Object^  sender, System::EventArgs^  e) 
-		 {
-				System::Windows::Forms::DialogResult result = openFileDialog1->ShowDialog();
-				if ( result == ::DialogResult::OK )
-				{
-					this->extrinsicDirLbl2->Text = openFileDialog1->FileName;
-				}
-		 }
 private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 		 {
 
@@ -1545,7 +1536,6 @@ public: void helper_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEv
 			this->cameraEditBtn->Enabled = true;
 			this->projEditBtn->Enabled = true;
 			this->projectorStartBtn->Enabled = true;
-			this->extrinsicEditBtn2->Enabled = true;
 			this->extrensicEditBtn->Enabled = true;
 			this->extrinsicStartBtn->Enabled = true;
 			this->checkBox1->Enabled = true;
