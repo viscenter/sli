@@ -730,6 +730,11 @@ private: bool reconOn;
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
 				cvSet(sl_data->proj_frame, cvScalar(50, 50, 50));
+				uchar* data = (uchar*)sl_data->proj_frame->imageData;
+				for(int i=0; i<sl_params->proj_w*6; i++)
+				{
+					data[i] = i%2?0:255;
+				}
 				cvShowImage("projWindow", sl_data->proj_frame);
 				//calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
 				//calibrationWindow->Visible = true;
@@ -754,6 +759,11 @@ private: bool reconOn;
 				cvNamedWindow("projWindow", CV_WINDOW_AUTOSIZE);
 				sl_data->proj_frame = cvCreateImage(cvSize(sl_params->proj_w, sl_params->proj_h), IPL_DEPTH_8U, 1);
 				cvSet(sl_data->proj_frame, cvScalar(50, 50, 50));
+				uchar* data = (uchar*)sl_data->proj_frame->imageData;
+				for(int i=0; i<sl_params->proj_w*6; i++)
+				{
+					data[i] = i%2?0:255;
+				}
 				cvShowImage("projWindow", sl_data->proj_frame);
 				cvMoveWindow("projWindow", -sl_params->proj_w-7, -33);
 				cvWaitKey(1);
