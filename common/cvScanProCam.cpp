@@ -443,7 +443,7 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 
 	cvProjectPoints2(orig_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
-	int x,y, temp, newCount;
+	int x,y, newCount;
 	for(int r=0; r<sl_params->cam_h; r++)
 	{
 		for(int c=0; c<sl_params->cam_w; c++)
@@ -549,4 +549,6 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 	cvReleaseMat(&reproj_points);
 	cvReleaseMat(&proj_points);
 	cvReleaseMat(&proj_mask);
+	cvReleaseMat(&bins);
+	cvReleaseMat(&counts);
 }

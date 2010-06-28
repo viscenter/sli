@@ -180,10 +180,10 @@ int savePointsPLY(char* filename,
 	// Open output file and create header.
 	FILE* pFile = fopen(filename, "w");
 
-	char filename2[1024];
-	strcpy(filename2, filename);
-	strcat(filename2, ".texture");
-	FILE* pFile2 = fopen(filename2, "w");
+	//char filename2[1024];
+	//strcpy(filename2, filename);
+	//strcat(filename2, ".texture");
+	//FILE* pFile2 = fopen(filename2, "w");
 
 	int cam_nelems = n_cols*n_rows;
 		
@@ -193,7 +193,7 @@ int savePointsPLY(char* filename,
 				numPoints++;
 
 	fprintf(pFile, "ply\nformat ascii 1.0\n");
-	fprintf(pFile, "element vertex %d\nproperty float x\nproperty float y\nproperty float z\n", numPoints);
+	fprintf(pFile, "element vertex %d\nproperty float x\nproperty float y\nproperty float z\nproperty float u\nproperty float v\n", numPoints);
 	//fprintf(pFile, "property float nx\n property float ny\n property float nz\n");
 	fprintf(pFile, "end_header\n");
 
@@ -203,24 +203,19 @@ int savePointsPLY(char* filename,
 			for(int col=0; col<n_cols; col++)
 			{
 				if(mask == NULL || mask->data.fl[col+row*n_cols] != 0){
-					for(int r=0; r<points->rows; r++){
+					for(int r=0; r<points->rows; r++)
 						fprintf(pFile, "%f ", points->data.fl[col+row*n_cols + r*cam_nelems]);
-					}
+					fprintf(pFile, "%f %f\n", (float)col/(float)n_cols, (float)row/(float)n_rows);
 					//for(int r=0; r<normals->rows; r++)
 						//fprintf(pFile, "%f ", -normals->data.fl[c + normals->cols*r]);
-					fprintf(pFile, "\n");
-					fprintf(pFile2, "%f %f\n", (float)col/(float)n_cols, (float)row/(float)n_rows);
+					//fprintf(pFile, "\n");
+					//fprintf(pFile2, "%f %f\n", (float)col/(float)n_cols, (float)row/(float)n_rows);
 				}
 			}
 		}
 	 }
 
 	if(fclose(pFile) != 0){
-		printf("ERROR: Cannot close PLY file!\n");
-		return -1;
-	}
-
-	if(fclose(pFile2) != 0){
 		printf("ERROR: Cannot close PLY file!\n");
 		return -1;
 	}

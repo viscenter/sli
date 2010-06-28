@@ -778,6 +778,7 @@ private: System::Windows::Forms::Button^  editOutputDirBtn;
 				cvReleaseMat(&colors);
 				cvReleaseMat(&depth_map);
 				cvReleaseMat(&mask);
+				cvReleaseMat(&resampled_points);
 				for(int i=0; i<(gray_ncols+gray_nrows+1); i++)
 					cvReleaseImage(&proj_gray_codes[i]);
 				delete[] proj_gray_codes;

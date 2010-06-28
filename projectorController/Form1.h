@@ -729,12 +729,20 @@ private: bool reconOn;
 			
 			private: System::Void calibrationBtn_Click(System::Object^  sender, System::EventArgs^  e) 
 			{
-				cvSet(sl_data->proj_frame, cvScalar(50, 50, 50));
+				cvSet(sl_data->proj_frame, cvScalar(255, 255, 255));
 				uchar* data = (uchar*)sl_data->proj_frame->imageData;
-				for(int i=0; i<sl_params->proj_w*6; i++)
-				{
-					data[i] = i%2?0:255;
-				}
+
+				for(int i=0; i<sl_params->proj_h*sl_params->proj_w; i+=40)
+					if(((i/40)%2 && i < 240000))
+						for(int j=0; j<=40; j++)
+							data[i+j] = 0;
+
+				for(int i=240400; i<sl_params->proj_h*sl_params->proj_w; i+=sl_params->proj_w)
+					for(int j=0; j<=40; j++)
+							data[i+j] = 0;
+
+
+
 				cvShowImage("projWindow", sl_data->proj_frame);
 				//calibrationForm^ calibrationWindow = gcnew calibrationForm(sl_params, sl_calib);
 				//calibrationWindow->Visible = true;

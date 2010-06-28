@@ -67,6 +67,12 @@ int generateChessboard(struct slParams* sl_params, IplImage*& board, int& border
 					j<((c+1)*sl_params->proj_board_w_pixels+border_cols); j++)
 					data[i*step+j] = 0;
 
+
+	data[781+10*step] = 0;data[782+10*step] = 0;data[783+10*step] = 0;data[784+10*step] = 0;data[785+10*step] = 0;data[786+10*step] = 0;data[787+10*step] = 0;data[788+10*step] = 0;
+	data[780+11*step] = 0;data[789+11*step] =0;data[780+12*step] = 0;data[789+12*step] =0;data[780+13*step] = 0;data[789+13*step] =0;
+	data[780+14*step] = 0;data[789+14*step] =0;data[780+15*step] = 0;data[789+15*step] =0;data[780+16*step] = 0;data[789+16*step] =0;
+	data[780+17*step] = 0;data[789+17*step] =0;data[780+18*step] = 0;data[789+18*step] =0;data[780+19*step] = 0;data[789+19*step] =0;
+
 	// Return without errors.
 	return 0;
 }
