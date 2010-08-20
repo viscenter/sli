@@ -191,6 +191,8 @@ private: System::Windows::Forms::Label^  label11;
 private: System::Windows::Forms::Label^  label12;
 private: System::Windows::Forms::TextBox^  tileBox;
 private: bool reconOn;
+private: System::Windows::Forms::Button^  resetBtn;
+
 
 
 
@@ -230,12 +232,13 @@ private: bool reconOn;
 			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->label12 = (gcnew System::Windows::Forms::Label());
 			this->tileBox = (gcnew System::Windows::Forms::TextBox());
+			this->resetBtn = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// connectBtn
 			// 
 			this->connectBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->connectBtn->Location = System::Drawing::Point(396, 363);
+			this->connectBtn->Location = System::Drawing::Point(396, 379);
 			this->connectBtn->Name = L"connectBtn";
 			this->connectBtn->Size = System::Drawing::Size(75, 23);
 			this->connectBtn->TabIndex = 1;
@@ -247,7 +250,7 @@ private: bool reconOn;
 			// 
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(246, 337);
+			this->label1->Location = System::Drawing::Point(246, 338);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(29, 13);
 			this->label1->TabIndex = 2;
@@ -256,7 +259,7 @@ private: bool reconOn;
 			// portBox
 			// 
 			this->portBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->portBox->Location = System::Drawing::Point(281, 334);
+			this->portBox->Location = System::Drawing::Point(281, 335);
 			this->portBox->Name = L"portBox";
 			this->portBox->Size = System::Drawing::Size(38, 20);
 			this->portBox->TabIndex = 3;
@@ -278,13 +281,13 @@ private: bool reconOn;
 			this->console->Name = L"console";
 			this->console->ReadOnly = true;
 			this->console->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->console->Size = System::Drawing::Size(459, 276);
+			this->console->Size = System::Drawing::Size(459, 270);
 			this->console->TabIndex = 1;
 			// 
 			// setNameBox
 			// 
 			this->setNameBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->setNameBox->Location = System::Drawing::Point(78, 294);
+			this->setNameBox->Location = System::Drawing::Point(78, 291);
 			this->setNameBox->Name = L"setNameBox";
 			this->setNameBox->Size = System::Drawing::Size(152, 20);
 			this->setNameBox->TabIndex = 40;
@@ -293,7 +296,7 @@ private: bool reconOn;
 			// 
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(15, 297);
+			this->label2->Location = System::Drawing::Point(15, 294);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 5;
@@ -302,18 +305,18 @@ private: bool reconOn;
 			// calibrationBtn
 			// 
 			this->calibrationBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->calibrationBtn->Location = System::Drawing::Point(380, 332);
+			this->calibrationBtn->Location = System::Drawing::Point(359, 348);
 			this->calibrationBtn->Name = L"calibrationBtn";
-			this->calibrationBtn->Size = System::Drawing::Size(91, 23);
+			this->calibrationBtn->Size = System::Drawing::Size(112, 23);
 			this->calibrationBtn->TabIndex = 9;
-			this->calibrationBtn->Text = L"Display Blank";
+			this->calibrationBtn->Text = L"Display Orientation";
 			this->calibrationBtn->UseVisualStyleBackColor = true;
 			this->calibrationBtn->Click += gcnew System::EventHandler(this, &Form1::calibrationBtn_Click);
 			// 
 			// ipBox
 			// 
 			this->ipBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->ipBox->Location = System::Drawing::Point(157, 334);
+			this->ipBox->Location = System::Drawing::Point(157, 335);
 			this->ipBox->Name = L"ipBox";
 			this->ipBox->Size = System::Drawing::Size(73, 20);
 			this->ipBox->TabIndex = 10;
@@ -323,7 +326,7 @@ private: bool reconOn;
 			// 
 			this->label4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(131, 337);
+			this->label4->Location = System::Drawing::Point(131, 338);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(20, 13);
 			this->label4->TabIndex = 11;
@@ -335,7 +338,7 @@ private: bool reconOn;
 			this->label5->AutoSize = true;
 			this->label5->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label5->Location = System::Drawing::Point(15, 337);
+			this->label5->Location = System::Drawing::Point(15, 338);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(75, 13);
 			this->label5->TabIndex = 12;
@@ -347,7 +350,7 @@ private: bool reconOn;
 			this->label9->AutoSize = true;
 			this->label9->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label9->Location = System::Drawing::Point(15, 366);
+			this->label9->Location = System::Drawing::Point(15, 367);
 			this->label9->Name = L"label9";
 			this->label9->Size = System::Drawing::Size(97, 13);
 			this->label9->TabIndex = 22;
@@ -357,7 +360,7 @@ private: bool reconOn;
 			// 
 			this->label10->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(131, 366);
+			this->label10->Location = System::Drawing::Point(131, 367);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(20, 13);
 			this->label10->TabIndex = 21;
@@ -366,7 +369,7 @@ private: bool reconOn;
 			// recon_ip_box
 			// 
 			this->recon_ip_box->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->recon_ip_box->Location = System::Drawing::Point(157, 363);
+			this->recon_ip_box->Location = System::Drawing::Point(157, 364);
 			this->recon_ip_box->Name = L"recon_ip_box";
 			this->recon_ip_box->Size = System::Drawing::Size(73, 20);
 			this->recon_ip_box->TabIndex = 20;
@@ -375,7 +378,7 @@ private: bool reconOn;
 			// recon_port_box
 			// 
 			this->recon_port_box->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->recon_port_box->Location = System::Drawing::Point(281, 363);
+			this->recon_port_box->Location = System::Drawing::Point(281, 364);
 			this->recon_port_box->Name = L"recon_port_box";
 			this->recon_port_box->Size = System::Drawing::Size(38, 20);
 			this->recon_port_box->TabIndex = 19;
@@ -385,7 +388,7 @@ private: bool reconOn;
 			// 
 			this->label11->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label11->AutoSize = true;
-			this->label11->Location = System::Drawing::Point(246, 366);
+			this->label11->Location = System::Drawing::Point(246, 367);
 			this->label11->Name = L"label11";
 			this->label11->Size = System::Drawing::Size(29, 13);
 			this->label11->TabIndex = 18;
@@ -395,7 +398,7 @@ private: bool reconOn;
 			// 
 			this->label12->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
 			this->label12->AutoSize = true;
-			this->label12->Location = System::Drawing::Point(260, 297);
+			this->label12->Location = System::Drawing::Point(260, 294);
 			this->label12->Name = L"label12";
 			this->label12->Size = System::Drawing::Size(58, 13);
 			this->label12->TabIndex = 24;
@@ -404,16 +407,28 @@ private: bool reconOn;
 			// tileBox
 			// 
 			this->tileBox->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->tileBox->Location = System::Drawing::Point(324, 294);
+			this->tileBox->Location = System::Drawing::Point(324, 291);
 			this->tileBox->Name = L"tileBox";
 			this->tileBox->Size = System::Drawing::Size(145, 20);
 			this->tileBox->TabIndex = 41;
+			// 
+			// resetBtn
+			// 
+			this->resetBtn->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->resetBtn->Location = System::Drawing::Point(359, 318);
+			this->resetBtn->Name = L"resetBtn";
+			this->resetBtn->Size = System::Drawing::Size(112, 23);
+			this->resetBtn->TabIndex = 42;
+			this->resetBtn->Text = L"Reset Sequence";
+			this->resetBtn->UseVisualStyleBackColor = true;
+			this->resetBtn->Click += gcnew System::EventHandler(this, &Form1::resetBtn_Click);
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(483, 395);
+			this->ClientSize = System::Drawing::Size(483, 411);
+			this->Controls->Add(this->resetBtn);
 			this->Controls->Add(this->label12);
 			this->Controls->Add(this->tileBox);
 			this->Controls->Add(this->label9);
@@ -838,6 +853,13 @@ private: bool reconOn;
 				
 				return true;
 			}
+private: System::Void resetBtn_Click(System::Object^  sender, System::EventArgs^  e) 
+		 {
+			 sl_data->patternNum = 0;
+			 char buffer[BUFFER_SIZE];
+			 sprintf(buffer, "Pattern Sequence Reset!");
+			 console->Text += gcnew System::String(buffer);
+		 }
 };
 }
 
