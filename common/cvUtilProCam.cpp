@@ -137,6 +137,7 @@ void intersectLineWithLine3D(const float* q1,
 void colorizeWinter(IplImage* src, IplImage*& dst, IplImage* mask){
 
 	// Create an increasing linear-ramp in the green channel.
+	cvSetZero(dst);
 	cvMerge(NULL, src, NULL, NULL, dst);
 
 	// Create a decreasing linear-ramp in the blue channel.
@@ -149,7 +150,7 @@ void colorizeWinter(IplImage* src, IplImage*& dst, IplImage* mask){
 }
 
 // Show an image, resampled to desired size.
-void cvShowImageResampled(char* name, 
+void cvShowImageResampled(const char* name, 
 						  IplImage* image, 
 						  int width, 
 						  int height){

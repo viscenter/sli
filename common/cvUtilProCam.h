@@ -36,7 +36,7 @@ void intersectLineWithLine3D(const float* q1, const float* v1, const float* q2, 
 void colorizeWinter(IplImage* src, IplImage*& dst, IplImage* mask);
 
 // Show an image, resampled to desired size.
-void cvShowImageResampled(char* name, IplImage* image, int width, int height);
+void cvShowImageResampled(const char* name, IplImage* image, int width, int height);
 
 // Save a PLY-formatted point cloud.
 int savePointsPLY(char* filename, CvMat* points, CvMat* normals, CvMat* colors, CvMat* mask, int n_cols, int n_rows);

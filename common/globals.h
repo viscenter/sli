@@ -4,11 +4,13 @@
 #include <cstdlib>
 #include <string>
 
+#ifdef WIN32
 using namespace System;
 using namespace System::ComponentModel;
 using namespace System::Collections;
 using namespace System::Windows::Forms;
 using namespace System::IO;
+#endif
 
 struct slData
 {
@@ -22,6 +24,7 @@ struct slData
 	int gray_rowshift;
 };
 
+#ifdef WIN32
 static std::string gc2std(System::String^ s)
 {
 	using System::IntPtr;
@@ -101,6 +104,7 @@ static int checkImages(String^ dirLocation, String^ filePattern)
 	
 	return files->Length;
 }
+#endif
 
 struct reconPtrs
 {

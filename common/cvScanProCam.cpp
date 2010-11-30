@@ -196,8 +196,10 @@ int displayDecodingResults(IplImage*& decoded_cols,
 
 	// Create a window to display correspondences.
 	cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+#ifdef WIN32
 	HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
 	BringWindowToTop(camWindow);
+#endif
 	cvWaitKey(1);
 
 	// Allocate image arrays.
@@ -238,8 +240,10 @@ int displayDepthMap(CvMat*& depth_map,
 
 	// Create a window to display depth map.
 	cvNamedWindow("camWindow", CV_WINDOW_AUTOSIZE);
+#ifdef WIN32
 	HWND camWindow = (HWND)cvGetWindowHandle("camWindow");
 	BringWindowToTop(camWindow);
+#endif
 	cvWaitKey(1);
 
 	// Allocate image arrays.
