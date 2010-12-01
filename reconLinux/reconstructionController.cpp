@@ -8,8 +8,8 @@
 #include <netinet/in.h>
 #include <dirent.h>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <cv.h>
+#include <highgui.h>
 
 #include "../common/cvCalibrateProCam.h"
 #include "../common/cvScanProCam.h"
@@ -114,7 +114,7 @@ int getLatestImages(const char *dirName,
   struct dirent **namelist = NULL;
   std::string baseName(dirName);
   baseName += "/Processed/";
-  int num = scandir( baseName.c_str(), &namelist, filter, versionsort );
+  int num = scandir( baseName.c_str(), &namelist, (int (*)(dirent*))filter, alphasort );
   printf("Found %d images in '%s'...\n", num, dirName);
   if( num < 0 ) return 0;
 

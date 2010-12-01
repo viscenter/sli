@@ -1,6 +1,6 @@
 
-CXXFLAGS += -I/usr/include/opencv -I. -g
-LDFLAGS += -L/usr/lib -lcv -lhighgui
+CXXFLAGS += $(shell pkg-config --cflags opencv) -I. -g
+LDFLAGS += $(shell pkg-config --libs opencv)
 
 .PHONY: all clean
 all: reconLinux
