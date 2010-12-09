@@ -103,7 +103,11 @@ bool loadSLConfigXML(slParams *sl_params, slCalib *sl_calib,
   return true;
 }
 
+#ifdef __MACH__
+int filter(struct dirent* ent)
+#else
 int filter(const struct dirent* ent)
+#endif
 {
   return strcasecmp(ent->d_name+strlen(ent->d_name)-4, ".tif") == 0;
 }
@@ -114,7 +118,7 @@ int getLatestImages(const char *dirName,
   struct dirent **namelist = NULL;
   std::string baseName(dirName);
   baseName += "/Processed/";
-  int num = scandir( baseName.c_str(), &namelist, (int (*)(dirent*))filter, alphasort );
+  int num = scandir( baseName.c_str(), &namelist, filter, alphasort );
   printf("Found %d images in '%s'...\n", num, dirName);
   if( num < 0 ) return 0;
 
@@ -187,7 +191,7 @@ void reconstructSurface(
                  gray_decoded_cols, gray_decoded_rows, gray_mask,
                  points, colors, depth_map, mask);
   
-  downsamplePoints(sl_params, sl_calib, points, mask, resampled_points, depth_map);
+  //downsamplePoints(sl_params, sl_calib, points, mask, resampled_points, depth_map);
 
   double min_val, max_val;
   cvMinMaxLoc(depth_map, &min_val, &max_val);
@@ -231,8 +235,8 @@ void reconstructSurface(
   //printf("Saving the point cloud...\n");
   sprintf(str, "%s/%s.ply", outputDir, baseName);
   //if(savePointsPLY(str, resampled_points, NULL, NULL, mask, sl_params->proj_w, sl_params->proj_h)){
-  if(savePointsPLY(str, resampled_points, NULL, NULL, mask, sl_params->cam_w, sl_params->cam_h)){
-  //if(savePointsPLY(str, points, NULL, NULL, mask, sl_params->cam_w, sl_params->cam_h)){
+  //if(savePointsPLY(str, resampled_points, NULL, NULL, mask, sl_params->cam_w, sl_params->cam_h)){
+  if(savePointsPLY(str, points, NULL, NULL, mask, sl_params->cam_w, sl_params->cam_h)){
     fprintf(stderr, "Saving the reconstructed point cloud failed!\n");
     return;
   }
