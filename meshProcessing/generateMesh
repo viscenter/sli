@@ -11,48 +11,35 @@ if [ -d "$2$13D" ]; then
 	cp $2$13D/$13D.ply $1-3D.ply
 fi
 
-
-echo "Grabbing and converting DNGs"
-#Determine which DNGs are the RGB spectrals
-NUM_IMAGES=`ls $3$1/Mega|wc -l`
-if [ "$NUM_IMAGES" = "13" ]; then
-	ufraw-batch --output=$1_003.ppm $3$1/Mega/$1_002.dng --silent
-	ufraw-batch --output=$1_005.ppm $3$1/Mega/$1_004.dng --silent
-	ufraw-batch --output=$1_008.ppm $3$1/Mega/$1_007.dng --silent
-else
-	ufraw-batch --output=$1_003.ppm $3$1/Mega/$1_003.dng --silent
-	ufraw-batch --output=$1_005.ppm $3$1/Mega/$1_005.dng --silent
-	ufraw-batch --output=$1_008.ppm $3$1/Mega/$1_008.dng --silent
+if [ ! -d "tmp"]; then
+	mkdir tmp;
 fi
 
-echo "Combining channels"
-convert $1_008.ppm $1_005.ppm $1_003.ppm -channel RGB -combine $1.png
-
-echo "Cleaning up"
-rm $1_00*.ppm
+echo "Grabbing and converting DNGs"
+scripts/composeShell $1 $3
 
 echo "Masking vertices"
-OUTPUT=`meshlabserver -i $1-3D.ply -o converted_$1.obj`
-./applyMask converted_$1.obj $1.png > mask_$1.obj
+OUTPUT=`bin/meshlabserver -i $1-3D.ply -o converted_$1.obj`
+bin/applyMask converted_$1.obj $1.png > mask_$1.obj
 
-OUTPUT=`meshlabserver -i mask_$1.obj -o normals_$1.ply -s getNormals.mlx`
+OUTPUT=`bin/meshlabserver -i mask_$1.obj -o normals_$1.ply -s scripts/getNormals.mlx`
 
 echo "Formatting ply"
-./removeHead normals_$1.ply $1
+bin/removeHead normals_$1.ply $1
 
 if [ -f "headOut_$1.ply" ]; then
 	echo "Running reconstruction"
-	./PoissonRecon.64 --in headOut_$1.ply --out recon_$1.ply --binary
+	bin/PoissonRecon.64 --in headOut_$1.ply --out recon_$1.ply --binary
 fi
 
 echo "Cleaning mesh"
-OUTPUT=`meshlabserver -i recon_$1.ply -o $1-mesh.obj -s cleanUp.mlx`
+OUTPUT=`bin/meshlabserver -i recon_$1.ply -o $1-mesh.obj -s scripts/cleanUp.mlx`
 
 echo "Flattening texture image"
-./flatten flatfield.png $1.png $1_flat.png
+bin/flatten flatfield.png $1.png $1_flat.png
 
 echo "Adding Texture"
-./texture $1-mesh.obj $1_flat.png $1.obj.mtl > $1.obj
+bin/texture $1-mesh.obj $1_flat.png $1.obj.mtl > $1.obj
 
 echo "Cleaning up"
 mv $1.obj tmp
