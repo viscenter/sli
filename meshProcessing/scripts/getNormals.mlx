@@ -1,0 +1,6 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Compute normals for point sets">
+  <Param tooltip="The number of neighbors used to estimate and propagate normals." description="Number of neigbors" type="RichInt" value="10" name="K"/>
+ </filter>
+</FilterScript>

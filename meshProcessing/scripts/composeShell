@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "Grabbing and converting DNGs"
+#Determine which DNGs are the RGB spectrals
+NUM_IMAGES=`ls $2$1/Mega|wc -l`
+echo "$NUM_IMAGES, $1, $2";
+if [ "$NUM_IMAGES" = "13" ]; then
+	ufraw-batch --output=$1_003.ppm $2$1/Mega/$1_002.dng
+	ufraw-batch --output=$1_005.ppm $2$1/Mega/$1_004.dng
+	ufraw-batch --output=$1_008.ppm $2$1/Mega/$1_007.dng
+else
+	ufraw-batch --output=$1_003.ppm $2$1/Mega/$1_003.dng
+	ufraw-batch --output=$1_005.ppm $2$1/Mega/$1_005.dng
+	ufraw-batch --output=$1_008.ppm $2$1/Mega/$1_008.dng
+fi
+
+echo "Combining channels"
+convert $1_008.ppm $1_005.ppm $1_003.ppm -channel RGB -combine $1.png
+
+echo "Cleaning up"
+rm $1_00*.ppm
