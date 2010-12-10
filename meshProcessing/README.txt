@@ -3,15 +3,18 @@ Mesh Generation README
 
 Make instructions:
 	Run make
-	if fails make sure the directory structure is created propery and all dependencies are isntalled
+	if fails make sure the directory structure is created propery and all dependencies are installed
 
 
 Top Level Scripts:
 generateMesh:
-	Usage: generateMesh [shortened name] [3D path] [Img path]
+	Usage: generateMesh [shortened name] [3D path] [Img path] [Storage path]
 		short name: Compressed name of page for reference. For instance the directory Chad003-3D would shorten to Chad003. E3-103r-3D would shorten to E3-103r
 		3D path: path to directory containg the generate 3D ply coordinates
 		Img path: the directory containing the Mega directory which contains the raw dng images
+		Storage path: location to place the model files upon completion
+
+		CAUTION: This script assumes you have set up some things that meshMaker.pl usually would do. You must have a flatfield.png in the running directory and the calibration folder directly as a subdirectory.
 
 
 meshMaker.pl
@@ -23,7 +26,7 @@ meshMaker.pl
 
 meshMaker.pl vs. generateMesh
 
-generateMesh is for the creation of a single mesh. Given specific directories for a given mesh, it will create and texture the mesh and place it in the directory tmp
+generateMesh is for the creation of a single mesh. Given specific directories for a given mesh, it will create and texture the mesh and place it in the directory supplied
 
 meshMaker.pl calls generateMesh. It is a wrapper that will create all of the meshes within a specified directory. Generated meshes will be stored in a directory tmp until completion of all meshes. Then all models will be copied to the supplied final directory
 

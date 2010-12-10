@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 {
   char * obj_file = argc > 1 ? argv[1] : NULL;
   char * img_file = argc > 2 ? argv[2] : NULL;
+  char * mtl_file = argc > 3 ? argv[3] : NULL;
 
   FILE *file = argc > 1 ? fopen(obj_file, "r") : stdin;
 
@@ -49,11 +50,11 @@ int main(int argc, char *argv[])
 
         if( img_file )
         {
-          printf("mtllib %s.mtl\n", img_file);
+          printf("mtllib %s\n", mtl_file);
           printf("usemtl default\n\n");
 
-          char mtl_file[1024];
-          snprintf(mtl_file, sizeof(mtl_file), "%s.mtl", img_file );
+          //char mtl_file[1024];
+          //snprintf(mtl_file, sizeof(mtl_file), "%s.mtl", img_file );
           FILE *mtl = fopen(mtl_file, "w");
           if( mtl )
           {
@@ -80,6 +81,11 @@ int main(int argc, char *argv[])
       {
         printf("f %d/%d/%d %d/%d/%d %d/%d/%d\n",
             x, x, i, y, y, j, z, z, k );
+      }
+      else if( sscanf(buffer, "f %d %d %d",
+	    &x, &y, &z ) == 3) 
+      {
+     	printf("f %d/%d %d/%d %d/%d\n", x,x,y,y,z,z);
       }
       else
         printf("%s", buffer);

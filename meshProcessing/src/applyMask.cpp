@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
 	cvCopy(hThresh,hThreshSrc);
 
-	cvSaveImage("hThresh.png",hThresh);
+//	cvSaveImage("hThresh.png",hThresh);
 
 	CvMemStorage* sto = cvCreateMemStorage(0);
 	CvSeq* contour;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	//cvWaitKey();
 
 	//cvSaveImage("src.png",src);
-	cvSaveImage("h.png",hThresh);
+	//cvSaveImage("h.png",hThresh);
 	//cvSaveImage("s.png",s);
 	//cvSaveImage("v.png",v);i
 	//cvSaveImage("cont.png",hThreshSrc);

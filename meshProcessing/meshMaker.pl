@@ -27,7 +27,12 @@ else {
 	system("mkdir calib");
 	system("mkdir calib/proj");
 }
-system("mkdir tmp");
+if(-d "tmp")
+{}
+else{
+	system("mkdir tmp");
+}
+
 #Get the Calibration files
 $calibPath = $path3D . "calib/proj";
 system("cp $calibPath/* calib/proj");
@@ -46,7 +51,7 @@ foreach $file (@files) {
 		#If file is flatfield, change current flatfield to it
 		if($file =~ /flat|Flat/) {
 			print("Changing Flat Field\n");
-			system("./composeShell $file $pathImg");
+			system("scripts/composeShell $file $pathImg");
 			$pngName = $file . ".png";
 			system("mv $pngName flatfield.png");
 		}
@@ -54,19 +59,19 @@ foreach $file (@files) {
 		if($file =~ /(\w+\d\d\d\w*)-*3D$/) {
 			$shortName = $1;
 			if($currFile == $lastFile) {
-				system("./generateMesh $shortName $path3D $pathImg $pathFinal");
+				system("./generateMesh $shortName $path3D $pathImg tmp");
 				$numRunning = 0;
 			}
 			elsif($files[$currFile+1] =~ /flat|Flat/) {
-				system("./generateMesh $shortName $path3D $pathImg $pathFinal");
+				system("./generateMesh $shortName $path3D $pathImg tmp");
 				$numRunning = 0;
 			}
 			elsif($numRunning == 7) {
-				system("./generateMesh $shortName $path3D $pathImg $pathFinal");
+				system("./generateMesh $shortName $path3D $pathImg tmp");
 				$numRunning = 0;
 			}
 			else {
-				system("./generateMesh $shortName $path3D $pathImg $pathFinal&");
+				system("./generateMesh $shortName $path3D $pathImg tmp&");
 				$numRunning++;
 			}
 				
@@ -76,9 +81,10 @@ foreach $file (@files) {
 	$currFile++;
 }
 
-print("Moving files to $finalPath");
+print("Moving files to $finalPath\n");
 @finalFiles = <tmp/*>;
 foreach $file (@finalFiles) {
+	print("Moving $file\n"):
 	system("mv $file $pathFinal");
 }
 
