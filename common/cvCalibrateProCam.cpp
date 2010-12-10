@@ -115,20 +115,19 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	}
 
 	// Extract extrinsic calibration parameters.
-	CvMat* r                = cvCreateMat(1, 3, CV_32FC1);
+	CvMat r_hdr;
 	CvMat* cam_rotation     = cvCreateMat(3, 3, CV_32FC1);
 	CvMat* cam_translation  = cvCreateMat(3, 1, CV_32FC1);
 	CvMat* proj_rotation    = cvCreateMat(3, 3, CV_32FC1);
 	CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
-	cvGetRow(sl_calib->cam_extrinsic, r, 0);
-	cvRodrigues2(r, cam_rotation, NULL);
+	cvGetRow(sl_calib->cam_extrinsic, &r_hdr, 0);
+	cvRodrigues2(&r_hdr, cam_rotation, NULL);
 	for(int i=0; i<3; i++)
 		cvmSet(cam_translation, i, 0, cvmGet(sl_calib->cam_extrinsic, 1, i));
-	cvGetRow(sl_calib->proj_extrinsic, r, 0);
-	cvRodrigues2(r, proj_rotation, NULL);
+	cvGetRow(sl_calib->proj_extrinsic, &r_hdr, 0);
+	cvRodrigues2(&r_hdr, proj_rotation, NULL);
 	for(int i=0; i<3; i++)
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
-	cvReleaseMat(&r);
 
 	// Determine centers of projection.
 	// Note: All positions are in coordinate system of the first camera.
