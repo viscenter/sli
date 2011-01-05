@@ -1,1 +1,7 @@
-**/*.o
+*.o
+*.swp
+
+# Added a few ignore directories as well
+Bin/
+bin/
+tmp/

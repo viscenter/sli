@@ -17,12 +17,16 @@ if [ -d "$2$13D" ]; then
 	cp $2$13D/$13D.ply $TEMPF_DIR/$1-3D.ply
 fi
 
+#Compose the image within the temp directory
+#Keeps the clutter images out of the top directory
 
-scripts/composeShell $1 $3
+cd $TEMPF_DIR
+../scripts/composeShell $1 $3
+cd ../
 
 echo "Masking vertices"
 OUTPUT=`bin/meshlabserver -i $TEMPF_DIR/$1-3D.ply -o $TEMPF_DIR/converted_$1.obj`
-bin/applyMask $TEMPF_DIR/converted_$1.obj $1.png > $TEMPF_DIR/mask_$1.obj
+bin/applyMask $TEMPF_DIR/converted_$1.obj $TEMPF_DIR/$1.png > $TEMPF_DIR/mask_$1.obj
 
 OUTPUT=`bin/meshlabserver -i $TEMPF_DIR/mask_$1.obj -o $TEMPF_DIR/normals_$1.ply -s scripts/getNormals.mlx`
 
@@ -38,7 +42,7 @@ echo "Cleaning mesh"
 OUTPUT=`bin/meshlabserver -i $TEMPF_DIR/recon_$1.ply -o $TEMPF_DIR/$1-mesh.obj -s scripts/cleanUp.mlx`
 
 echo "Flattening texture image"
-bin/flatfield flatfield.png $1.png $1_flat.png
+bin/flatfield flatfield.png $TEMPF_DIR/$1.png $1_flat.png
 
 echo "Adding Texture"
 bin/texture $TEMPF_DIR/$1-mesh.obj $1_flat.png $1.obj.mtl > $4/$1.obj
@@ -46,5 +50,4 @@ bin/texture $TEMPF_DIR/$1-mesh.obj $1_flat.png $1.obj.mtl > $4/$1.obj
 echo "Cleaning up"
 mv $1.obj.mtl $4
 mv $1_flat.png $4
-rm $1.png
 rm $TEMPF_DIR/*$1*

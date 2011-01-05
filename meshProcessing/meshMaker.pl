@@ -84,7 +84,7 @@ foreach $file (@files) {
 print("Moving files to $finalPath\n");
 @finalFiles = <tmp/*>;
 foreach $file (@finalFiles) {
-	print("Moving $file\n"):
+	print("Moving $file\n");
 	system("mv $file $pathFinal");
 }
 

@@ -672,12 +672,12 @@ private: System::Windows::Forms::Label^  label4;
 						rotation_vectors, translation_vectors, calib_flags);
 					
 					CvMat* R = cvCreateMat(3, 3, CV_32FC1);
-					CvMat* r = cvCreateMat(1, 3, CV_32FC1);
+					CvMat r;
 					/*for(int i=0; i<successes; ++i){
 						sprintf(str,"%s\\%0.2d.png", calibDir, i);
 						cvSaveImage(str, calibImages[i]);
-						cvGetRow(rotation_vectors, r, i);
-						cvRodrigues2(r, R, NULL);
+						cvGetRow(rotation_vectors, &r, i);
+						cvRodrigues2(&r, R, NULL);
 						sprintf(str,"%s\\cam_rotation_matrix_%0.2d.xml", calibDir, i);
 						cvSave(str, R);
 					}*/
@@ -699,7 +699,6 @@ private: System::Windows::Forms::Label^  label4;
 					cvReleaseMat(&rotation_vectors);
   					cvReleaseMat(&translation_vectors);
 					cvReleaseMat(&R);
-					cvReleaseMat(&r);
 				}
 				else{
 					this->cameraStatusLbl->ForeColor = System::Drawing::Color::Red;
@@ -1061,12 +1060,12 @@ private: System::Windows::Forms::Label^  label4;
 					
 					sprintf(calibDir, "%s\\calib\\cam", sl_params->outdir);
 					CvMat* R = cvCreateMat(3, 3, CV_32FC1);
-					CvMat* r = cvCreateMat(1, 3, CV_32FC1);
+					CvMat r;
 					/*for(int i=0; i<successes; ++i){
 						sprintf(str,"%s\\%0.2d.png", calibDir, i);
 						cvSaveImage(str, cam_calibImages[i]);
-						cvGetRow(cam_rotation_vectors, r, i);
-						cvRodrigues2(r, R, NULL);
+						cvGetRow(cam_rotation_vectors, &r, i);
+						cvRodrigues2(&r, R, NULL);
 						sprintf(str,"%s\\cam_rotation_matrix_%0.2d.xml", calibDir, i);
 						//cvSave(str, R);
 					}*/
@@ -1079,7 +1078,6 @@ private: System::Windows::Forms::Label^  label4;
 					sprintf(str,"%s\\cam_translation_vectors.xml", calibDir);
 					cvSave(str, cam_translation_vectors);
 					cvReleaseMat(&R);
-					cvReleaseMat(&r);
 					sl_calib->cam_intrinsic_calib = true;
 				}
 
@@ -1180,14 +1178,14 @@ private: System::Windows::Forms::Label^  label4;
 				
 				sprintf(calibDir, "%s\\calib\\proj", sl_params->outdir);
 				CvMat* R = cvCreateMat(3, 3, CV_32FC1);
-				CvMat* r = cvCreateMat(1, 3, CV_32FC1);
+				CvMat r;
 				/*for(int i=0; i<successes; ++i){
 					sprintf(str,"%s\\%0.2d.png", calibDir, i);
 					cvSaveImage(str, proj_calibImages[i]);
 					sprintf(str,"%s\\%0.2db.png", calibDir, i);
 					cvSaveImage(str, cam_calibImages[i]);
-					cvGetRow(proj_rotation_vectors, r, i);
-					cvRodrigues2(r, R, NULL);
+					cvGetRow(proj_rotation_vectors, &r, i);
+					cvRodrigues2(&r, R, NULL);
 					sprintf(str,"%s\\proj_rotation_matrix_%0.2d.xml", calibDir, i);
 					//cvSave(str, R);
 				}*/
@@ -1289,7 +1287,6 @@ private: System::Windows::Forms::Label^  label4;
 				cvReleaseMat(&proj_rotation_vectors);
   				cvReleaseMat(&proj_translation_vectors);
 				cvReleaseMat(&R);
-				cvReleaseMat(&r);
 				cvReleaseMat(&cam_object_points_00);
 				cvReleaseMat(&cam_image_points_00);
 				cvReleaseMat(&cam_rotation_vector_00);
@@ -1474,9 +1471,11 @@ private: System::Void extrinsicStartBtn_Click(System::Object^  sender, System::E
 						CV_MAT_ELEM(*proj_points, float, j, i) = point_rows[i];
 				}
 					
-				cvGetRow(sl_calib->proj_extrinsic, proj_rotation, 0);
 				for(int i=0; i<3; i++)
+				{
+					cvmSet(proj_rotation, i, 0, cvmGet(sl_calib->proj_extrinsic, 0, i));
 					cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
+				}
 				cvProjectPoints2(proj_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
 				
 				cvSub( reproj_points, proj_image_points, reproj_points );
