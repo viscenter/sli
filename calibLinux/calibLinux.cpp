@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
 	slParams sl_params;
 	slCalib sl_calib;
 	loadSLConfigXML(&sl_params, &sl_calib);
+	cameraIntrinsicsRun(&sl_params, &sl_calib, argv[1]);
 	extrinsicCalibrationRun(&sl_params, &sl_calib, argv[1]);
 	return 0;
 }
@@ -169,7 +170,7 @@ bool cameraIntrinsicsRun(slParams* sl_params, slCalib* sl_calib,string imageDire
 		int found = detectChessboard(cam_frame_gray, board_size, corners, &corner_count);
 
 		// If chessboard is detected, then add points to calibration list.
-		if(corner_count == board_n){
+		if(found && corner_count == board_n){
 			for(int i=successes*board_n, j=0; j<board_n; ++i,++j){
 				CV_MAT_ELEM(*image_points,  float, i, 0) = corners[j].x;
 				CV_MAT_ELEM(*image_points,  float, i, 1) = corners[j].y;
