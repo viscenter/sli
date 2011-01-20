@@ -17,11 +17,13 @@
 #include "../common/cvUtilProCam.h"
 #include "../common/globals.h"
 
+
 char CONFIG_FILE[] = "./config.xml";
 
 using namespace std;
 
 bool calibrate_both = true;
+bool verbose = false;
 
 bool extrinsicCalibrationRun(slParams*, slCalib*, string);
 bool cameraIntrinsicsRun(slParams*, slCalib*, string); 
@@ -29,6 +31,15 @@ bool loadSLConfigXML(slParams*, slCalib*);
 
 int main(int argc, char* argv[])
 {
+	if(argc < 2)
+	{
+		cerr << "calibLinux picture_directory [-v]" << endl;
+		return 1;
+	}
+	if(argc >= 3 && strcmp(argv[2], "-v") == 0)
+	{
+		verbose = true;
+	}
 	slParams sl_params;
 	slCalib sl_calib;
 	loadSLConfigXML(&sl_params, &sl_calib);
@@ -103,7 +114,7 @@ bool cameraIntrinsicsRun(slParams* sl_params, slCalib* sl_calib,string imageDire
 	sprintf(calibDir, "%s/calib/cam", sl_params->outdir);
 	mkdir(str, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	mkdir(calibDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	//Huh?
+	// Huh?
 	sprintf(str, "rm -rf \"%s\"", calibDir);
 	system(str);
 	if(mkdir(calibDir,  S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0){
@@ -166,7 +177,7 @@ bool cameraIntrinsicsRun(slParams* sl_params, slCalib* sl_calib,string imageDire
 		// Find chessboard corners.
 		CvPoint2D32f* corners = new CvPoint2D32f[board_n];
 		int corner_count;
-		int found = detectChessboard(cam_frame_gray, board_size, corners, &corner_count);
+		int found = detectChessboard(cam_frame_gray, cam_frame_gray, board_size, corners, &corner_count);
 
 		// If chessboard is detected, then add points to calibration list.
 		if(corner_count == board_n){
@@ -336,7 +347,7 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 			sprintf(str, "rm -rf \"%s\"", calibDir);
 			system(str);
 			if(mkdir(calibDir,  S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0){
-				cerr << "ERROR: Cannot open output directory!" << endl;
+				cerr << "ERROR: Cannot open output directory " << calibDir << "!" << endl;
 				return false;
 			}
 		}
@@ -356,7 +367,7 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 		sprintf(str, "rm -rf \"%s\"", calibDir);
 		system(str);
 		if(mkdir(calibDir,  S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0){
-			cerr << "ERROR: Cannot open output directory!" << endl;
+			cerr << "ERROR: Cannot open output directory " << calibDir << "!" << endl;
 			return false;
 		}
 		
@@ -428,6 +439,7 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 		bool goodFrame;
 		bool skip = false;
 		int cvKey = -1;
+		bool exitLoop = false;
 		for(int num=0; num<n_boards; num+=2)
 		{
 			goodFrame = false;
@@ -440,8 +452,8 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 			// Transfer cam_frame_1 early so we can threshold it
 			cvCvtColor(cam_frame_1, cam_frame_1_gray, CV_RGB2GRAY);
 			
-			cvErode(cam_frame_1_gray,cam_frame_1_gray,NULL,2);
-			cvDilate(cam_frame_1_gray,cam_frame_1_gray,NULL,2);
+			cvErode(cam_frame_1_gray,cam_frame_3_gray,NULL,2);
+			cvDilate(cam_frame_3_gray,cam_frame_3_gray,NULL,2);
 			
 			//TESTING
 			//cvShowImageResampled("detect",cam_frame_1_gray, 1024,768);
@@ -449,18 +461,42 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 			
 			// Perform adaptive thresholding
 			// TODO: Should account for diff bit depths
-			cvAdaptiveThreshold(cam_frame_1_gray, cam_frame_3_gray,
+			cvAdaptiveThreshold(cam_frame_3_gray, cam_frame_3_gray,
 				255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,
 				(cam_frame_1_gray->width<cam_frame_1_gray->height)?cam_frame_1_gray->width:cam_frame_1_gray->height);
+				
 			
 			// Find camera chessboard corners.
 			CvPoint2D32f* cam_corners = new CvPoint2D32f[cam_board_n];
 			int cam_corner_count;
 			int proj_found = 0;
-			int cam_found =	detectChessboard(cam_frame_3_gray, cam_board_size, cam_corners, &cam_corner_count);
-
+			int cam_found =	detectChessboard(cam_frame_1_gray, cam_frame_3_gray, cam_board_size, cam_corners, &cam_corner_count);
+			
+			if(verbose)
+			{
+				cvDrawChessboardCorners(cam_frame_3_gray, cam_board_size, cam_corners, cam_corner_count, cam_found);
+				cvShowImageResampled("detect",cam_frame_3_gray, 1024,768);
+				cout << "Press 'c' to Continue or 'i' to Ignore" << endl;
+				while(!exitLoop)
+				{
+					cvKey = cvWaitKey() & 0xFF;
+					switch(cvKey)
+					{
+						case 'i':
+							cout << "Ignoring." << endl;
+							skip = true;
+							exitLoop = true;
+							break;
+						case 'c':
+							cout << "Continuing." << endl;
+							exitLoop = true;
+							break;
+					}
+				}
+				exitLoop = false;
+			}
 			// If camera chessboard is found, attempt to detect projector chessboard.
-			if((cam_found) && (cam_corner_count == cam_board_n)){
+			if((cam_found) && (!skip)){
 				//cvCopyImage(imagesBuffer[num+1], cam_frame_2);
 				cvScale(imagesBuffer[num+1], cam_frame_2, 2.*(sl_params->proj_gain/100.), 0);
 
@@ -482,32 +518,33 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 				// Find projector chessboard corners.
 				CvPoint2D32f* proj_corners = new CvPoint2D32f[proj_board_n];
 				int proj_corner_count;
-				proj_found = detectChessboard(cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
+				proj_found = detectChessboard(cam_frame_2_gray, cam_frame_2_gray, proj_board_size, proj_corners, &proj_corner_count);
 				
-				// Display current projector tracking results.
-				if(!proj_found)
+				if(verbose)
 				{
-					//cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
-					//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
-					//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
-					//sl_params->cam_gain -= 5;
-					//if(sl_params->cam_gain < 5)
-					//{
-					//	if(projGainEdit)
-					//	{
-							skip = true;
-					//	}
-					//	else
-					//	{
-					//		projGainEdit = true;
-					//		sl_params->proj_gain = 65;
-					//		sl_params->cam_gain = 35;
-					//	}
-					//}
+					cvDrawChessboardCorners(cam_frame_2_gray, proj_board_size, proj_corners, proj_corner_count, proj_found);
+					cvShowImageResampled("detect",cam_frame_2_gray, 1024,768);
+					cout << "Press 'c' to Continue or 'i' to Ignore" << endl;
+					while(!exitLoop)
+					{
+						cvKey = cvWaitKey() & 0xFF;
+						switch(cvKey)
+						{
+							case 'i':
+								cout << "Ignoring." << endl;
+								skip = true;
+								exitLoop = true;
+								break;
+							case 'c':
+								cout << "Continuing." << endl;
+								exitLoop = true;
+								break;
+						}
+					}
+					exitLoop = false;
 				}
-
 				// If chessboard is detected, then update calibration lists.
-				if((proj_found) && (proj_corner_count == proj_board_n)){
+				if((proj_found) && (!skip)){
 					// Add camera calibration data.
 					for(int i=successes*cam_board_n, j=0; j<cam_board_n; ++i,++j){
 						CV_MAT_ELEM(*cam_image_points,  float, i, 0) = cam_corners[j].x;
@@ -531,6 +568,27 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 					successes++;
 					goodFrame = true;
 				}
+				else
+				{
+					//cvCvtColor(cam_frame_2_gray, cam_frame_3, CV_GRAY2RGB);
+					//cvDrawChessboardCorners(cam_frame_3, proj_board_size, proj_corners, proj_corner_count, proj_found);
+					//cvShowImageResampled("camWindow", cam_frame_3, sl_params->window_w, sl_params->window_h);
+					//sl_params->cam_gain -= 5;
+					//if(sl_params->cam_gain < 5)
+					//{
+					//	if(projGainEdit)
+					//	{
+							skip = true;
+					//	}
+					//	else
+					//	{
+					//		projGainEdit = true;
+					//		sl_params->proj_gain = 65;
+					//		sl_params->cam_gain = 35;
+					//	}
+					//}
+				}
+
 
 				// Free allocated resources.
 				delete[] proj_corners;

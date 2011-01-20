@@ -85,7 +85,7 @@ int detectChessboard(IplImage* frame, CvSize board_size,
 
 	// Find chessboard corners.
 	int found = cvFindChessboardCorners(
-		frame, board_size, corners, corner_count, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+		frame, board_size, corners, corner_count, /*CV_CALIB_CB_ADAPTIVE_THRESH |*/ CV_CALIB_CB_FILTER_QUADS);
 
 	// Refine chessboard corners.
 	IplImage* gray_frame = cvCreateImage(cvGetSize(frame), frame->depth, 1);
@@ -97,6 +97,10 @@ int detectChessboard(IplImage* frame, CvSize board_size,
 		cvSize(11,11), cvSize(-1,-1), 
 		cvTermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1));
 
+	//cvDrawChessboardCorners(gray_frame,board_size, corners, *corner_count, found);
+	//cvShowImageResampled("detect",gray_frame, 1024,768);
+	//cvWaitKey();
+	
 	// Release allocated resources.
 	cvReleaseImage(&gray_frame);
 

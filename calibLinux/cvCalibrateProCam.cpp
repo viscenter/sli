@@ -79,27 +79,27 @@ int generateChessboard(struct slParams* sl_params, IplImage*& board, int& border
 
 // Detect chessboard corners (with subpixel refinement).
 // Note: Returns 1 if chessboard is found, 0 otherwise.
-int detectChessboard(IplImage* frame, CvSize board_size,
+int detectChessboard(IplImage* original_frame, IplImage* adjusted_frame, CvSize board_size,
                      CvPoint2D32f* corners,
                      int* corner_count){
 
 	// Find chessboard corners.
 	int found = cvFindChessboardCorners(
-		frame, board_size, corners, corner_count, /*CV_CALIB_CB_ADAPTIVE_THRESH |*/ CV_CALIB_CB_FILTER_QUADS);
+		adjusted_frame, board_size, corners, corner_count, /*CV_CALIB_CB_ADAPTIVE_THRESH |*/ CV_CALIB_CB_FILTER_QUADS);
 
 	// Refine chessboard corners.
-	IplImage* gray_frame = cvCreateImage(cvGetSize(frame), frame->depth, 1);
-	if(frame->nChannels > 1)
-		cvCvtColor(frame, gray_frame, CV_BGR2GRAY);
+	IplImage* gray_frame = cvCreateImage(cvGetSize(original_frame), original_frame->depth, 1);
+	if(original_frame->nChannels > 1)
+		cvCvtColor(original_frame, gray_frame, CV_BGR2GRAY);
 	else
-		cvCopyImage(frame, gray_frame);
+		cvCopyImage(original_frame, gray_frame);
 	cvFindCornerSubPix(gray_frame, corners, *corner_count, 
 		cvSize(11,11), cvSize(-1,-1), 
 		cvTermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1));
 
 	//TESTING
 	//cvDrawChessboardCorners(gray_frame,board_size, corners, *corner_count, found);
-	//cvShowImageResampled("detect",gray_frame, 1024,768);
+	//cvShowImageResampled("detect", gray_frame, 1024,768);
 	//cvWaitKey();
 	
 	// Release allocated resources.

@@ -33,7 +33,9 @@ int generateChessboard(struct slParams* sl_params, IplImage*& board, int& border
 
 // Detect chessboard corners (with subpixel refinement).
 // Note: Returns 1 if chessboard is found, 0 otherwise.
-int detectChessboard(IplImage* frame, CvSize board_size, CvPoint2D32f* corners, int* corner_count CV_DEFAULT(NULL));
+// The adjusted frame is used to find the corners,
+// the original is used for cvFindCornerSubPix
+int detectChessboard(IplImage* original_frame, IplImage* adjusted_frame, CvSize board_size, CvPoint2D32f* corners, int* corner_count CV_DEFAULT(NULL));
 
 // Evaluate geometry of projector-camera optical rays and planes.
 int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib);
