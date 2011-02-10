@@ -1,0 +1,40 @@
+#!/bin/bash
+
+BORDER=20
+
+echo "Finding largest page size"
+DIR=$1
+WMAX=0
+HMAX=0
+
+NUMFILES=`ls $DIR*.png | wc -l`
+COUNTER=1
+
+
+for f in $DIR*.png
+do
+	echo "Finding size for image $COUNTER of $NUMFILES"
+	SIZE=`./findPageSize $f`
+	set $SIZE
+	if [ $1 -gt $WMAX ]; then
+		let WMAX=$1
+	fi
+	if [ $2 -gt $HMAX ]; then
+		let HMAX=$2
+	fi
+	let COUNTER=$COUNTER+1
+done
+
+echo "Largest Size: $WMAX X $HMAX"
+echo "Cropping images with a $BORDER pixel border"
+
+let HMAX=$HMAX+$BORDER
+let WMAX=$WMAX+$BORDER
+
+let COUNTER=1
+for f in $DIR*.png
+do
+	echo "Cropping image $COUNTER of $NUMFILES"
+	./cropToPage $f -w $WMAX -h $HMAX
+	let COUNTER=$COUNTER+1
+done
