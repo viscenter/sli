@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include "../../imageProcessing/src/pageFinder.h"
 
 using namespace cv;
 using namespace std;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
 	inFile.close();
 
 	IplImage* src = cvLoadImage(argv[2]);
-
+/*
 	for(int i=0;i<2;i++) {
 		int width = cvGetSize(src).width/2;
 		int height = cvGetSize(src).height/2;
@@ -98,17 +99,19 @@ int main(int argc, char* argv[])
 		}
 
 		contour = cvFindNextContour(scan);
-	}
+	}*/
 		
 	//cout << lLength << endl;
 
 	//cvDrawContours(hThreshSrc,lCont,cvScalarAll(255),cvScalarAll(255),-1);
-	CvRect pageBound = cvBoundingRect(lCont);
+	CvRect pageBound = findPageBound(src);
 	CvPoint p1,p2;
 	p1.x = pageBound.x;
 	p1.y = pageBound.y;
 	p2.x = pageBound.x + pageBound.width;
 	p2.y = pageBound.y + pageBound.height;
+
+	printf("p1(%d,%d) (%d,%d)\n",pageBound.x,pageBound.y,pageBound.width,pageBound.height); 
 
 	//cout<< p1.x << ", " << p1.y << endl;
 	//cout << p2.x << ", " << p2.y << endl;
@@ -123,13 +126,13 @@ int main(int argc, char* argv[])
 	//cvSaveImage("s.png",s);
 	//cvSaveImage("v.png",v);i
 	//cvSaveImage("cont.png",hThreshSrc);
-	cvReleaseImage(&src);
-	cvReleaseImage(&hsv);
+	//cvReleaseImage(&src);
+	/*cvReleaseImage(&hsv);
 	cvReleaseImage(&h);
 	cvReleaseImage(&s);
-	cvReleaseImage(&hThresh);
+	cvReleaseImage(&hThresh);*/
 	//cvReleaseImage(&hThreshSrc);
-	cvReleaseImage(&v);
+	//cvReleaseImage(&v);
 
 	//Assume that nearly all of the points in the middle of the vertices are		 on the page plane
 	int min,max;
@@ -163,19 +166,19 @@ int main(int argc, char* argv[])
           if( x_rat < 0 ) x_rat = 0; if( y_rat < 0 ) y_rat = 0;
           if( x_rat > 1 ) x_rat = 1; if( y_rat > 1 ) y_rat = 1;
 
-	  int x = x_rat*hThreshSrc->width;
-	  int y = y_rat*hThreshSrc->height;
+	  int x = x_rat*src->width;
+	  int y = y_rat*src->height;
 
 	  //Get a pointer to the right row of the image
-	  uchar* yPtr = (uchar*)(hThreshSrc->imageData + y * hThreshSrc->widthStep);
+	  //uchar* yPtr = (uchar*)(hThreshSrc->imageData + y * hThreshSrc->widthStep);
 	  //Get the value of the xth pixel in the row
-	  int pixVal = (int)yPtr[x];
+	  //int pixVal = (int)yPtr[x];
 
 	  bool inRect = (x >= p1.x && x <= p2.x && y>= p1.y && y <= p2.y);
 
 	  bool inZPlane = (abs(vertices[i].z - zavg) < Z_BUFF);
 
-	  if(inRect && pixVal != 0 && inZPlane) {
+	  if(inRect/* && pixVal != 0*//* && inZPlane*/) {
 		  CvPoint3D32f v = vertices[i];
 		  printf("v %f %f %f\n",v.x,v.y,v.z);
 	  }
@@ -183,6 +186,6 @@ int main(int argc, char* argv[])
           //printf("vt %f %f\n", x, y );
         }
 
-	cvReleaseImage(&hThreshSrc);
+	cvReleaseImage(&src);
 	return 0;
 }

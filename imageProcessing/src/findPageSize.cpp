@@ -8,6 +8,6 @@ int main(int argc, char** argv)
  
     IplImage* src = cvLoadImage(argv[1]);
 	CvRect pageBound = findPageBound(src);
-	printf("%d %d\n",pageBound.width,pageBound.height);
+	printf("xOffset: %d yOffset: %d Width: %d Height: %d\n",pageBound.x,pageBound.y,pageBound.width,pageBound.height);
 	return 0;
 }

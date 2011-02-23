@@ -13,7 +13,7 @@ bin/flatfield: src/flatfield.o
 bin/texture: src/texture.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
-bin/applyMask: src/applyMask.o
+bin/applyMask: src/applyMask.o src/pageFinder.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 bin/removeHead: src/removeHead.o
