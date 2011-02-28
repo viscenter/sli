@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $# -lt 4 ]; then
+	
+	echo "Usage: generateMesh [shortened name] [3D path] [Img path] [Storage path]"
+	exit 0;
+fi
+
 TEMPF_DIR="tempFiles";
 echo "Beginning mesh generation"
 
@@ -28,7 +34,7 @@ echo "Masking vertices"
 OUTPUT=`bin/meshlabserver -i $TEMPF_DIR/$1-3D.ply -o $TEMPF_DIR/converted_$1.obj`
 bin/applyMask $TEMPF_DIR/converted_$1.obj $TEMPF_DIR/$1.png > $TEMPF_DIR/mask_$1.obj
 
-bin/meshlabserver -i $TEMPF_DIR/mask_$1.obj -o $TEMPF_DIR/normals_$1.ply -s scripts/getNormals.mlx
+OUTPUT=`bin/meshlabserver -i $TEMPF_DIR/mask_$1.obj -o $TEMPF_DIR/normals_$1.ply -s scripts/getNormals.mlx`
 
 echo "Formatting ply"
 bin/removeHead $TEMPF_DIR/normals_$1.ply $TEMPF_DIR/headOut_$1.ply
@@ -48,6 +54,6 @@ echo "Adding Texture"
 bin/texture $TEMPF_DIR/$1-mesh.obj $1_flat.png $1.obj.mtl > $4/$1.obj
 
 echo "Cleaning up"
-#mv $1.obj.mtl $4
-#mv $1_flat.png $4
-#rm $TEMPF_DIR/*$1*
+mv $1.obj.mtl $4
+mv $1_flat.png $4
+rm $TEMPF_DIR/*$1*

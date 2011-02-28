@@ -8,7 +8,15 @@ struct Line {
 	CvPoint p1,p2;
 };
 
+
 CvRect findPageBound(IplImage* src)
+{
+	IplImage* null = NULL;
+	return findPageBound(src,null);
+}
+
+
+CvRect findPageBound(IplImage* src,IplImage*& threshOut)
 {
 	IplImage* half = cvCreateImage(cvSize(src->width/2,src->height/2),src->depth,3);
 	IplImage* quar = cvCreateImage(cvSize(half->width/2,half->height/2),src->depth,3);
@@ -35,8 +43,7 @@ CvRect findPageBound(IplImage* src)
 
 	IplImage* hThresh = cvCreateImage(cvGetSize(h),h->depth,1);
 
-	cvThreshold(h,hThresh,50,100,CV_THRESH_BINARY_INV);
-
+	cvThreshold(h,hThresh,60,100,CV_THRESH_BINARY_INV);
 
 
 	IplImage* hThreshSrc = cvCreateImage(cvGetSize(h),h->depth,1);
@@ -134,7 +141,7 @@ CvRect findPageBound(IplImage* src)
 		}
 	}
 
-	/*printf("%d groups\n",(int)mLines.size());
+	/*/printf("%d groups\n",(int)mLines.size());
 	for(int j=0;j<(int)mLines[one].size();j++) {
 		cvLine(hThreshSrc, mLines[one][j].p1, mLines[one][j].p2, CV_RGB(255,255,255),3,8);
 	}
@@ -160,8 +167,6 @@ CvRect findPageBound(IplImage* src)
 			top1 = l.p2;
 		if(l.p1.y > bot1.y)
 			bot1 = l.p1;
-		if(l.p2.y > bot1.y)
-			bot1 = l.p2;
 	}
 	double total2 = 0;
 	for(int i=0;i<(int)mLines[two].size();i++) {
@@ -172,10 +177,11 @@ CvRect findPageBound(IplImage* src)
 		if(l.p2.y < top2.y)
 			top2 = l.p2;
 		if(l.p1.y > bot2.y)
-			bot1 = l.p1;
+			bot2 = l.p1;
 		if(l.p2.y > bot2.y)
-			bot1 = l.p2;
+			bot2 = l.p2;
 	}
+
 
 	CvPoint topLeft,botLeft,topRight,botRight;
 	if(mLines[one][0].p1.x < mLines[two][0].p1.x) {
@@ -202,26 +208,34 @@ CvRect findPageBound(IplImage* src)
 	topRight.x += 10;
 	botRight.x += 10;
 
+
+
 	CvPoint intPointLeft;
+	bool isInt = false;
 	for(int i=topLeft.y;i<eight->height;i++){
 		int newx = ((i-topLeft.y) * (1/leftSlope))+topLeft.x;
 		unsigned char* yPtr = (unsigned char*)(hThreshSrc->imageData + i*hThreshSrc->widthStep);
 		int pixVal = (int)yPtr[newx];
-		if(pixVal != 0) {
+		if(pixVal != 0 && !isInt) {
 			intPointLeft = cvPoint(newx,i);
-			break;
+			isInt=true;
 		}
+		if(pixVal == 0 && isInt) //Skip over random intersections and look for last one (with perspective change)
+			isInt =false;
 	
 	}
+	isInt = false;
 	CvPoint intPointRight;
 	for(int i=topRight.y;i<eight->height;i++){
 		int newx = ((i-topRight.y) * (1/rightSlope))+topRight.x;
 		unsigned char* yPtr = (unsigned char*)(hThreshSrc->imageData + i*hThreshSrc->widthStep);
 		int pixVal = (int)yPtr[newx];
-		if(pixVal != 0) {
+		if(pixVal != 0 && !isInt) {
 			intPointRight = cvPoint(newx,i);
-			break;
+			isInt = true;
 		}
+		if(pixVal == 0 && isInt)
+			isInt = false;
 	}
 
 	CvRect pageBound = cvBoundingRect(lCont);
@@ -229,15 +243,17 @@ CvRect findPageBound(IplImage* src)
 
 	int xTopLeft = ((pageBound.y-topLeft.y) * (1/leftSlope))+topLeft.x;
 	int xTopRight = ((pageBound.y-topRight.y) * (1/rightSlope))+topRight.x;
-/*
-	cvLine(hThreshSrc,top1,bot1,CV_RGB(255,255,255),1,8);
-	cvLine(hThreshSrc,top2,bot2,CV_RGB(255,255,255),1,8);
-	cvNamedWindow("thresh");
-	cvShowImage("thresh",hThresh);
-	cvWaitKey();
 
+	cvLine(eight,topLeft,botLeft,CV_RGB(255,255,255),1,8);
+	cvLine(eight,topRight,botRight,CV_RGB(255,255,255),1,8);
+	cvLine(hThreshSrc,topLeft,botLeft,CV_RGB(255,255,255),1,8);
+	cvLine(hThreshSrc,topRight,botRight,CV_RGB(255,255,255),1,8);
+	cvNamedWindow("thresh");
+	cvNamedWindow("src");
 	cvShowImage("thresh",hThreshSrc);
-	cvWaitKey();*/
+
+	cvShowImage("src",eight);
+	cvWaitKey();
 	
 	if(intPointLeft.x < xTopLeft)
 		pageBound.x = intPointLeft.x;
@@ -263,10 +279,14 @@ CvRect findPageBound(IplImage* src)
 	cvReleaseImage(&s);
 	cvReleaseImage(&v);
 	cvReleaseImage(&hThresh);
-	cvReleaseImage(&hThreshSrc);
 	cvReleaseImage(&half);
 	cvReleaseImage(&quar);
 	cvReleaseImage(&eight);
+
+	if(threshOut != NULL) 
+		threshOut = hThreshSrc;
+	else 
+		cvReleaseImage(&hThreshSrc);
 
 	return pageBound;
 }

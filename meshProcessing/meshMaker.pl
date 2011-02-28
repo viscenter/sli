@@ -56,7 +56,7 @@ foreach $file (@files) {
 			system("mv $pngName flatfield.png");
 		}
 		#Find 3D directories and save the name minus (3D) for later use
-		if($file =~ /(\w+\d\d\d\w*)-*3D$/) {
+		if($file =~ /(\w+-*\d\d\d\w*)-*3D$/) {
 			$shortName = $1;
 			if($currFile == $lastFile) {
 				system("./generateMesh $shortName $path3D $pathImg tmp");

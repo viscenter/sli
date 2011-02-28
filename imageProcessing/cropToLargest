@@ -2,8 +2,20 @@
 
 BORDER=20
 
+if [ $# -lt 1 ]; then
+	echo "Usage: cropToLargest <Directory> [<Out Directory>]"
+	exit 0;
+fi
+
 echo "Finding largest page size"
 DIR=$1
+
+if [ $# -gt 1 ]; then
+	OUTDIR=$2
+else
+	OUTDIR=$DIR
+fi
+
 WMAX=0
 HMAX=0
 
@@ -16,11 +28,11 @@ do
 	echo "Finding size for image $COUNTER of $NUMFILES"
 	SIZE=`./findPageSize $f`
 	set $SIZE
-	if [ $1 -gt $WMAX ]; then
-		let WMAX=$1
+	if [ $6 -gt $WMAX ]; then
+		let WMAX=$6
 	fi
-	if [ $2 -gt $HMAX ]; then
-		let HMAX=$2
+	if [ $8 -gt $HMAX ]; then
+		let HMAX=$8
 	fi
 	let COUNTER=$COUNTER+1
 done
@@ -38,3 +50,8 @@ do
 	./cropToPage $f -w $WMAX -h $HMAX
 	let COUNTER=$COUNTER+1
 done
+
+if [ $OUTDIR != $DIR ]; then
+	echo "Transferring images to $OUTDIR"
+	mv $DIR*_crop.png $OUTDIR
+fi

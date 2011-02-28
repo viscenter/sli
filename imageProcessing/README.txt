@@ -23,9 +23,12 @@ reTexture <obj file> <original width> <original height> <new width> <new height>
 
 Wrap Scripts:
 
-cropToLargest <Directory>
+cropToLargest <Directory> [<Out Directory>]
 	Will take supplied directory containing page images, find the largest
 	page size, and crop all images to the same (largest) size.
+
+	Supplying the out directory will tell the script where to put the cropped 
+	files. Otherwise, the new images will be saved in the input directory.
 
 	Adds a set number of pixel border to the returned largest size. To change
 	the size of the border, change the BORDER variable at the beginning of the 

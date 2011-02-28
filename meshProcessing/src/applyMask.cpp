@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <stdio.h>
 #include "../../imageProcessing/src/pageFinder.h"
 
 using namespace cv;
@@ -45,73 +46,15 @@ int main(int argc, char* argv[])
 	inFile.close();
 
 	IplImage* src = cvLoadImage(argv[2]);
-/*
-	for(int i=0;i<2;i++) {
-		int width = cvGetSize(src).width/2;
-		int height = cvGetSize(src).height/2;
-
-		IplImage* tmp = cvCreateImage(cvSize(width,height),src->depth,3);
-
-		cvPyrDown(src, tmp, CV_GAUSSIAN_5x5);
-		cvReleaseImage(&src);
-		src = tmp;
-	}
-
-	IplImage* hsv = cvCreateImage(cvGetSize(src),src->depth,3);
-	cvCvtColor(src,hsv,CV_BGR2HSV);
-
-	IplImage* h = cvCreateImage(cvGetSize(hsv),hsv->depth,1);
-	IplImage* s = cvCreateImage(cvGetSize(hsv),hsv->depth,1);
-	IplImage* v = cvCreateImage(cvGetSize(hsv),hsv->depth,1);
-
-	cvSplit(hsv,h,s,v,NULL);
-
-	cvSmooth(h,h);
-	cvDilate(h,h,NULL,5);
-	cvErode(h,h,NULL,15);
-	cvDilate(h,h,NULL,10);
-	//cvSaveImage("h.png",h);
-
-	IplImage* hThresh = cvCreateImage(cvGetSize(h),h->depth,1);
-
-	cvThreshold(h,hThresh,60,100,CV_THRESH_BINARY_INV);
-	IplImage* hThreshSrc = cvCreateImage(cvGetSize(h),h->depth,1);
-
-	cvCopy(hThresh,hThreshSrc);
-
-//	cvSaveImage("hThresh.png",hThresh);
-
-	CvMemStorage* sto = cvCreateMemStorage(0);
-	CvSeq* contour;
-
-	CvContourScanner scan = cvStartFindContours(hThresh,sto);
-
-	//cvNamedWindow("Contours",1);
-	contour = cvFindNextContour(scan);
-	CvSeq* lCont = NULL;
-	double lLength = 0;
-	while(contour != NULL)
-	{
-		double newLength = cvContourPerimeter(contour);
-		if(newLength > lLength) {
-			lCont = contour;
-			lLength = newLength;
-		}
-
-		contour = cvFindNextContour(scan);
-	}*/
-		
-	//cout << lLength << endl;
-
-	//cvDrawContours(hThreshSrc,lCont,cvScalarAll(255),cvScalarAll(255),-1);
-	CvRect pageBound = findPageBound(src);
+	
+	IplImage* mask = src; //Initilaize mask to a non-null value
+	CvRect pageBound = findPageBound(src,mask); //get page bound rectangle as well as an image mask of the page
 	CvPoint p1,p2;
 	p1.x = pageBound.x;
 	p1.y = pageBound.y;
 	p2.x = pageBound.x + pageBound.width;
 	p2.y = pageBound.y + pageBound.height;
 
-	printf("p1(%d,%d) (%d,%d)\n",pageBound.x,pageBound.y,pageBound.width,pageBound.height); 
 
 	//cout<< p1.x << ", " << p1.y << endl;
 	//cout << p2.x << ", " << p2.y << endl;
@@ -135,17 +78,6 @@ int main(int argc, char* argv[])
 	//cvReleaseImage(&v);
 
 	//Assume that nearly all of the points in the middle of the vertices are		 on the page plane
-	int min,max;
-	min = vertices.size() * (3./8.);
-	max = vertices.size() * (5./8.);
-
-	long ztotal = 0;
-	for(int i=min;i<max;i++)
-		ztotal += vertices[i].z;
-	
-	float zavg = (float)ztotal / (float)(max-min);
-
-	cout << zavg << endl;
 
 	CvMat *intr = (CvMat*)cvLoad("calib/proj/cam_intrinsic.xml");
         CvMat *dist = (CvMat*)cvLoad("calib/proj/cam_distortion.xml");
@@ -169,16 +101,18 @@ int main(int argc, char* argv[])
 	  int x = x_rat*src->width;
 	  int y = y_rat*src->height;
 
+	  int xMask = x/8; //Account for pyrDown of mask image
+	  int yMask = y/8;
+
 	  //Get a pointer to the right row of the image
-	  //uchar* yPtr = (uchar*)(hThreshSrc->imageData + y * hThreshSrc->widthStep);
+	  uchar* yPtr = (uchar*)(mask->imageData + yMask * mask->widthStep);
 	  //Get the value of the xth pixel in the row
-	  //int pixVal = (int)yPtr[x];
+	  int pixVal = (int)yPtr[xMask];
 
 	  bool inRect = (x >= p1.x && x <= p2.x && y>= p1.y && y <= p2.y);
 
-	  bool inZPlane = (abs(vertices[i].z - zavg) < Z_BUFF);
 
-	  if(inRect/* && pixVal != 0*//* && inZPlane*/) {
+	  if(inRect && pixVal != 0/* && inZPlane*/) {
 		  CvPoint3D32f v = vertices[i];
 		  printf("v %f %f %f\n",v.x,v.y,v.z);
 	  }
@@ -187,5 +121,6 @@ int main(int argc, char* argv[])
         }
 
 	cvReleaseImage(&src);
+	cvReleaseImage(&mask);
 	return 0;
 }
