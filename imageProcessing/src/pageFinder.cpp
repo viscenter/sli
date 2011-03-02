@@ -265,7 +265,7 @@ CvRect findPageBound(IplImage* src,IplImage*& threshOut)
 	else
 		pageBound.width = xTopRight - pageBound.x;
 
-	if(intPointLeft.y < intPointRight.y)
+	if(intPointLeft.y > intPointRight.y)
 		pageBound.height = intPointLeft.y - pageBound.y;
 	else
 		pageBound.height = intPointRight.y - pageBound.y;

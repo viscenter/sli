@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BORDER=20
+BUFFER=175
 
 if [ $# -lt 1 ]; then
 	echo "Usage: cropToLargest <Directory> [<Out Directory>]"
@@ -32,7 +33,11 @@ do
 		let WMAX=$6
 	fi
 	if [ $8 -gt $HMAX ]; then
-		let HMAX=$8
+		if [ $4 -gt $BUFFER ]; then
+			let HMAX=$8
+		else
+			echo "Ignoring bad threshold"
+		fi
 	fi
 	let COUNTER=$COUNTER+1
 done
