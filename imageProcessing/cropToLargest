@@ -28,15 +28,38 @@ for f in $DIR*.png
 do
 	echo "Finding size for image $COUNTER of $NUMFILES"
 	SIZE=`./findPageSize $f`
-	set $SIZE
-	if [ $6 -gt $WMAX ]; then
-		let WMAX=$6
-	fi
-	if [ $8 -gt $HMAX ]; then
-		if [ $4 -gt $BUFFER ]; then
-			let HMAX=$8
-		else
+	if [ "$SIZE" != "" ]; then
+		echo "$SIZE"
+		set $SIZE
+		TFLAG=1
+		if [ $2 -lt 0 ]; then
+			let TFLAG=0
+		fi
+		if [ $4 -lt 0 ]; then
+			let TFLAG=0
+		fi
+		if [ $6 -lt 0 ]; then
+			let TFLAG=0
+		fi
+		if [ $8 -lt 0 ]; then
+			let TFLAG=0
+		fi
+		if [ $6 -gt 7200 ];then
+			let TFLAG=0
+		fi
+		if [ $8 -gt 5800 ]; then
+			let TFLAG=0
+		fi
+
+		if [ $TFLAG -eq 0 ]; then
 			echo "Ignoring bad threshold"
+		else
+			if [ $6 -gt $WMAX ]; then
+				let WMAX=$6
+			fi
+			if [ $8 -gt $HMAX ]; then
+				let HMAX=$8
+			fi
 		fi
 	fi
 	let COUNTER=$COUNTER+1
@@ -51,12 +74,11 @@ let WMAX=$WMAX+$BORDER
 let COUNTER=1
 for f in $DIR*.png
 do
+	cutf=${f/$DIR/}
+	cropf=${cutf/.png/_crop.png}
+	outf=$OUTDIR$cropf
 	echo "Cropping image $COUNTER of $NUMFILES"
-	./cropToPage $f -w $WMAX -h $HMAX
+	./cropToPage $f -w $WMAX -h $HMAX -o $outf
 	let COUNTER=$COUNTER+1
 done
 
-if [ $OUTDIR != $DIR ]; then
-	echo "Transferring images to $OUTDIR"
-	mv $DIR*_crop.png $OUTDIR
-fi

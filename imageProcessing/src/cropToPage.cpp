@@ -22,8 +22,9 @@ int main(int argc, char** argv)
 	bool f_xoff= false;
 	bool f_yoff = false;
 	bool f_useoff = false;
+	bool f_visual = false;
 
-	while((c = getopt(argc,argv,"ro:w:h:x:y:")) != -1) {
+	while((c = getopt(argc,argv,"ro:w:h:x:y:v")) != -1) {
 		switch(c) {
 			case 'r':
 				f_overwrite = true;
@@ -47,6 +48,9 @@ int main(int argc, char** argv)
 			case 'y':
 				f_yoff = true;
 				yOffset = atoi(optarg);
+			case 'v':
+				f_visual = true;
+				break;
 		}
 				
 	}
@@ -59,6 +63,7 @@ int main(int argc, char** argv)
 		cout << "	-x <xOffset>-- Supply x offset for page bound\n";
 		cout << "	-y <yOffset>-- Supply y offest for page bound\n";
 		cout << "	-r -- Overwrite input image with new image\n";
+		cout << "	-v -- Visualize page determination\n";
 		return 0;
 	}
 
@@ -103,7 +108,7 @@ int main(int argc, char** argv)
 		pageBound = cvRect(xOffset,yOffset,inWidth,inHeight);
 	else {
 	    CvPoint p1,p2;
-  	    pageBound = findPageBound(src);
+  	    pageBound = findPageBound(src,f_visual);
 	    p1.x = pageBound.x;
 	    p1.y = pageBound.y;
 	    p2.x = pageBound.x + pageBound.width;
@@ -113,38 +118,39 @@ int main(int argc, char** argv)
 	        if(pageBound.width > inWidth) {//Input width is smaller than size of page
 	            printf("WARNING: input width (%d) is less than size of page (%d). Page is likely to be cut.\n",inWidth,pageBound.width);
 	        }
-	        p1.x -= (inWidth - pageBound.width) / 2;
-	        p2.x += (inWidth - pageBound.width) / 2;
+	        int shift = (inWidth - pageBound.width) / 2;
 	        if((inWidth - pageBound.width) % 2 != 0) {//Difference is odd so move left over one extra pixel
 	            if(inWidth - pageBound.width < 0)
-	                p1.x += 1;
+	                shift += 1;
 	            else
-	                p1.x -= 1;
+	                shift -= 1;
 	        }
-	        pageBound = cvRect(p1.x,p1.y,inWidth,pageBound.height);
+	        if(pageBound.x - shift >= 0)
+				pageBound.x -= shift;
+			else
+				pageBound.x = 0;
+
+			pageBound.width = inWidth;
 	    }
 	
 	    if(f_height) {
 	        if(pageBound.height > inHeight) {//Input height is smaller than size of page
 	            printf("WARNING: input height (%d) is less than size of page (%d). Page is likely to be cut.\n",inHeight,pageBound.height);
 	        }
+	        int shift = (inHeight - pageBound.height) / 2;
+	        if((inHeight - pageBound.height) % 2 != 0) {//Difference is odd so move up/down one extra pixel
+	            if(inHeight - pageBound.height < 0)
+	                shift += 1;
+	            else
+	                shift -= 1;
+	        }
+	        if(pageBound.y - shift >= 0)
+				pageBound.y -= shift;
+			else
+				pageBound.y = 0;
+
+			pageBound.height = inHeight;
 	
-			int difference = inHeight - pageBound.height;
-			int add=1;
-			if(difference < 0) {
-				difference = -difference;
-				add = -1;
-			}
-			int remaining = difference;
-	
-			//Bottom bound is likely near bottom of image, so check to make sure we dont exceed the image height during expansion
-			while(p2.y < src->height-1 && remaining > difference/2) {
-				p2.y += add;
-				remaining--;
-			}
-			p1.y -= add*remaining;
-	
-	        pageBound = cvRect(p1.x,p1.y,pageBound.width,inHeight);
 	    }
 	}
     IplImage* cropped = cvCreateImage( cvSize(pageBound.width, pageBound.height), src->depth, 3);
