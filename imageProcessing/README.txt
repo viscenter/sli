@@ -2,8 +2,10 @@ Image Processing:
 
 Binaries:
 
-findPageSize <Page Image>
+findPageSize <Page Image> [Options]
 	-Prints size of rectangle bounding the page with x and y offsets to stdout
+	-Options
+		-v -- Show visualization of page finding process
 
 cropToPage <Page Image> [Options]
 	Without options will crop image down to page
@@ -16,6 +18,8 @@ cropToPage <Page Image> [Options]
         -y <yOffset>-- Supply y offest for page bound
 		-r -- Overwrite input image file with new cropped image
 				->Will be overridden by -o if supplied
+		-v -- Use visual in page finding
+		-b <Border> -- Adds a given pixel border around the desired size or page
 
 reTexture <obj file> <original width> <original height> <new width> <new height><x offset> <y offset>  >  <new obj>
 	Will reapply texture with a cropped image to the given obj file.
@@ -35,6 +39,12 @@ cropToLargest <Directory> [<Out Directory>]
 	script
 
 	Files will be saved with the default names from cropToPage
+
+cropAll <Directory [<Out Directory>]
+	Works similarly to cropToLargest, only it does not use a standardized largest size.
+	Instead, it crops each image to its particular page, whatever size it may be.
+
+	Adds a border around page by default based on BORDER variable at beginning of script
 
 
 Dependecncies (Dependent upon the following packages):

@@ -24,7 +24,9 @@ int main(int argc, char** argv)
 	bool f_useoff = false;
 	bool f_visual = false;
 
-	while((c = getopt(argc,argv,"ro:w:h:x:y:v")) != -1) {
+	int border = 0;
+
+	while((c = getopt(argc,argv,"ro:w:h:x:y:vb:")) != -1) {
 		switch(c) {
 			case 'r':
 				f_overwrite = true;
@@ -51,6 +53,8 @@ int main(int argc, char** argv)
 			case 'v':
 				f_visual = true;
 				break;
+			case 'b':
+				border = atoi(optarg);
 		}
 				
 	}
@@ -64,6 +68,7 @@ int main(int argc, char** argv)
 		cout << "	-y <yOffset>-- Supply y offest for page bound\n";
 		cout << "	-r -- Overwrite input image with new image\n";
 		cout << "	-v -- Visualize page determination\n";
+		cout << "	-b <Border>-- Add padding around page size\n";
 		return 0;
 	}
 
@@ -125,8 +130,12 @@ int main(int argc, char** argv)
 	            else
 	                shift -= 1;
 	        }
-	        if(pageBound.x - shift >= 0)
-				pageBound.x -= shift;
+	        if(pageBound.x - shift >= 0) {
+				if((pageBound.x - shift) + inWidth >= src->width)
+					pageBound.x = src->width - inWidth;
+				else
+					pageBound.x -= shift;
+			}
 			else
 				pageBound.x = 0;
 
@@ -144,14 +153,34 @@ int main(int argc, char** argv)
 	            else
 	                shift -= 1;
 	        }
-	        if(pageBound.y - shift >= 0)
-				pageBound.y -= shift;
+	        if(pageBound.y - shift >= 0) {
+				if((pageBound.y - shift) + inHeight >= src->height)
+					pageBound.y = src->height - inHeight;
+				else
+					pageBound.y -= shift;
+			}
 			else
 				pageBound.y = 0;
 
 			pageBound.height = inHeight;
 	
 	    }
+		if(border) {
+			pageBound.x -= border;
+			pageBound.width += 2*border;
+			pageBound.y -= border;
+			pageBound.height += 2*border;
+
+			if(pageBound.x < 0)
+				pageBound.x = 0;
+			if(pageBound.y < 0)
+				pageBound.y = 0;
+			if(pageBound.x + pageBound.width >= src->width)
+				pageBound.width = src->width-pageBound.x;
+			if(pageBound.y + pageBound.height >= src->height)
+				pageBound.height = src->height-pageBound.y;
+		}
+
 	}
     IplImage* cropped = cvCreateImage( cvSize(pageBound.width, pageBound.height), src->depth, 3);
     cvSetImageROI(src,pageBound);

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+BORDER=20
+
+DIR=$1
+
+if [ $# -gt 1 ]; then
+	OUTDIR=$2
+else
+	OUTDIR=$DIR
+fi
+
+COUNT=`ls $DIR*.png | wc -l`
+
+for f in $DIR*.png
+do
+	cutf=${f/$DIR/}
+	cropf=${cutf/.png/_crop.png}
+    outf=$OUTDIR$cropf
+
+	./cropToPage $f -o $outf -b $BORDER
+done

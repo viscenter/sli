@@ -54,22 +54,39 @@ do
 		if [ $TFLAG -eq 0 ]; then
 			echo "Ignoring bad threshold"
 		else
-			if [ $6 -gt $WMAX ]; then
-				let WMAX=$6
-			fi
-			if [ $8 -gt $HMAX ]; then
-				let HMAX=$8
-			fi
+			WIDTHS[$COUNTER]=$6
+			HEIGHTS[$COUNTER]=$8
 		fi
 	fi
 	let COUNTER=$COUNTER+1
 done
 
+echo "Input any image numbers to remove incorrect sizes"
+echo "(q to quit and continue to cropping)"
+read INPUT
+while [ "$INPUT" != "q" ]
+do
+	WIDTHS[$INPUT]=0
+	HEIGHTS[$INPUT]=0
+	echo "Image $INPUT removed"
+	read INPUT
+done
+for width in ${WIDTHS[@]}
+do
+	if [ $width -gt $WMAX ]; then
+		let WMAX=$width
+	fi
+done
+for height in ${HEIGHTS[@]}
+do
+	if [ $height -gt $HMAX ]; then
+		let HMAX=$height
+	fi
+done
+
 echo "Largest Size: $WMAX X $HMAX"
 echo "Cropping images with a $BORDER pixel border"
 
-let HMAX=$HMAX+$BORDER
-let WMAX=$WMAX+$BORDER
 
 let COUNTER=1
 for f in $DIR*.png
@@ -78,7 +95,7 @@ do
 	cropf=${cutf/.png/_crop.png}
 	outf=$OUTDIR$cropf
 	echo "Cropping image $COUNTER of $NUMFILES"
-	./cropToPage $f -w $WMAX -h $HMAX -o $outf
+	./cropToPage $f -w $WMAX -h $HMAX -o $outf -b $BORDER
 	let COUNTER=$COUNTER+1
 done
 

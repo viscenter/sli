@@ -355,6 +355,18 @@ CvRect findPageBound(IplImage* src,IplImage*& threshOut,bool visual)
 	int xTopLeft = ((pageBound.y-topLeft.y) * (1/leftSlope))+topLeft.x;
 	int xTopRight = ((pageBound.y-topRight.y) * (1/rightSlope))+topRight.x;
 
+	topLeft.x = int(((0-botLeft.y) * (1/leftSlope))+botLeft.x);
+	topRight.x = int(((0-botRight.y) * (1/rightSlope))+botRight.x);
+
+	botLeft.x = int(((eight->width-1-topLeft.y) * (1/leftSlope))+topLeft.x);
+	botRight.x = int(((eight->width-1-topRight.y) * (1/rightSlope))+topRight.x);
+
+	topLeft.y = 0;
+	topRight.y = 0;
+
+	botLeft.y = eight->width-1;
+	botRight.y = eight->width-1;
+
 	if(visual) {
 		cvLine(eight,topLeft,botLeft,CV_RGB(255,255,255),1,8);
 		cvLine(eight,topRight,botRight,CV_RGB(255,255,255),1,8);
