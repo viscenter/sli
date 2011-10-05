@@ -5,7 +5,10 @@ LDFLAGS += $(shell pkg-config --libs opencv)
 PROGS=bin/flatfield bin/texture bin/PoissonRecon bin/applyMask bin/removeHead
 
 .PHONY: all clean
-all: $(PROGS)
+all: bin $(PROGS)
+
+bin:
+	mkdir -p bin
 
 bin/flatfield: src/flatfield.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
@@ -19,9 +22,12 @@ bin/applyMask: src/applyMask.o ../imageProcessing/src/pageFinder.o
 bin/removeHead: src/removeHead.o
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
-bin/PoissonRecon:
+bin/PoissonRecon: PoissonRecon/Bin/Linux
 	$(MAKE) -C PoissonRecon release
 	ln -s ../PoissonRecon/Bin/Linux/PoissonRecon $@
+
+PoissonRecon/Bin/Linux:
+	mkdir -p PoissonRecon/Bin/Linux
 
 clean:
 	$(MAKE) -C PoissonRecon clean
