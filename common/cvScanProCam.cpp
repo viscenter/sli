@@ -444,7 +444,7 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 
 	for(int i=0; i<3; i++)
 	{
-		cvmSet(proj_rotation, i, 0, cvmGet(sl_calib->proj_extrinsic, 0, i));
+		cvmSet(proj_rotation, 0, i, cvmGet(sl_calib->proj_extrinsic, 0, i));
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 	}
 
