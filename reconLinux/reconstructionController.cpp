@@ -64,6 +64,9 @@ bool loadSLConfigXML(slParams *sl_params, slCalib *sl_calib,
     sl_calib->cam_intrinsic_calib = true;
     fprintf(stderr, "Loaded previous intrinsic camera calibration.\n");
   }
+  else {
+    fprintf(stderr, "WARNING: previous intrinsic calibration NOT loaded.\n");
+  }
 
   // Load intrinsic projector calibration parameters (if found);
   sprintf(str1, "%s/calib/proj/proj_intrinsic.xml",  sl_params->outdir);
@@ -73,6 +76,9 @@ bool loadSLConfigXML(slParams *sl_params, slCalib *sl_calib,
     sl_calib->proj_distortion = (CvMat*)cvLoad(str2);
     sl_calib->proj_intrinsic_calib = true;
     fprintf(stderr, "Loaded previous intrinsic projector calibration.\n");
+  }
+  else {
+    fprintf(stderr, "WARNING: previous intrinsic projector calibration NOT loaded.\n");
   }
   
   // Load extrinsic projector-camera parameters (if found).
@@ -85,6 +91,9 @@ bool loadSLConfigXML(slParams *sl_params, slCalib *sl_calib,
     sl_calib->procam_extrinsic_calib = true;
     evaluateProCamGeometry(sl_params, sl_calib);
     fprintf(stderr, "Loaded previous extrinsic projector-camera calibration.\n");
+  }
+  else {
+    fprintf(stderr, "WARNING: previous extrinsic projector-camera calibration NOT loaded.\n");
   }
   
   // Initialize background model.
