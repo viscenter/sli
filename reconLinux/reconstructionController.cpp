@@ -142,7 +142,7 @@ int getLatestImages(const char *dirName,
 }
 
 void reconstructSurface(
-    const char* baseName, slParams* sl_params, slCalib* sl_calib)
+    const char* dirName, slParams* sl_params, slCalib* sl_calib)
 {
   IplImage** proj_gray_codes = NULL;
   int gray_ncols, gray_nrows;
@@ -153,7 +153,7 @@ void reconstructSurface(
   sl_params->scan_cols, sl_params->scan_rows);
 
   IplImage **cam_gray_codes = new IplImage*[22];
-  int numImages = getLatestImages(baseName, cam_gray_codes, 22);
+  int numImages = getLatestImages(dirName, cam_gray_codes, 22);
 
   IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
   IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params->cam_w, sl_params->cam_h), IPL_DEPTH_16U, 1);
@@ -168,9 +168,15 @@ void reconstructSurface(
   
   char str[1024], outputDir[1024];
   mkdir(sl_params->outdir, 0755);
-  sprintf(outputDir, "3D/%s", baseName);
-  //sprintf(outputDir, "%s/%s", sl_params->outdir, baseName);
-  mkdir("3D", 0755);
+
+  std::string baseNameBuilder(dirName);
+  size_t last_slash_position = baseNameBuilder.find_last_of("/");
+  baseNameBuilder = baseNameBuilder.substr(last_slash_position+1);
+  const char* baseName = baseNameBuilder.c_str();
+
+  //sprintf(outputDir, "3D/%s", baseName);
+  sprintf(outputDir, "%s/%s", sl_params->outdir, baseName);
+  //mkdir("3D", 0755);
   mkdir(outputDir, 0755);
 
   // Display and save the correspondences.
