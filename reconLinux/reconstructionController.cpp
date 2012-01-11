@@ -205,8 +205,12 @@ void reconstructSurface(
                  cam_gray_codes[0],
                  gray_decoded_cols, gray_decoded_rows, gray_mask,
                  points, colors, depth_map, mask);
-  
-  //downsamplePoints(sl_params, sl_calib, points, mask, resampled_points, depth_map);
+
+  // cvSave("points.xml",points);
+
+  CvMat *points_trans = cvCreateMat(sl_params->cam_h*sl_params->cam_w, 3, CV_32FC1); 
+  cvTranspose(points, points_trans);
+  downsamplePoints(sl_params, sl_calib, points_trans, mask, resampled_points, depth_map);
 
   double min_val, max_val;
   cvMinMaxLoc(depth_map, &min_val, &max_val);

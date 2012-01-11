@@ -428,6 +428,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 	return 0;
 }
 
+// downsample reconstructed scene into points visible from camera/projector plane
 void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMat* orig_points, CvMat*& mask, CvMat*& resample_points, CvMat*& depth_map)
 {
 	//depth_map = NULL;
@@ -435,11 +436,11 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 	int proj_nelems = sl_params->proj_w*sl_params->proj_h;
 	CvMat* proj_rotation    = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* proj_translation = cvCreateMat(3, 1, CV_32FC1);
-	CvMat* reproj_points = cvCreateMat(2, sl_params->cam_h*sl_params->cam_w, CV_32FC1);
-	CvMat* proj_points = cvCreateMat(3, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
-	CvMat* proj_mask = cvCreateMat(1, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
-	CvMat* bins = cvCreateMat(10, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
-	CvMat* counts = cvCreateMat(1, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+	CvMat* reproj_points = cvCreateMat(cam_nelems, 2, CV_32FC1);
+	CvMat* proj_points = cvCreateMat(3, proj_nelems, CV_32FC1);
+	CvMat* proj_mask = cvCreateMat(1, proj_nelems, CV_32FC1);
+	CvMat* bins = cvCreateMat(10, proj_nelems, CV_32FC1);
+	CvMat* counts = cvCreateMat(1, proj_nelems, CV_32FC1);
 	cvZero(counts);
 
 	for(int i=0; i<3; i++)
@@ -448,7 +449,29 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 	}
 
+  printf("orig_points:\t%d x %d x %d\n", CV_MAT_CN(orig_points->type), orig_points->rows, orig_points->cols);
+  printf("reproj_points:\t%d x %d x %d\n", CV_MAT_CN(reproj_points->type), reproj_points->rows, reproj_points->cols);
+
+  // project reconstructed 3D points onto 2D camera image plane
+  // orig_points: cam_nelems*3
+  // reproj_points: cam_nelems*2
 	cvProjectPoints2(orig_points, proj_rotation, proj_translation, sl_calib->proj_intrinsic, sl_calib->proj_distortion, reproj_points);
+
+  // transpose reproj_points from cam_nelems*2 -> 2*cam_nelems
+  CvMat* temp_transpose = cvCreateMat(2, cam_nelems, CV_32FC1); 
+  cvTranspose(reproj_points, temp_transpose);
+  cvReleaseMat(&reproj_points);
+  reproj_points = temp_transpose;
+
+  // transpose orig_points from cam_nelems*3 -> 3*cam_nelems
+  temp_transpose = cvCreateMat(3, cam_nelems, CV_32FC1); 
+  cvTranspose(orig_points, temp_transpose);
+  cvReleaseMat(&orig_points);
+  orig_points = temp_transpose;
+  
+  // copy reproj_points into bins and counts
+  // orig_points: 3*cam_nelems
+  // reproj_points: 2*cam_nelems
 	int x,y, newCount;
 	for(int r=0; r<sl_params->cam_h; r++)
 	{
@@ -477,7 +500,11 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 	}
 	cvReleaseMat(&reproj_points);
 
-	//cvZero(proj_points);
+	cvZero(proj_points);
+
+  // copy orig_points into proj_points using bins and counts
+  // orig_points: 3*cam_nelems
+  // proj_points: 3*proj_nelems
 	for(int r=0; r<sl_params->proj_h; r++)
 	{
 		for(int c=0; c<sl_params->proj_w; c++)
@@ -516,14 +543,33 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 			}
 		}
 	}
+  
+  // transpose proj_points from 3*proj_nelems -> proj_nelems*3 
+  temp_transpose = cvCreateMat(proj_nelems, 3, CV_32FC1); 
+  cvTranspose(proj_points, temp_transpose);
+  cvReleaseMat(&proj_points);
+  proj_points = temp_transpose;
 
 	cvZero(proj_rotation);
 	cvZero(proj_translation);
-	reproj_points = cvCreateMat(2, sl_params->proj_h*sl_params->proj_w, CV_32FC1);
+	reproj_points = cvCreateMat(proj_nelems, 2, CV_32FC1);
 
+  // project proj_points into camera
+  // proj_points: proj_nelems*3
+  // reproj_points: proj_nelems*2
 	cvProjectPoints2(proj_points, proj_rotation, proj_translation, sl_calib->cam_intrinsic, sl_calib->cam_distortion, reproj_points);
+
+  // transpose reproj_points from proj_nelems*2 -> 2*proj_nelems
+  temp_transpose = cvCreateMat(2, proj_nelems, CV_32FC1);
+  cvTranspose(reproj_points, temp_transpose);
+  cvReleaseMat(&reproj_points);
+  reproj_points = temp_transpose;
 	
 	cvZero(mask);
+
+  // copy reproj_points into resample_points
+  // reproj_points: 2*proj_nelems
+  // resample_points: 3*cam_nelems
 	for(int r=0; r<sl_params->proj_h; r++)
 	{
 		for(int c=0; c<sl_params->proj_w; c++)
@@ -542,9 +588,9 @@ void downsamplePoints(struct slParams* sl_params, struct slCalib* sl_calib, CvMa
 					//	depth_map->data.fl[x+y*sl_params->cam_w] = proj_points->data.fl[c+r*sl_params->proj_w+2*proj_nelems];
 					mask->data.fl[x+y*sl_params->cam_w] = 1;
 				}
-				else
+				else // out of camera bounds, but camera mask already zeroed
 				{
-					mask->data.fl[x+y*sl_params->cam_w] = 0;
+					// mask->data.fl[x+y*sl_params->cam_w] = 0;
 				}
 			}
 		}
