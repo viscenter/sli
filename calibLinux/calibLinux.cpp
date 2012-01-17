@@ -87,10 +87,10 @@ int getImages3(string dirName, IplImage**& imagesBuffer, int numImages)
 	imagesBuffer = new IplImage* [numImages];
 	for( int i=0; i<numImages; ++i )
 	{
+    const char * fileName = (baseName + "/" + namelist[num-numImages+i]->d_name).c_str();
 		fprintf(stderr, "Loading image '%s' to %d...\n",
-			namelist[num-numImages+i]->d_name, i);
-		imagesBuffer[i] = cvLoadImage(
-			(baseName + namelist[num-numImages+i]->d_name).c_str());
+			fileName, i);
+		imagesBuffer[i] = cvLoadImage(fileName);
 		if( imagesBuffer[i] ) ++count;
 	}
 
