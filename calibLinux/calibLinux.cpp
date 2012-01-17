@@ -168,17 +168,19 @@ bool cameraIntrinsicsRun(slParams* sl_params, slCalib* sl_calib,string imageDire
 		// Get next available frame.
 		cvCopyImage(imagesBuffer[num], cam_frame);
 		cvScale(cam_frame, cam_frame, 2.*(sl_params->cam_gain/100.), 0);
-		
+
 		// Threshold cam_frame and store in cam_frame_gray
 		cvCvtColor(cam_frame, cam_frame_gray, CV_RGB2GRAY);
 		cvAdaptiveThreshold(cam_frame_gray, cam_frame_gray,
 				255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,
-				(cam_frame_gray->width<cam_frame_gray->height)?cam_frame_gray->width:cam_frame_gray->height);
+				99);
+
 				
 		// Find chessboard corners.
 		CvPoint2D32f* corners = new CvPoint2D32f[board_n];
 		int corner_count;
 		int found = detectChessboard(cam_frame_gray, cam_frame_gray, board_size, corners, &corner_count);
+    cerr << corner_count << " corners found" << endl;
 
 		// If chessboard is detected, then add points to calibration list.
 		if(found && corner_count == board_n){
@@ -464,7 +466,7 @@ bool extrinsicCalibrationRun(slParams* sl_params, slCalib* sl_calib,string image
 			// TODO: Should account for diff bit depths
 			cvAdaptiveThreshold(cam_frame_3_gray, cam_frame_3_gray,
 				255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,
-				(cam_frame_1_gray->width<cam_frame_1_gray->height)?cam_frame_1_gray->width:cam_frame_1_gray->height);
+				99);
 				
 			
 			// Find camera chessboard corners.
