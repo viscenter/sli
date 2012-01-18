@@ -27,7 +27,11 @@ int main(int argc, char* argv[])
   file[1] = (CvMat*)cvLoad(argv[2]);
 
   for(int i = 0; i < 2; i++) {
-    cout << argv[i+1] << ":" << endl;
+    cout << argv[i+1] << ":";
+    cout << "\t\t" << file[i]->rows << "\tx\t" << file[i]->cols << "\tmatrix of type "
+      << CV_MAT_TYPE(file[i]->type) << " x "
+      << CV_MAT_DEPTH(file[i]->type) << " x "
+      << CV_MAT_CN(file[i]->type) << endl;
     for(int r = 0; r < file[i]->rows; r++) {
       for(int c = 0; c < file[i]->cols; c++) {
         cout << cvmGet(file[i], r, c) << "\t";
