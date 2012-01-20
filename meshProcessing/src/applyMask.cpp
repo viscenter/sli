@@ -114,7 +114,9 @@ int main(int argc, char* argv[])
 
 	  if(inRect && pixVal != 0/* && inZPlane*/) {
 		  CvPoint3D32f v = vertices[i];
-		  printf("v %f %f %f\n",v.x,v.y,v.z);
+      if(!((v.x == 0.0) && (v.y == 0.0) && (v.z == 0.0))) {
+        printf("v %f %f %f\n",v.x,v.y,v.z);
+      }
 	  }
 
           //printf("vt %f %f\n", x, y );
