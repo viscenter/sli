@@ -182,8 +182,8 @@ int main(int argc, char** argv)
 		}
 
 	}
-    IplImage* cropped = cvCreateImage( cvSize(pageBound.width, pageBound.height), src->depth, 3);
     cvSetImageROI(src,pageBound);
+    IplImage* cropped = cvCreateImage( cvGetSize(src), src->depth, 3);
     cvCopy(src,cropped);
 	printf("OriginalWidth: %d OriginalHeigth: %d NewWidth: %d NewHeight: %d xOffset: %d yOffset: %d\n",
 			src->width,src->height,cropped->width,cropped->height,pageBound.x,pageBound.y);
